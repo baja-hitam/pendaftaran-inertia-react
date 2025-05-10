@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('email');
-            $table->string('password');
+        Schema::create('Mperiode', function (Blueprint $table) {
+            $table->string('cperiode',8)->primary();
+            $table->string('caktif',1)->default('T');
             $table->timestamps();
         });
     }
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('Mperiode');
     }
 };

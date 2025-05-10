@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logo from "../../../assets/logo_sekolah.png";
+import logo from "../../../../../public/asset/logo_sekolah.png";
 import { Menu } from "../molecules/Menu";
 import { IconForm } from "../atoms/IconForm";
 import { IconDashboard } from "../atoms/IconDashboard";
@@ -40,10 +40,10 @@ const Sidebar = () => {
           SMP ISLAM PLUS AL MADINAH
         </p>
       </div>
-      <Menu open={open} text='Dashboard' link='/dashboard'>
+      <Menu open={open} text='Dashboard' link='/'>
       <IconDashboard/>
       </Menu>
-      <Menu open={open} text='Formulir Pendaftaran' link='/'>
+      <Menu open={open} text='Formulir Pendaftaran' link='/we'>
       <IconForm/>
       </Menu>
     </div>

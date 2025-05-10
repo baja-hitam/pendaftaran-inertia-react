@@ -1,10 +1,23 @@
 // import React from 'react'
+import { useEffect, useState } from "react";
 import { TemplateAuth } from "./template/TemplateAuth";
 import { FormLogin } from "./UI/organisms/FormLogin";
-import { Link } from '@inertiajs/react';
-import { Head } from '@inertiajs/react'
+import { Link,Head,usePage } from '@inertiajs/react';
+import { toast,ToastContainer } from "react-toastify";
 
 const Login = () => {
+  const { flash } = usePage().props;
+  useEffect(() => {
+    console.log('test'); 
+    
+    if (flash.message != null) {
+      toast.success(flash.message,{
+        autoClose: 500,
+        position: 'top-right'
+      });
+    }
+  },[])
+
   return (
     <div className="flex justify-center items-center bg-[#226F54] min-h-screen">
     <Head>

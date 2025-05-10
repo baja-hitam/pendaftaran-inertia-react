@@ -3,6 +3,7 @@ import { FormDaftar } from "./UI/organisms/FormDaftar";
 import { Link,Head } from "@inertiajs/react";
 
 const Daftar = () => {
+  
   return (
     <div>
       <Head>
@@ -13,7 +14,7 @@ const Daftar = () => {
           <FormDaftar />
           <p className="text-sm mt-2">
             Sudah punya akun?{" "}
-            <Link className="text-[#226F54]" href="/login">
+            <Link className="text-[#226F54]" href="/">
               Login Disini !
             </Link>
           </p>

@@ -1,48 +1,37 @@
 import { useState } from "react";
 import { Button } from "../atoms/Button";
 import { InputForm } from "../molecules/InputForm";
+import { useForm } from "@inertiajs/react";
 import { toast } from "react-toastify";
 
 export const FormDaftar = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [noHandphone, setNoHandphone] = useState("");
+  const {data, setData, post} = useForm({
+    email: '',
+    password: '',
+  });
 
-  const handleChangeEmail = (e) => {
-    setEmail(e.target.value);
-  };
-  const handleChangePassword = (e) => {
-    setPassword(e.target.value);
-  };
-  const handleChangeNoHandphone = (e) => {
-    let value = e.target.value.replace(/[^0-9]/g, "");
-    setNoHandphone(value);
-  };
-
-  const submitLogin = async (e) => {
+const handleChangeFormDaftar = (e) => {
+    setData({
+      ...data,
+      [e.target.name]: e.target.value,
+    });
+  }
+const submitDaftar = (e) => {
     e.preventDefault();
+    post("/register");
   };
   return (
     <>
-      <form onSubmit={submitLogin}>
+      <form onSubmit={submitDaftar}>
         <InputForm
           label="Email Address *"
           placeholder="Masukkan Email"
           type="email"
           minLength="8"
           required
-          value={email}
-          onChange={handleChangeEmail}
-        />
-        <InputForm
-          label="No Handphone *"
-          placeholder="Masukkan No Handphone"
-          type="text"
-          minLength="11"
-          maxLength="13"
-          required
-          value={noHandphone}
-          onChange={handleChangeNoHandphone}
+          name="email"
+          value={data.email}
+          onChange={handleChangeFormDaftar}
         />
         <InputForm
           label="Password *"
@@ -50,8 +39,9 @@ export const FormDaftar = () => {
           type="password"
           minLength="8"
           required
-          value={password}
-          onChange={handleChangePassword}
+          name="password"
+          value={data.password}
+          onChange={handleChangeFormDaftar}
         />
         <Button type="submit">Daftar</Button>
       </form>
