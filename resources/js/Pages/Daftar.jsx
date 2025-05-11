@@ -1,9 +1,24 @@
 import { TemplateAuth } from "./template/TemplateAuth";
 import { FormDaftar } from "./UI/organisms/FormDaftar";
-import { Link,Head } from "@inertiajs/react";
+import { Link,Head,usePage } from "@inertiajs/react";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+
 
 const Daftar = () => {
-  
+    const { flash } = usePage().props;
+    
+    useEffect(() => {
+      if (flash.status == 'error') {
+        console.log(flash.message);
+        
+        toast.error(flash.message, {
+          autoClose: 500,
+          position: 'top-right'
+        });
+      }
+    },[flash])
+
   return (
     <div>
       <Head>

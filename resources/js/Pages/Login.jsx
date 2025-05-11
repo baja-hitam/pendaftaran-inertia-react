@@ -7,10 +7,9 @@ import { toast,ToastContainer } from "react-toastify";
 
 const Login = () => {
   const { flash } = usePage().props;
+
   useEffect(() => {
-    console.log('test'); 
-    
-    if (flash.message != null) {
+    if (flash.status == 'success') {
       toast.success(flash.message,{
         autoClose: 500,
         position: 'top-right'

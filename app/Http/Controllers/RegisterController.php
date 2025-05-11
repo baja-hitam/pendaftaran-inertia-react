@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Modulus\Authentication;
+use App\Http\Modulus\Registration;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,10 +20,23 @@ class RegisterController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $modul = new Authentication;
+        $modul = new Registration;
         $modul->email = $request->email;
         $modul->password = $request->password;
+        $checkEmail = $modul->checkEmail();
+        if(!empty($checkEmail)){
+            $request->session()->flash('status', 'error');
+            $request->session()->flash('message', 'Email sudah terdaftar');
+            return back();
+        }
         $result = $modul->register();
-        return to_route('login')->with('message', $result);
+        if(!$result){
+            $request->session()->flash('status', 'error');
+            $request->session()->flash('message', 'Anda Gagal Mendaftar');
+            return back();
+        }
+        $request->session()->flash('status', 'success');
+        $request->session()->flash('message', 'Anda Berhasil Mendaftar');
+        return to_route('login');
     }
 }
