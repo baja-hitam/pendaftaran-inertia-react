@@ -14,7 +14,7 @@ const Daftar = () => {
         
         toast.error(flash.message, {
           autoClose: 500,
-          position: 'top-right'
+          position: 'top-center'
         });
       }
     },[flash])
@@ -29,7 +29,7 @@ const Daftar = () => {
           <FormDaftar />
           <p className="text-sm mt-2">
             Sudah punya akun?{" "}
-            <Link className="text-[#226F54]" href="/">
+            <Link className="text-[#226F54]" href="/login">
               Login Disini !
             </Link>
           </p>

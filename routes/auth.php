@@ -11,5 +11,5 @@ use Inertia\Inertia;
 Route::middleware(AuthSession::class)->group(function () {
     Route::get('/', function () {
         return Inertia::render('Dashboard');
-    });
+    })->name('dashboard');
 });

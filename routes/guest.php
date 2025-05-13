@@ -5,5 +5,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegisterController;
 
 Route::get('/login',[AuthController::class, 'index'])->name('login');
+Route::post('/login',[AuthController::class, 'login'])->name('login.post');
 Route::get('/register',[RegisterController::class, 'index'])->name('register');
-Route::post('/register',[RegisterController::class, 'store'])->name('login.post');
+Route::post('/register',[RegisterController::class, 'store'])->name('register.post');

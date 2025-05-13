@@ -2,6 +2,7 @@
 namespace App\Http\Modulus;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class Registration
 {
@@ -23,10 +24,10 @@ class Registration
     }
     public function register()
     {
-        $query = "INSERT INTO users (email, password) VALUES (:email, :password)";
+        $query = "INSERT INTO users (email, password) VALUES (:xemail, :xpassword)";
         $conn = DB::connection("mysql")->insert($query, [
-            'email' => $this->email,
-            'password' => password_hash($this->password, PASSWORD_BCRYPT)
+            'xemail' => $this->email,
+            'xpassword' => Hash::make($this->password)
         ]);
         return $conn;
     }

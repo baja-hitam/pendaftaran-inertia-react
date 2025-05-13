@@ -12,10 +12,16 @@ const Login = () => {
     if (flash.status == 'success') {
       toast.success(flash.message,{
         autoClose: 500,
-        position: 'top-right'
+        position: 'top-center'
+      });
+    }else if (flash.status == 'error') {
+      toast.error(flash.message,{
+        autoClose: 500,
+        position: 'top-center'
       });
     }
-  },[])
+  },[flash])
+  
 
   return (
     <div className="flex justify-center items-center bg-[#226F54] min-h-screen">
