@@ -24,10 +24,11 @@ class Registration
     }
     public function register()
     {
-        $query = "INSERT INTO users (email, password) VALUES (:xemail, :xpassword)";
+        $query = "INSERT INTO users (email, password,level) VALUES (:xemail, :xpassword,:xlevel)";
         $conn = DB::connection("mysql")->insert($query, [
             'xemail' => $this->email,
-            'xpassword' => Hash::make($this->password)
+            'xpassword' => Hash::make($this->password),
+            'xlevel' => '2'
         ]);
         return $conn;
     }
