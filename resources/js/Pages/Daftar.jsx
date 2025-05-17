@@ -25,7 +25,7 @@ const Daftar = () => {
         <title>Daftar</title>
       </Head>
       <div className="flex justify-center items-center bg-[#226F54] min-h-screen">
-        <TemplateAuth text="Assalamualaikum, Selamat Datang di Sistem Informasi Manajemen Penerimaan Peserta Didik Baru SMP Islam Plus Al Madinah" text1="Silahkan Anda Untuk Mendaftar !">
+        <TemplateAuth text="Assalamualaikum, Selamat Datang di Sistem Informasi Manajemen Penerimaan Peserta Didik Baru SMP Islam Plus Al Madinah" head="Daftar" text1="Silahkan Anda Untuk Mendaftar !">
           <FormDaftar />
           <p className="text-sm mt-2">
             Sudah punya akun?{" "}

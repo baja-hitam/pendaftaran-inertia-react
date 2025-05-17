@@ -28,7 +28,7 @@ const Login = () => {
     <Head>
       <title>Login</title>
     </Head>
-      <TemplateAuth text="Assalamualaikum, Selamat Datang di Sistem Informasi Manajemen Penerimaan Peserta Didik Baru SMP Islam Plus Al Madinah" text1="Silahkan Anda Login !">
+      <TemplateAuth text="Assalamualaikum, Selamat Datang di Sistem Informasi Manajemen Penerimaan Peserta Didik Baru SMP Islam Plus Al Madinah" head="Login" text1="Silahkan Anda Login !">
         <FormLogin />
         <p className="text-sm mt-2 md:ml-3 lg:ml-0">
           Belum punya akun?<Link className="text-[#226F54]" href="/register">Daftar Disini !</Link>
