@@ -1,10 +1,9 @@
 import { useState } from "react";
 import logo from "../../../../../public/asset/logo_sekolah.png";
-import { Menu } from "../molecules/Menu";
-import { IconForm } from "../atoms/IconForm";
-import { IconDashboard } from "../atoms/IconDashboard";
-const Sidebar = () => {
-  const [open, setOpen] = useState(false);
+import React from "react";
+
+const Sidebar = ({children,status}) => {
+  const [open, setOpen] = useState(status);
   let time;
   return (
     <div
@@ -40,12 +39,9 @@ const Sidebar = () => {
           SMP ISLAM PLUS AL MADINAH
         </p>
       </div>
-      <Menu open={open} text='Dashboard' link='/'>
-      <IconDashboard/>
-      </Menu>
-      <Menu open={open} text='Formulir Pendaftaran' link='/we'>
-      <IconForm/>
-      </Menu>
+      {React.Children.map(children, (child) =>
+        React.isValidElement(child) ? React.cloneElement(child, { open }) : child
+      )}
     </div>
   );
 };

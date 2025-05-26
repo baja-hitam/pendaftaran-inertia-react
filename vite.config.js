@@ -10,4 +10,12 @@ export default defineConfig({
         }),
         react(),
     ],
+    // server:{
+    //     host:'192.168.211.16',
+    //     port: 5173,
+    //     cors: {
+    //         origin: '*',
+    //         credentials: true,
+    //     }
+    // }
 });

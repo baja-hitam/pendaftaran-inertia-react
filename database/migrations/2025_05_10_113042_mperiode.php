@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('Mperiode', function (Blueprint $table) {
             $table->string('cperiode',8)->primary();
+            $table->date('dstart_date');
+            $table->date('dend_date');
             $table->string('caktif',1)->default('T');
             $table->timestamps();
         });

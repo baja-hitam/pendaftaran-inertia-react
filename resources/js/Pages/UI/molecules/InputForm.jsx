@@ -1,5 +1,4 @@
 import { Input } from "../atoms/Input";
-import { Label } from "../atoms/Label";
 export const InputForm = ({
   type,
   placeholder,
@@ -7,19 +6,19 @@ export const InputForm = ({
   name,
   value,
   onChange,
-  label,
   minLength,
   maxLength,
+  className
 }) => {
   return (
     <div className="mb-2">
-      <Label label={label}>{label}</Label>
       <Input
         type={type}
         placeholder={placeholder}
         required={required}
         name={name}
         value={value}
+        className={className}
         minLength={minLength}
         maxLength={maxLength}
         onChange={onChange}

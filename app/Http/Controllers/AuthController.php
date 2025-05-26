@@ -13,6 +13,9 @@ class AuthController extends Controller
     public function index(){
         return Inertia::render('Login');
     }
+    public function indexAdmin(){
+        return Inertia::render('admin/Login');
+    }
     public function login(Request $request){
         $modul = new Authentication;
         $modul->email = $request->email;
@@ -24,6 +27,12 @@ class AuthController extends Controller
             return back();
         }
         session(['user' => $data[0]->email]);
-        return to_route('dashboard');
+        if($data[0]->level == '1'){
+            session(['level' => $data[0]->level]);
+            return to_route('dashboard');
+        }else if($data[0]->level == '2'){
+            session(['level' => $data[0]->level]);
+            return to_route('admin.periode');
+        }
     }
 }
