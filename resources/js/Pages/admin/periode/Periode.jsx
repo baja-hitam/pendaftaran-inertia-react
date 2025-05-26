@@ -19,22 +19,22 @@ const Periode = ({data}) => {
       });
     
     const columns = [
-        {
-            name: 'Periode',
-            selector: row => row.cperiode,
-        },
-        {
-            name: 'Tanggal Mulai',
-            selector: row => row.dstart_date,
-        },
-        {
-            name: 'Tanggal Akhir',
-            selector: row => row.dend_date,
-        },
-        {
-            name: 'Status',
-            selector: row => row.caktif,
-        },
+      {
+        name: 'Periode',
+        selector: row => row.cperiode.slice(0, 4) + '/' + row.cperiode.slice(4),
+      },
+      {
+        name: 'Tanggal Mulai',
+        selector: row => row.dstart_date,
+      },
+      {
+        name: 'Tanggal Akhir',
+        selector: row => row.dend_date,
+      },
+      {
+        name: 'Status',
+        selector: row => (row.caktif == 'T') ? 'Aktif' : 'Tidak Aktif',
+      },
     ];
 
   return (
