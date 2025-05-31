@@ -10,7 +10,7 @@ const Daftar = () => {
     
     useEffect(() => {
       if (flash.status == 'error') {
-        console.log(flash.message);
+        // console.log(flash.message);
         
         toast.error(flash.message, {
           autoClose: 500,

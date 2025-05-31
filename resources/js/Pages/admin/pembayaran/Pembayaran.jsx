@@ -8,13 +8,13 @@ import React, { useState,useEffect } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
 import ButtonLink from "../../UI/atoms/ButtonLink";
 import { toast,ToastContainer } from "react-toastify";
-import TambahPeriode from "./TambahPeriode";
-import EditPeriode from "./EditPeriode";
 import Swal from 'sweetalert2';
+import TambahPembayaran from "./TambahPembayaran";
 import withReactContent from 'sweetalert2-react-content';
+import EditPembayaran from "./EditPembayaran";
 
 
-const Periode = ({datas}) => {
+const Pembayaran = ({datas}) => {
     const [tambahMode, setTambahMode] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [dataEdit, setDataEdit] = useState(null);
@@ -28,36 +28,25 @@ const Periode = ({datas}) => {
         setDataEdit(row);
         setEditMode(true);
     }
-    const handleDeletePeriode = (periode) => {
-        MySwal.fire({
-            title: <strong>Konfirmasi</strong>,
-            html: <i>Apakah kamu yakin ingin menghapus data ini?</i>,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // console.log(periode);
-                
-                router.post('/admin/periode/delete',{periode: periode});
-            }
-        });
-        
+    const handleDeletePembayaran = (id) => {
+            MySwal.fire({
+                title: <strong>Konfirmasi</strong>,
+                html: <i>Apakah kamu yakin ingin menghapus data ini?</i>,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // console.log(periode);
+                    
+                    router.post('/admin/pembayaran/delete',{id: id});
+                }
+            });
+            
     }
     const handleCloseEdit = () => {
         setEditMode(false);
-    }
-    const handleChangeParseDate = (date) => {
-        // console.log(date);
-        date = new Date(date);
-        const formatted = new Intl.DateTimeFormat("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        }).format(date);
-
-        return formatted;
     }
 
     useEffect(() => {
@@ -101,26 +90,23 @@ const Periode = ({datas}) => {
 
     const columns = [
         {
-            name: "Periode",
-            selector: (row) => row.cperiode.slice(0, 4) + "/" + row.cperiode.slice(4),
+            name: "Nama Pembayaran",
+            wrap: true,
+            selector: (row) => row.nama_pembayaran,
         },
         {
-            name: "Tanggal Mulai",
-            selector: (row) => handleChangeParseDate(row.dstart_date),
-        },
-        {
-            name: "Tanggal Akhir",
-            selector: (row) => handleChangeParseDate(row.dend_date),
-        },
-        {
-            name: "Status",
-            selector: (row) => (row.caktif == "T" ? "Aktif" : "Tidak Aktif"),
+            name: "Total Pembayaran",
+            selector: (row) => row.total_pembayaran,
+            format: (row) => new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+            }).format(row.total_pembayaran),
         },
         {
             name: "Aksi",
             cell: (row) => (<div className="flex flex-row gap-x-2"> 
                 <button className="bg-blue-600 w-16 h-7 text-white rounded-md hover:bg-blue-700" onClick={() => handleOpenEdit(row)}>Edit</button>
-                <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeletePeriode(row.cperiode)}>Hapus</button>
+                <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeletePembayaran(row.id)}>Hapus</button>
                 </div>)
         }
     ];
@@ -128,7 +114,7 @@ const Periode = ({datas}) => {
     return (
         <div className="bg-[#226F54] relative min-h-screen flex flex-row justify-end pb-3">
             <Head>
-                <title>Periode</title>
+                <title>Pembayaran</title>
             </Head>
             <Sidebar>
                 <Menu text="Dashboard" link="/">
@@ -143,7 +129,7 @@ const Periode = ({datas}) => {
             </Sidebar>
             <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
-                    Master Periode
+                    Master Pembayaran
                 </p>
                 <Card
                     className={
@@ -154,28 +140,28 @@ const Periode = ({datas}) => {
                         handleOpen={handleOpenModalTambah}
                         className="text-sm py-2"
                     >
-                        Tambah Periode
+                        Tambah Jenis Pembayaran
                     </ButtonLink>
                     <DataTable
                         columns={columns}
                         data={datas}
                         theme="custom"
                         customStyles={customStyles}
-                        noDataComponent={<i>Tidak Ada Data Periode</i>}
+                        noDataComponent={<i>Tidak Ada Jenis Pembayaran</i>}
                     />
                 </Card>
                 <ToastContainer/>
                 {tambahMode && (
-                    <TambahPeriode
+                    <TambahPembayaran
                         open={tambahMode}
                         handleChangeOpen={handleOpenModalTambah}
                     />
                 )}
                 {editMode && (
-                    <EditPeriode
+                    <EditPembayaran
                         open={editMode}
-                        row={dataEdit}
                         handleChangeOpen={handleCloseEdit}
+                        row={dataEdit}
                     />
                 )}
             </div>
@@ -183,4 +169,4 @@ const Periode = ({datas}) => {
     );
 };
 
-export default Periode;
+export default Pembayaran;

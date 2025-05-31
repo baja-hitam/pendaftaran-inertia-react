@@ -1,8 +1,7 @@
-import { NavLink } from "react-router-dom";
 import { Link,usePage } from "@inertiajs/react";
 export const Menu = ({ open, children, text, link }) => {
   const { url,component } = usePage();
-  console.log(url,component);
+  // console.log(url,component);
   
   return (
       <div

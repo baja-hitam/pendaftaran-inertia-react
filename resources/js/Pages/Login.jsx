@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { TemplateAuth } from "./template/TemplateAuth";
 import { FormLogin } from "./UI/organisms/FormLogin";
 import { Link,Head,usePage } from '@inertiajs/react';
-import { toast,ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const { flash } = usePage().props;

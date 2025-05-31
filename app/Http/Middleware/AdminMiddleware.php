@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class LevelGuard
+class AdminMiddleware
 {
     /**
      * Handle an incoming request.
@@ -15,10 +15,10 @@ class LevelGuard
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (session('level') == '2') {
+        if (session('level') == '2' && session('user')) {
             return $next($request);
         }else{
-            return redirect('/login');
+            return redirect('/admin');
         }
     }
 }
