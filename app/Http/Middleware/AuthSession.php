@@ -15,7 +15,7 @@ class AuthSession
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (session('user')) {
+        if (session('user') && session('level') == '1') {
             return $next($request);
         }else{
             return redirect('/login');

@@ -16,11 +16,13 @@ class Authentication
     }
     public function login()
     {
-        $query = "SELECT * FROM users WHERE email = :xemail";
+        $query = "SELECT * FROM users WHERE email = :remail";
         $conn = DB::connection("mysql")->select($query, [
-            'xemail' => $this->email,
+            'remail' => $this->email,
         ]);
-        if(!Hash::check($this->password, $conn[0]->password)){
+        if(empty($conn)){
+            return [];
+        }else if(!Hash::check($this->password, $conn[0]->password)){
             return [];
         }
         return $conn;

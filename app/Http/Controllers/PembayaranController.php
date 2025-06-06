@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Modulus\Mpembayaran;
+use App\Http\Modulus\Tpembayaran;
 use Illuminate\Http\Request;
 
 class PembayaranController extends Controller
@@ -14,6 +15,19 @@ class PembayaranController extends Controller
         $data = $modul->getAllPembayaran();
         return inertia('admin/pembayaran/Pembayaran', [
             'datas' => $data
+        ]);
+    }
+    public function index_transaksi()
+    {
+        $modul = new Tpembayaran;
+        $data = $modul->getAllUser();
+        $data1 = $modul->getAllPembayaran();
+        $data2 = $modul->getAllTransaksi();
+        // dd($data2);
+        return inertia('admin/transaksi_pembayaran/TransaksiPembayaran',[
+            'datasUserOption' => $data,
+            'datasJenPembayaranOption' =>$data1,
+            'datas'=>$data2
         ]);
     }
     public function store(Request $request)
@@ -28,6 +42,50 @@ class PembayaranController extends Controller
             session()->flash('error', 'Pembayaran gagal ditambahkan');
         }
         return to_route('admin.pembayaran');
+    }
+    public function store_transaksi(Request $request)
+    {
+        $startYear = date('Y');
+        $endYear = $startYear + 1;
+        $modul = new Tpembayaran;
+        $modul->id_user = $request->selectedUser['value'];
+        $modul->id_pembayaran = $request->selectedPembayaran['value'];
+        $modul->cperiode = $startYear.$endYear;
+        $modul->tanggal_pembayaran = date('y-m-d');
+        $modul->njumlah = preg_replace('/\./', '', $request->dibayarkan);
+        $data = $modul->store();
+        if ($data) {
+            session()->flash('success', 'Transaksi pembayaran berhasil ditambahkan');
+        } else {
+            session()->flash('error', 'Transaksi pembayaran gagal ditambahkan');
+        }
+        return to_route('admin.transaksi-pembayaran');
+    }
+    public function update_transaksi(Request $request){
+        $startYear = date('Y');
+        $endYear = $startYear + 1;
+        $modul = new Tpembayaran;
+        $modul->id_user = $request->selectedUser['value'];
+        $modul->id_pembayaran = $request->selectedPembayaran['value'];
+        $modul->cperiode = $startYear.$endYear;
+        $modul->njumlah = preg_replace('/\./', '', $request->dibayarkan);
+        $data = $modul->update($request->id);
+        if ($data) {
+            session()->flash('success', 'Transaksi pembayaran berhasil diupdate');
+        } else {
+            session()->flash('error', 'Transaksi pembayaran gagal diupdate');
+        }
+        return to_route('admin.transaksi-pembayaran');
+    }
+    public function destroy_transaksi(Request $request){
+        $modul = new Tpembayaran;
+        $data = $modul->destroy($request->id);
+        if ($data) {
+            session()->flash('success', 'Transaksi pembayaran berhasil dihapus');
+        } else {
+            session()->flash('error', 'Transaksi pembayaran gagal dihapus');
+        }
+        return to_route('admin.transaksi-pembayaran');
     }
     public function destroy(Request $request)
     {

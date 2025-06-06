@@ -27,6 +27,7 @@ class AuthController extends Controller
             return back();
         }
         session(['user' => $data[0]->email]);
+        session(['id_user'=>$data[0]->id_user]);
         if($data[0]->level == '1'){
             session(['level' => $data[0]->level]);
             return to_route('dashboard');

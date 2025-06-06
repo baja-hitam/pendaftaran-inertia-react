@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pendaftaran_siswa',function(Blueprint $table){
-            $table->id();
-            $table->string('id_user');
+        Schema::create('calon_siswa',function(Blueprint $table){
+            $table->unsignedBigInteger('id_calon_siswa')->primary();
+            $table->unsignedBigInteger('id_user');
+            $table->string('cperiode',8);
             $table->string('nama_lengkap', 255);
             $table->string('nama_panggilan', 100);
             $table->char('jenis_kelamin', 1);
@@ -55,7 +56,12 @@ return new class extends Migration
             $table->string('nama_riwayat_sekolah', 255)->nullable();
             $table->date('tanggal_pindah')->nullable();
             $table->text('alasan_pindah')->nullable();
-
+            $table->string('kesenian', 255)->nullable();
+            $table->string('olahraga', 255)->nullable();
+            $table->string('organisasi', 255)->nullable();
+            $table->string('prestasi_lainnya', 255)->nullable();
+            $table->string('hobi')->nullable();
+            $table->string('cita_cita')->nullable();
             $table->timestamps();
         });
     }

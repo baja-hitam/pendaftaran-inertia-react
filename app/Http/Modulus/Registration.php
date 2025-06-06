@@ -16,19 +16,19 @@ class Registration
         return $this->password;
     }
     public function checkEmail(){
-        $query = "SELECT * FROM users WHERE email = :email";
-        $conn = DB::connection("mysql")->select($query, [
-            'email' => $this->email
+        $query = "SELECT * FROM users WHERE email = :remail";
+        $conn = DB::connection(name: "mysql")->select($query, [
+            'remail' => $this->email
         ]);
         return $conn;
     }
     public function register()
     {
-        $query = "INSERT INTO users (email, password,level) VALUES (:xemail, :xpassword,:xlevel)";
+        $query = "INSERT INTO users (email, password,level) VALUES (:remail, :rpassword,:rlevel)";
         $conn = DB::connection("mysql")->insert($query, [
-            'xemail' => $this->email,
-            'xpassword' => Hash::make($this->password),
-            'xlevel' => '2'
+            'remail' => $this->email,
+            'rpassword' => Hash::make($this->password),
+            'rlevel' => '1'
         ]);
         return $conn;
     }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\PendaftaranSiswa;
 use App\Http\Controllers\RegisterController;
 use App\Http\Middleware\AdminMiddleware;
 use Inertia\Inertia;
@@ -15,9 +16,9 @@ Route::middleware(AuthSession::class)->group(function () {
     Route::get('/', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
-    Route::get('/pendaftaran', function () {
-        return Inertia::render('Pendaftaran');
-    })->name('pendaftaran');
+    Route::get('/pendaftaran',[PendaftaranSiswa::class,'index'])->name('pendaftaran');
+    Route::post('/pendaftaran/store', [PendaftaranSiswa::class, 'store'])->name('pendaftaran.store');
+    Route::post('/pendaftaran/update', [PendaftaranSiswa::class, 'update'])->name('pendaftaran.update');
 });
 Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/periode', [PeriodeController::class,'index'])->name('admin.periode');
@@ -28,4 +29,8 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::post('/admin/pembayaran/store', [PembayaranController::class, 'store'])->name('admin.pembayaran.store');
     Route::post('/admin/pembayaran/update', [PembayaranController::class, 'update'])->name('admin.pembayaran.update');
     Route::post('/admin/pembayaran/delete', [PembayaranController::class, 'destroy'])->name('admin.pembayaran.delete');
+    Route::get('/admin/transaksi-pembayaran',[PembayaranController::class,'index_transaksi'])->name('admin.transaksi-pembayaran');
+    Route::post('/admin/transaksi-pembayaran/store',[PembayaranController::class,'store_transaksi'])->name('admin.transaksi-pembayaran.store');
+    Route::post('/admin/transaksi-pembayaran/update',[PembayaranController::class,'update_transaksi'])->name('admin.transaksi-pembayaran.update');
+    Route::post('/admin/transaksi-pembayaran/delete',[PembayaranController::class,'destroy_transaksi'])->name('admin.transaksi-pembayaran.delete');
 });

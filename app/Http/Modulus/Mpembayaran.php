@@ -8,6 +8,11 @@ class Mpembayaran
     public $nama_pembayaran;
     public $total_pembayaran;
 
+    public $id_user;
+    public $cperiode;
+    public $tanggal_pembayaran;
+    public $jumlah_pembayaran;
+
 
     public function getNamaPembayaran()
     {
@@ -23,7 +28,7 @@ class Mpembayaran
     }
     public function getAllPembayaran()
     {
-        $query = "SELECT * FROM mpembayaran ORDER BY id DESC";
+        $query = "SELECT * FROM mpembayaran ORDER BY id_pembayaran DESC";
         $conn = DB::connection("mysql")->select($query);
         if (empty($conn)) {
             return [];
@@ -41,7 +46,7 @@ class Mpembayaran
     }
     public function destroy()
     {
-        $query = "DELETE FROM mpembayaran WHERE id = :rid";
+        $query = "DELETE FROM mpembayaran WHERE id_pembayaran = :rid";
         $conn = DB::connection("mysql")->delete($query, [
             'rid' => $this->getId()
         ]);
@@ -49,7 +54,7 @@ class Mpembayaran
     }
     public function update()
     {
-        $query = "UPDATE mpembayaran SET nama_pembayaran = :rnama_pembayaran, total_pembayaran = :rtotal_pembayaran, updated_at = NOW() WHERE id = :rid";
+        $query = "UPDATE mpembayaran SET nama_pembayaran = :rnama_pembayaran, total_pembayaran = :rtotal_pembayaran, updated_at = NOW() WHERE id_pembayaran = :rid";
         $conn = DB::connection("mysql")->update($query, [
             'rnama_pembayaran' => $this->getNamaPembayaran(),
             'rtotal_pembayaran' => $this->getTotalPembayaran(),
