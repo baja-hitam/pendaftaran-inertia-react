@@ -79,7 +79,7 @@ return (
                             htmlFor="emailUser"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                        Email User
+                        Email User *
                         </Label>
                         <Select
                         options={optionsUser}
@@ -93,7 +93,7 @@ return (
                             htmlFor="jenPembayaran"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                        Jenis Pembayaran
+                        Jenis Pembayaran *
                         </Label>
                         <Select
                         options={optionsJenPembayaran}
@@ -107,7 +107,7 @@ return (
                             htmlFor="status"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                        Dibayarkan
+                        Dibayarkan *
                         </Label>
                         <InputForm
                             type='text'

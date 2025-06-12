@@ -32,7 +32,7 @@ class Tpembayaran
 
     public function getAllPembayaran()
     {
-        $query = "SELECT * FROM mpembayaran ORDER BY id_pembayaran DESC";
+        $query = "SELECT * FROM mpembayaran ORDER BY nama_pembayaran DESC";
         $conn = DB::connection("mysql")->select($query);
         if (empty($conn)) {
             return [];
@@ -67,11 +67,33 @@ class Tpembayaran
         $conn = DB::connection('mysql')->select($query);
         return $conn;
     }
-    public function checkTransaksiFormulir(){
-        $query = "SELECT * FROM transaksi_pembayaran WHERE id_user = :id_user AND cperiode = :cperiode AND id_pembayaran = 1";
+    public function riwayatPembayaran()
+    {
+        $query = <<<EOD
+            SELECT 
+            mpembayaran.id_pembayaran,
+            mpembayaran.nama_pembayaran,
+            mpembayaran.total_pembayaran,
+            transaksi_pembayaran.id_transaksi_pembayaran,
+            transaksi_pembayaran.id_user,
+            transaksi_pembayaran.tanggal_pembayaran
+            from mpembayaran 
+            LEFT JOIN transaksi_pembayaran 
+            on mpembayaran.id_pembayaran = transaksi_pembayaran.id_pembayaran 
+            AND transaksi_pembayaran.id_user = :riduser
+            AND transaksi_pembayaran.cperiode = :rcperiode
+        EOD;
         $conn = DB::connection("mysql")->select($query, [
-            'id_user' => $this->getIdUser(),
-            'cperiode' => $this->getCperiode()
+            'riduser' => $this->getIdUser(),
+            'rcperiode' => $this->getCperiode()
+        ]);
+        return $conn;
+    }
+    public function checkTransaksiFormulir(){
+        $query = "SELECT * FROM transaksi_pembayaran WHERE id_user = :riduser AND cperiode = :rcperiode AND id_pembayaran = 1";
+        $conn = DB::connection("mysql")->select($query, [
+            'riduser' => $this->getIdUser(),
+            'rcperiode' => $this->getCperiode()
         ]);
         if (empty($conn)) {
             return [];
@@ -80,10 +102,10 @@ class Tpembayaran
     }
     public function store()
     {
-        $query = "INSERT INTO transaksi_pembayaran (id_user,id_pembayaran,cperiode,tanggal_pembayaran, jumlah_pembayaran, created_at, updated_at) VALUES (:id_user, :id_pembayaran, :rcperiode, :rtanggalpembayaran, :rnjumlah, NOW(), NOW())";
+        $query = "INSERT INTO transaksi_pembayaran (id_user,id_pembayaran,cperiode,tanggal_pembayaran, jumlah_pembayaran, created_at, updated_at) VALUES (:riduser, :ridpembayaran, :rcperiode, :rtanggalpembayaran, :rnjumlah, NOW(), NOW())";
         $conn = DB::connection("mysql")->insert($query, [
-            'id_user' => $this->getIdUser(),
-            'id_pembayaran' => $this->getIdPembayaran(),
+            'riduser' => $this->getIdUser(),
+            'ridpembayaran' => $this->getIdPembayaran(),
             'rcperiode' => $this->getCperiode(),
             'rtanggalpembayaran' => $this->getTanggalPembayaran(),
             'rnjumlah' => $this->getNjumlah()
@@ -93,21 +115,21 @@ class Tpembayaran
 
     public function update($id_transaksi_pembayaran)
     {
-        $query = "UPDATE transaksi_pembayaran SET id_user = :id_user, id_pembayaran = :id_pembayaran, cperiode = :rcperiode, jumlah_pembayaran = :rnjumlah, updated_at = NOW() WHERE id_transaksi_pembayaran = :id_transaksi_pembayaran";
+        $query = "UPDATE transaksi_pembayaran SET id_user = :riduser, id_pembayaran = :ridpembayaran, cperiode = :rcperiode, jumlah_pembayaran = :rnjumlah, updated_at = NOW() WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
         $conn = DB::connection("mysql")->update($query, [
-            'id_user' => $this->getIdUser(),
-            'id_pembayaran' => $this->getIdPembayaran(),
+            'riduser' => $this->getIdUser(),
+            'ridpembayaran' => $this->getIdPembayaran(),
             'rcperiode' => $this->getCperiode(),
             'rnjumlah' => $this->getNjumlah(),
-            'id_transaksi_pembayaran' => $id_transaksi_pembayaran
+            'ridtransaksipembayaran' => $id_transaksi_pembayaran
         ]);
         return $conn;
     }
     public function destroy($id_transaksi_pembayaran)
     {
-        $query = "DELETE FROM transaksi_pembayaran WHERE id_transaksi_pembayaran = :id_transaksi_pembayaran";
+        $query = "DELETE FROM transaksi_pembayaran WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
         $conn = DB::connection("mysql")->delete($query, [
-            'id_transaksi_pembayaran' => $id_transaksi_pembayaran
+            'ridtransaksipembayaran' => $id_transaksi_pembayaran
         ]);
         return $conn;
     }

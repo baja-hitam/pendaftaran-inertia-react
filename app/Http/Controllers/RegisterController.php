@@ -15,10 +15,10 @@ class RegisterController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:8',
-        ]);
+        // $request->validate([
+        //     'email' => 'required|string|email|max:255',
+        //     'password' => 'required|string|min:8',
+        // ]);
 
         $modul = new Registration;
         $modul->email = $request->email;

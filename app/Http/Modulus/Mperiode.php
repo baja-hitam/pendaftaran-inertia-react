@@ -36,7 +36,7 @@ class Mperiode
         return $conn;
     }
     public function checkPeriode(){
-        $query = "SELECT * FROM Mperiode WHERE cperiode = :rcperiode";
+        $query = "SELECT * FROM Mperiode WHERE cperiode = :rcperiode and caktif = 'T'";
         $conn = DB::connection("mysql")->select($query, [
             'rcperiode' => $this->getCperiode()
         ]);

@@ -10,6 +10,7 @@ import { Label } from "../../UI/atoms/Label";
 import InputSelect from "../../UI/atoms/InputSelect";
 
 const EditPeriode = ({open,row,handleChangeOpen})=>{
+    const [error, setError] = useState(null);
     const {data, setData, post} = useForm({
         startDate: row?.dstart_date,
         endDate: row?.dend_date,
@@ -32,6 +33,11 @@ const EditPeriode = ({open,row,handleChangeOpen})=>{
         }
         const handleSubmitPeriode = (e) => {
             e.preventDefault();
+            // Validasi tanggal
+            if(data.startDate === "" || data.endDate === "") {
+                setError("Tanggal mulai dan tanggal selesai harus diisi.");
+                return;
+            }
             // console.log(data);
             handleChangeOpen(false);
             post('/admin/periode/update')
@@ -48,7 +54,7 @@ const EditPeriode = ({open,row,handleChangeOpen})=>{
                             htmlFor="startDate"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                            Tanggal Mulai
+                            Tanggal Mulai *
                         </Label>
                         <Flatpickr
                         className="bg-[#ececec] rounded-lg h-[35px] w-full"
@@ -57,11 +63,16 @@ const EditPeriode = ({open,row,handleChangeOpen})=>{
                         placeholder="Tanggal Buka Pendaftaran"
                         options={{ locale: Indonesian,dateFormat: "Y-m-d" }}
                         />
+                        {error && (
+                            <p className="text-red-500 text-sm mt-2">
+                                {error}
+                            </p>
+                        )}
                         <Label
                             htmlFor="endDate"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                            Tanggal Selesai
+                            Tanggal Selesai *
                         </Label>
                         <Flatpickr
                         className="bg-[#ececec] rounded-lg h-[35px] w-full"
@@ -70,11 +81,16 @@ const EditPeriode = ({open,row,handleChangeOpen})=>{
                         value={data.endDate}
                         options={{ locale: Indonesian,dateFormat: "Y-m-d",minDate: data.startDate }}
                         />
+                        {error && (
+                            <p className="text-red-500 text-sm mt-2">
+                                {error}
+                            </p>
+                        )}
                         <Label
                             htmlFor="status"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                        Pilih Status Periode
+                        Pilih Status Periode *
                         </Label>
                         <InputSelect
                             label="Pilih Bulan"

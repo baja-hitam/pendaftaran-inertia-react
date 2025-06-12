@@ -73,7 +73,7 @@ const EditPembayaran = ({ open, row, handleChangeOpen }) => {
                     htmlFor="namaPembayaran"
                     className="block mb-2 text-sm font-medium text-gray-700"
                 >
-                    Nama Pembayaran
+                    Nama Pembayaran *
                 </Label>
                 <InputForm
                     type="text"
@@ -88,7 +88,7 @@ const EditPembayaran = ({ open, row, handleChangeOpen }) => {
                     htmlFor="totalPembayaran"
                     className="block mb-2 text-sm font-medium text-gray-700"
                 >
-                    Total Pembayaran
+                    Total Pembayaran *
                 </Label>
                 <InputForm
                     type="text"

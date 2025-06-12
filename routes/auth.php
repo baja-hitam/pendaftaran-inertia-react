@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TransaksiPembayaran;
 use App\Http\Middleware\AuthSession;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -19,6 +20,7 @@ Route::middleware(AuthSession::class)->group(function () {
     Route::get('/pendaftaran',[PendaftaranSiswa::class,'index'])->name('pendaftaran');
     Route::post('/pendaftaran/store', [PendaftaranSiswa::class, 'store'])->name('pendaftaran.store');
     Route::post('/pendaftaran/update', [PendaftaranSiswa::class, 'update'])->name('pendaftaran.update');
+    Route::get('/riwayat-pembayaran', [TransaksiPembayaran::class, 'riwayat_pembayaran'])->name('riwayat.pembayaran');
 });
 Route::middleware(AdminMiddleware::class)->group(function () {
     Route::get('/admin/periode', [PeriodeController::class,'index'])->name('admin.periode');
@@ -29,8 +31,10 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::post('/admin/pembayaran/store', [PembayaranController::class, 'store'])->name('admin.pembayaran.store');
     Route::post('/admin/pembayaran/update', [PembayaranController::class, 'update'])->name('admin.pembayaran.update');
     Route::post('/admin/pembayaran/delete', [PembayaranController::class, 'destroy'])->name('admin.pembayaran.delete');
-    Route::get('/admin/transaksi-pembayaran',[PembayaranController::class,'index_transaksi'])->name('admin.transaksi-pembayaran');
-    Route::post('/admin/transaksi-pembayaran/store',[PembayaranController::class,'store_transaksi'])->name('admin.transaksi-pembayaran.store');
-    Route::post('/admin/transaksi-pembayaran/update',[PembayaranController::class,'update_transaksi'])->name('admin.transaksi-pembayaran.update');
-    Route::post('/admin/transaksi-pembayaran/delete',[PembayaranController::class,'destroy_transaksi'])->name('admin.transaksi-pembayaran.delete');
+    Route::get('/admin/transaksi-pembayaran',[TransaksiPembayaran::class,'index'])->name('admin.transaksi-pembayaran');
+    Route::post('/admin/transaksi-pembayaran/store',[TransaksiPembayaran::class,'store'])->name('admin.transaksi-pembayaran.store');
+    Route::post('/admin/transaksi-pembayaran/update',[TransaksiPembayaran::class,'update'])->name('admin.transaksi-pembayaran.update');
+    Route::post('/admin/transaksi-pembayaran/delete',[TransaksiPembayaran::class,'destroy'])->name('admin.transaksi-pembayaran.delete');
+    Route::get('/admin/calon-siswa',[PendaftaranSiswa::class,'get_daftar_calon_siswa'])->name('admin.daftar.calon-siswa');
+    Route::post('/admin/calon-siswa/detail',[PendaftaranSiswa::class,'detail_calon_siswa'])->name('admin.detail.calon-siswa');
 });

@@ -1,20 +1,10 @@
-import Sidebar from "../UI/organisms/Sidebar";
 import { Card } from "../UI/organisms/Card";
-import { Menu } from "../UI/molecules/Menu";
-import { IconDashboard } from "../UI/atoms/IconDashboard";
-import { IconForm } from "../UI/atoms/IconForm";
+import TemplateSidebar from "./TemplateSidebar";
 
 export const TemplateDashboard = () => {
   return (
     <>
-        <Sidebar>
-        <Menu text='Dashboard' link='/'>
-          <IconDashboard/>
-        </Menu>
-        <Menu text='Formulir Pendaftaran' link='/pendaftaran'>
-          <IconForm/>
-        </Menu>
-        </Sidebar>
+        <TemplateSidebar />
         <div className="w-[70%] h-max m-2 sm:w-[80%] xl:w-[90%] xl:mt-12">
             <p className="text-xl font-poppins text-white sm:text-2xl xl:text-3xl">Alur Pendaftaran</p>
             <div className="flex flex-col gap-y-2.5 mt-3 sm:grid sm:grid-cols-2 sm:gap-3.5 xl:grid-cols-4">

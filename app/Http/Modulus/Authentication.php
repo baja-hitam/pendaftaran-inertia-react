@@ -27,5 +27,18 @@ class Authentication
         }
         return $conn;
     }
+    public function login_admin()
+    {
+        $query = "SELECT * FROM users WHERE email = :remail and level = '2'";
+        $conn = DB::connection("mysql")->select($query, [
+            'remail' => $this->email,
+        ]);
+        if(empty($conn)){
+            return [];
+        }else if(!Hash::check($this->password, $conn[0]->password)){
+            return [];
+        }
+        return $conn;
+    }
 }
 ?>

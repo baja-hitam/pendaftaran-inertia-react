@@ -24,7 +24,7 @@ class Registration
     }
     public function register()
     {
-        $query = "INSERT INTO users (email, password,level) VALUES (:remail, :rpassword,:rlevel)";
+        $query = "INSERT INTO users (email, password,level,created_at,updated_at) VALUES (:remail, :rpassword,:rlevel,NOW(), NOW())";
         $conn = DB::connection("mysql")->insert($query, [
             'remail' => $this->email,
             'rpassword' => Hash::make($this->password),

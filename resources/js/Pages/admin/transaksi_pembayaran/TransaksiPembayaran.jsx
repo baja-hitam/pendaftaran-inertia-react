@@ -22,8 +22,6 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption}) =
     const { flash } = usePage().props;
     const handleOpenModalTambah = (o) => {
         setTambahMode(o);
-        // console.log(tambahMode);
-        
     };
 
     const handleOpenEdit = (row)=>{
@@ -152,6 +150,9 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption}) =
                 <Menu text="Transaksi Pembayaran" link="/admin/transaksi-pembayaran">
                     <IconForm />
                 </Menu>
+                <Menu text="Daftar Calon Siswa" link="/admin/calon-siswa">
+                    <IconForm />
+                </Menu>
             </Sidebar>
             <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
@@ -173,7 +174,7 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption}) =
                         data={datas}
                         theme="custom"
                         customStyles={customStyles}
-                        noDataComponent={<i>Tidak Ada Jenis Pembayaran</i>}
+                        noDataComponent={<i>Tidak Ada Transaksi Pembayaran</i>}
                     />
                 </Card>
                 <ToastContainer/>

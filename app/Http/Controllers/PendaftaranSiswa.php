@@ -15,7 +15,6 @@ class PendaftaranSiswa extends Controller
         $modul = new Pendaftaran;
         $modul->periode = $startYear.$endYear;
         $data = $modul->index();
-        $id_user = $data->id_user ?? '';
         $modul1 = new Tpembayaran;
         $modul1->cperiode = $startYear.$endYear;
         $modul1->id_user = session('id_user');
@@ -32,7 +31,28 @@ class PendaftaranSiswa extends Controller
             'statusPembayaran' => $statusPembayaran,
         ]);
     }
-
+    public function get_daftar_calon_siswa()
+    {
+        $startYear = date('Y');
+        $endYear = $startYear + 1;
+        $modul = new Pendaftaran;
+        $modul->periode = $startYear.$endYear;
+        $data = $modul->getDaftarCalonSiswa();
+        // dd($data);
+        return Inertia::render('admin/calon_siswa/CalonSiswa',[
+            'datas'=>$data,
+        ]);
+    }
+    public function detail_calon_siswa(Request $request)
+    {
+        $modul = new Pendaftaran;
+        $modul->idCalonSiswa = $request->id;
+        $data = $modul->detailCalonSiswa();
+        // dd($data);
+        return Inertia::render('admin/calon_siswa/DataCalonSiswa',[
+            'datas'=>$data,
+        ]);
+    }
     public function store(Request $request)
     {
         $startYear = date('Y');

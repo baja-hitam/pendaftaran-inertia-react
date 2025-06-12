@@ -12,6 +12,7 @@ import InputSelect from "../../UI/atoms/InputSelect";
 
 
 const TambahPeriode = ({open,handleChangeOpen}) => {
+    const [error, setError] = useState(null);
     const {data, setData, post} = useForm({
         startDate: "",
         endDate: "",
@@ -32,6 +33,11 @@ const TambahPeriode = ({open,handleChangeOpen}) => {
     }
     const handleSubmitPeriode = (e) => {
         e.preventDefault();
+        // Validasi tanggal
+        if(data.startDate === "" || data.endDate === "") {
+            setError("Tanggal mulai dan tanggal selesai harus diisi.");
+            return;
+        }
         // console.log(data);
         handleChangeOpen(false);
         post('/admin/periode/store')
@@ -49,35 +55,43 @@ return (
                             htmlFor="startDate"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                            Tanggal Mulai
+                            Tanggal Mulai *
                         </Label>
                         <Flatpickr
                         className="bg-[#ececec] rounded-lg h-[35px] w-full"
                         onChange={handleChangeStartDate}
                         value={data.startDate}
-                        required
                         placeholder="Tanggal Buka Pendaftaran"
                         options={{ locale: Indonesian,dateFormat: "Y-m-d" }}
                         />
+                        {error && (
+                            <div className="text-red-500 text-sm mt-2">
+                                {error}
+                            </div>
+                        )}
                         <Label
                             htmlFor="endDate"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                            Tanggal Selesai
+                            Tanggal Selesai *
                         </Label>
                         <Flatpickr
                         className="bg-[#ececec] rounded-lg h-[35px] w-full"
                         placeholder="Tanggal Tutup Pendaftaran"
                         onChange={handleChangeEndDate}
                         value={data.endDate}
-                        required
                         options={{ locale: Indonesian,dateFormat: "Y-m-d",minDate: data.startDate }}
                         />
+                        {error && (
+                            <div className="text-red-500 text-sm mt-2">
+                                {error}
+                            </div>
+                        )}
                         <Label
                             htmlFor="status"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                        Pilih Status Periode
+                        Pilih Status Periode *
                         </Label>
                         <InputSelect
                             label="Pilih Bulan"

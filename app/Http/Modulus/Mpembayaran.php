@@ -8,11 +8,6 @@ class Mpembayaran
     public $nama_pembayaran;
     public $total_pembayaran;
 
-    public $id_user;
-    public $cperiode;
-    public $tanggal_pembayaran;
-    public $jumlah_pembayaran;
-
 
     public function getNamaPembayaran()
     {
@@ -28,7 +23,7 @@ class Mpembayaran
     }
     public function getAllPembayaran()
     {
-        $query = "SELECT * FROM mpembayaran ORDER BY id_pembayaran DESC";
+        $query = "SELECT * FROM mpembayaran ORDER BY nama_pembayaran DESC";
         $conn = DB::connection("mysql")->select($query);
         if (empty($conn)) {
             return [];

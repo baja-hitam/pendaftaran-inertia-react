@@ -143,6 +143,9 @@ const Periode = ({datas}) => {
                 <Menu text="Transaksi Pembayaran" link="/admin/transaksi-pembayaran">
                     <IconForm />
                 </Menu>
+                <Menu text="Daftar Calon Siswa" link="/admin/calon-siswa">
+                    <IconForm />
+                </Menu>
             </Sidebar>
             <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">

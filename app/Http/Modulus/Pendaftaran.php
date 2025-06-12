@@ -50,6 +50,7 @@ class Pendaftaran
     public $prestasiLainnya;
     public $hobi;
     public $citaCita;
+    public $idCalonSiswa;
 
     public $namaAyah;
     public $tempatLahirAyah;
@@ -93,6 +94,11 @@ class Pendaftaran
     public $penghasilanWali;
     public $alamatWali;
     public $telpWali;
+
+    public function getIdCalonSiswa()
+    {
+        return $this->idCalonSiswa;
+    }
 
     public function getNamaAyah()
     {
@@ -517,6 +523,34 @@ class Pendaftaran
         }
 
         return $conn[0]->id_orangtua_wali + 1;
+    }
+    public function getDaftarCalonSiswa(){
+        $query = <<<EOD
+        SELECT * FROM calon_siswa
+        INNER JOIN orang_tua_wali ON calon_siswa.id_calon_siswa = orang_tua_wali.id_calon_siswa
+        WHERE cperiode = :rcperiode
+        EOD;
+        $conn = DB::connection('mysql')->select($query,[
+            'rcperiode'=>$this->getPeriode(),
+        ]);
+        if(empty($conn)){
+            return [];
+        }
+        return $conn;
+    }
+    public function detailCalonSiswa(){
+        $query = <<<EOD
+        SELECT * FROM calon_siswa
+        INNER JOIN orang_tua_wali ON calon_siswa.id_calon_siswa = orang_tua_wali.id_calon_siswa
+        WHERE calon_siswa.id_calon_siswa = :ridcalonsiswa
+        EOD;
+        $conn = DB::connection('mysql')->select($query,[
+            'ridcalonsiswa'=>$this->getIdCalonSiswa(),
+        ]);
+        if(empty($conn)){
+            return [];
+        }
+        return $conn[0];
     }
     public function index(){
         $query = "SELECT * FROM calon_siswa INNER JOIN orang_tua_wali ON calon_siswa.id_calon_siswa = orang_tua_wali.id_calon_siswa WHERE calon_siswa.id_user = :riduser AND calon_siswa.cperiode = :rcperiode";
