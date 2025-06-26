@@ -10,7 +10,7 @@ const InputSelect = ({options, value, onChange, className = "",name, required = 
         required={required}
         className="p-1 rounded-lg bg-[#ececec] focus:outline-none focus:ring-2 focus:ring-[#598c77]"
       >
-        <option value="" disabled>-- Pilih --</option>
+        <option value="">-- Pilih --</option>
         {options.map((option, index) => (
           <option key={index} value={option.value ?? option}>
             {option.label ?? option}

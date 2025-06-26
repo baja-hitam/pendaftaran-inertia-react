@@ -1,27 +1,28 @@
 <?php
 
 namespace App\Http\Controllers;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
 use App\Http\Modulus\Pendaftaran;
 use App\Http\Modulus\Tpembayaran;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
+use App\Http\Modulus\KartuPeserta;
 
 class PendaftaranSiswa extends Controller
 {
     public function index()
     {
-        $startYear = date('Y');
-        $endYear = $startYear + 1;
         $modul = new Pendaftaran;
-        $modul->periode = $startYear.$endYear;
+        $modul->periode = session('periode');
         $data = $modul->index();
+        // dd($data);
         $modul1 = new Tpembayaran;
-        $modul1->cperiode = $startYear.$endYear;
+        $modul1->periode = session('periode');
         $modul1->id_user = session('id_user');
+        $modul1->id_pembayaran = 1; // Asumsi id_pembayaran untuk formulir adalah 1
         // dd($modul1);
         $data1 = $modul1->checkTransaksiFormulir();
         // dd($data1);
-        if (!empty($data1)) {
+        if (!empty($data1) && $data1[0]->lunas == 'T') {
             $statusPembayaran = true;
         } else {
             $statusPembayaran = false;
@@ -31,13 +32,304 @@ class PendaftaranSiswa extends Controller
             'statusPembayaran' => $statusPembayaran,
         ]);
     }
+    
+    public function store(Request $request)
+    {
+        $modul = new Pendaftaran;
+        $modul->periode = session('periode');
+        $modul->namaSiswa = $request->input('namaSiswa');
+        $modul->namaPanggilan = $request->input('namaPanggilan');
+        $modul->jenisKelamin = $request->input('jenisKelamin');
+        $modul->tempatLahir = $request->input('tempatLahir');
+        $modul->tanggalLahir = $request->input('tanggalLahir');
+        $modul->agama = $request->input('agama');
+        $modul->kewarganegaraan = $request->input('kewarganegaraan');
+        $modul->anakKeBerapa = $request->input('anakKeBerapa');
+        $modul->jmlKandung = $request->input('jmlKandung');
+        $modul->jmlTiri = $request->input('jmlTiri');
+        $modul->jmlAngkat = $request->input('jmlAngkat');
+        $modul->statusAnak = $request->input('statusAnak');
+        $modul->bahasa = $request->input('bahasa');
+        $modul->alamat = $request->input('alamat');
+        $modul->noKK = $request->input('noKK');
+        $modul->kelurahan = $request->input('kelurahan');
+        $modul->kecamatan = $request->input('kecamatan');
+        $modul->kotaKabupaten = $request->input('kotaKabupaten');
+        $modul->kodePos = $request->input('kodePos');
+        $modul->telp = $request->input('telp');
+        $modul->alamatTersebut = $request->input('alamatTersebut');
+        $modul->namaPemilikAlamat = $request->input('namaPemilikAlamat');
+        $modul->modeTransportasi = $request->input('modeTransportasi');
+        $modul->golonganDarah = $request->input('golonganDarah');
+        $modul->penyakit = $request->input('penyakit');
+        $modul->tempatDirawat = $request->input('tempatDirawat');
+        $modul->kelainanJasmani = $request->input('kelainanJasmani');
+        $modul->tinggiBadan = $request->input('tinggiBadan');
+        $modul->beratBadan = $request->input('beratBadan');
+        $modul->sdAsal = $request->input('sdAsal');
+        $modul->tanggalIjazah = $request->input('tanggalIjazah');
+        $modul->nomorIjazah = $request->input('nomorIjazah');
+        $modul->tanggalSkhun = $request->input('tanggalSkhun');
+        $modul->nomorSkhun = $request->input('nomorSkhun');
+        $modul->lamaBelajar = $request->input('lamaBelajar');
+        $modul->nisn = $request->input('nisn');
+        $modul->tipeSekolah = $request->input('tipeSekolah');
+        $modul->namaSekolah = $request->input('namaSekolah');
+        $modul->tanggalPindah = $request->input('tanggalPindah');
+        $modul->alasanPindah = $request->input('alasanPindah');
+        $modul->kesenian = $request->input('kesenian');
+        $modul->olahraga = $request->input('olahraga');
+        $modul->organisasi = $request->input('organisasi');
+        $modul->prestasiLainnya = $request->input('prestasiLainnya');
+        $modul->hobi = $request->input('hobi');
+        $modul->citaCita = $request->input('citaCita');
+        $no_form = $modul->store_formulir();
+        if(empty($no_form)){
+            session()->flash('error', 'Formulir Pendaftaran Gagal Disimpan');
+            return to_route('pendaftaran');
+        }
+        $modul->noForm = $no_form;
+        $data = $modul->store();
+        if ($data) {
+            session()->flash('success', 'Formulir Pendaftaran Siswa Berhasil Disimpan');
+        } else {
+            session()->flash('error', 'Formulir Pendaftaran Siswa Gagal Disimpan');
+        }
+        return to_route('pendaftaran');
+    }
+    public function store_ortu(Request $request){
+        $modul = new Pendaftaran;
+        $modul->periode = session('periode');
+        $modul->namaAyah = $request->input('namaAyah');
+        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
+        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
+        $modul->nikAyah = $request->input('nikAyah');
+        $modul->agamaAyah = $request->input('agamaAyah');
+        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
+        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
+        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
+        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
+        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
+        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
+        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
+        $modul->telpAyah = $request->input('telpAyah');
+        $modul->statusAyah = $request->input('statusAyah');
+        $modul->namaIbu = $request->input('namaIbu');
+        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
+        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
+        $modul->nikIbu = $request->input('nikIbu');
+        $modul->agamaIbu = $request->input('agamaIbu');
+        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
+        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
+        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
+        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
+        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
+        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
+        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
+        $modul->telpIbu = $request->input('telpIbu');
+        $modul->statusIbu = $request->input('statusIbu');
+        $modul->namaWali = $request->input('namaWali');
+        $modul->tempatLahirWali = $request->input('tempatLahirWali');
+        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
+        $modul->nikWali = $request->input('nikWali');
+        $modul->agamaWali = $request->input('agamaWali');
+        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
+        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
+        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
+        $modul->pekerjaanWali = $request->input('pekerjaanWali');
+        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
+        $modul->alamatWali = $request->input('alamatWali');
+        $modul->telpWali = $request->input('telpWali');
+        $no_form = $modul->store_formulir();
+        if(empty($no_form)){
+            session()->flash('error', 'Formulir Pendaftaran Gagal Disimpan');
+            return to_route('pendaftaran');
+        }
+        $modul->noForm = $no_form;
+        $data = $modul->store_orang_tua_wali();
+        if ($data) {
+            session()->flash('success', 'Formulir Pendaftaran Orang Tua Berhasil Disimpan');
+        } else {
+            session()->flash('error', 'Formulir Pendaftaran Orang Tua Gagal Disimpan');
+        }
+        return to_route('pendaftaran');
+    }
+    public function update(Request $request)
+    {
+        $modul = new Pendaftaran;
+        $modul->namaSiswa = $request->input('namaSiswa');
+        $modul->namaPanggilan = $request->input('namaPanggilan');
+        $modul->jenisKelamin = $request->input('jenisKelamin');
+        $modul->tempatLahir = $request->input('tempatLahir');
+        $modul->tanggalLahir = $request->input('tanggalLahir');
+        $modul->agama = $request->input('agama');
+        $modul->kewarganegaraan = $request->input('kewarganegaraan');
+        $modul->anakKeBerapa = $request->input('anakKeBerapa');
+        $modul->jmlKandung = $request->input('jmlKandung');
+        $modul->jmlTiri = $request->input('jmlTiri');
+        $modul->jmlAngkat = $request->input('jmlAngkat');
+        $modul->statusAnak = $request->input('statusAnak');
+        $modul->bahasa = $request->input('bahasa');
+        $modul->alamat = $request->input('alamat');
+        $modul->noKK = $request->input('noKK');
+        $modul->kelurahan = $request->input('kelurahan');
+        $modul->kecamatan = $request->input('kecamatan');
+        $modul->kotaKabupaten = $request->input('kotaKabupaten');
+        $modul->kodePos = $request->input('kodePos');
+        $modul->telp = $request->input('telp');
+        $modul->alamatTersebut = $request->input('alamatTersebut');
+        $modul->namaPemilikAlamat = $request->input('namaPemilikAlamat');
+        $modul->modeTransportasi = $request->input('modeTransportasi');
+        $modul->golonganDarah = $request->input('golonganDarah');
+        $modul->penyakit = $request->input('penyakit');
+        $modul->tempatDirawat = $request->input('tempatDirawat');
+        $modul->kelainanJasmani = $request->input('kelainanJasmani');
+        $modul->tinggiBadan = $request->input('tinggiBadan');
+        $modul->beratBadan = $request->input('beratBadan');
+        $modul->sdAsal = $request->input('sdAsal');
+        $modul->tanggalIjazah = $request->input('tanggalIjazah');
+        $modul->nomorIjazah = $request->input('nomorIjazah');
+        $modul->tanggalSkhun = $request->input('tanggalSkhun');
+        $modul->nomorSkhun = $request->input('nomorSkhun');
+        $modul->lamaBelajar = $request->input('lamaBelajar');
+        $modul->nisn = $request->input('nisn');
+        $modul->tipeSekolah = $request->input('tipeSekolah');
+        $modul->namaSekolah = $request->input('namaSekolah');
+        $modul->tanggalPindah = $request->input('tanggalPindah');
+        $modul->alasanPindah = $request->input('alasanPindah');
+        $modul->kesenian = $request->input('kesenian');
+        $modul->olahraga = $request->input('olahraga');
+        $modul->organisasi = $request->input('organisasi');
+        $modul->prestasiLainnya = $request->input('prestasiLainnya');
+        $modul->hobi = $request->input('hobi');
+        $modul->citaCita = $request->input('citaCita');
+        $modul->namaAyah = $request->input('namaAyah');
+        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
+        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
+        $modul->nikAyah = $request->input('nikAyah');
+        $modul->agamaAyah = $request->input('agamaAyah');
+        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
+        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
+        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
+        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
+        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
+        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
+        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
+        $modul->telpAyah = $request->input('telpAyah');
+        $modul->statusAyah = $request->input('statusAyah');
+        $modul->namaIbu = $request->input('namaIbu');
+        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
+        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
+        $modul->nikIbu = $request->input('nikIbu');
+        $modul->agamaIbu = $request->input('agamaIbu');
+        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
+        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
+        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
+        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
+        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
+        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
+        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
+        $modul->telpIbu = $request->input('telpIbu');
+        $modul->statusIbu = $request->input('statusIbu');
+        $modul->namaWali = $request->input('namaWali');
+        $modul->tempatLahirWali = $request->input('tempatLahirWali');
+        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
+        $modul->nikWali = $request->input('nikWali');
+        $modul->agamaWali = $request->input('agamaWali');
+        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
+        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
+        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
+        $modul->pekerjaanWali = $request->input('pekerjaanWali');
+        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
+        $modul->alamatWali = $request->input('alamatWali');
+        $modul->telpWali = $request->input('telpWali');
+        $data = $modul->update($request->input('idCalonSiswa'));
+        // dd($data);
+        if ($data) {
+            session()->flash('success', 'Formulir Pendaftaran Siswa Berhasil Diupdate');
+        } else {
+            session()->flash('error', 'Formulir Pendaftaran Siswa Gagal Diupdate');
+        }
+        return to_route('pendaftaran');
+    }
+    public function update_ortu(Request $request)
+    {
+        $modul = new Pendaftaran;
+        $modul->namaAyah = $request->input('namaAyah');
+        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
+        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
+        $modul->nikAyah = $request->input('nikAyah');
+        $modul->agamaAyah = $request->input('agamaAyah');
+        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
+        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
+        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
+        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
+        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
+        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
+        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
+        $modul->telpAyah = $request->input('telpAyah');
+        $modul->statusAyah = $request->input('statusAyah');
+        $modul->namaIbu = $request->input('namaIbu');
+        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
+        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
+        $modul->nikIbu = $request->input('nikIbu');
+        $modul->agamaIbu = $request->input('agamaIbu');
+        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
+        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
+        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
+        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
+        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
+        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
+        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
+        $modul->telpIbu = $request->input('telpIbu');
+        $modul->statusIbu = $request->input('statusIbu');
+        $modul->namaWali = $request->input('namaWali');
+        $modul->tempatLahirWali = $request->input('tempatLahirWali');
+        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
+        $modul->nikWali = $request->input('nikWali');
+        $modul->agamaWali = $request->input('agamaWali');
+        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
+        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
+        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
+        $modul->pekerjaanWali = $request->input('pekerjaanWali');
+        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
+        $modul->alamatWali = $request->input('alamatWali');
+        $modul->telpWali = $request->input('telpWali');
+        $data = $modul->updateOrangTuaWali($request->input('idOrangTuaWali'));
+        // dd($data);
+        if ($data) {
+            session()->flash('success', 'Formulir Pendaftaran Orang Tua Berhasil Diupdate');
+        } else {
+            session()->flash('error', 'Formulir Pendaftaran Orang Tua Gagal Diupdate');
+        }
+        return to_route('pendaftaran');
+    }
+    public function cetak_kartu_peserta(Request $request)
+    {
+        // dd($request->all());
+        $modul = new KartuPeserta;
+        $modul->no_form = $request->no_form;
+        $no_peserta = $modul->getRandomNoPeserta(session('periode'));
+        // dd($no_peserta);
+        $result = $modul->checkCalonSiswa();
+        // dd($result);
+        if(empty($result)){
+            $modul->store($no_peserta);
+        }
+        $data = $modul->getDataKartuPeserta();
+        // dd($data);
+        // $data = $modul->detailCalonSiswa();
+        // // dd($data);
+        return Inertia::render('calon_siswa/cetak_kartu_peserta/StreamPdf',[
+            'datas'=>$data,
+        ]);
+    }
+
+    // Admin
     public function get_daftar_calon_siswa()
     {
-        $startYear = date('Y');
-        $endYear = $startYear + 1;
         $modul = new Pendaftaran;
-        $modul->periode = $startYear.$endYear;
-        $data = $modul->getDaftarCalonSiswa();
+        $data = $modul->getDaftarFormulir();
         // dd($data);
         return Inertia::render('admin/calon_siswa/CalonSiswa',[
             'datas'=>$data,
@@ -45,214 +337,26 @@ class PendaftaranSiswa extends Controller
     }
     public function detail_calon_siswa(Request $request)
     {
+        // dd($request->all());
         $modul = new Pendaftaran;
-        $modul->idCalonSiswa = $request->id;
-        $data = $modul->detailCalonSiswa();
+        $modul->noForm = $request->no_form;
+        $data = $modul->detailFormulir();
         // dd($data);
         return Inertia::render('admin/calon_siswa/DataCalonSiswa',[
             'datas'=>$data,
         ]);
     }
-    public function store(Request $request)
+
+    public function cetak_calon_siswa(Request $request)
     {
-        $startYear = date('Y');
-        $endYear = $startYear + 1;
+        // dd($request->all());
         $modul = new Pendaftaran;
-        $modul->periode = $startYear.$endYear;
-        $modul->namaSiswa = $request->input('namaSiswa');
-        $modul->namaPanggilan = $request->input('namaPanggilan');
-        $modul->jenisKelamin = $request->input('jenisKelamin');
-        $modul->tempatLahir = $request->input('tempatLahir');
-        $modul->tanggalLahir = $request->input('tanggalLahir');
-        $modul->agama = $request->input('agama');
-        $modul->kewarganegaraan = $request->input('kewarganegaraan');
-        $modul->anakKeBerapa = $request->input('anakKeBerapa');
-        $modul->jmlKandung = $request->input('jmlKandung');
-        $modul->jmlTiri = $request->input('jmlTiri');
-        $modul->jmlAngkat = $request->input('jmlAngkat');
-        $modul->statusAnak = $request->input('statusAnak');
-        $modul->bahasa = $request->input('bahasa');
-        $modul->alamat = $request->input('alamat');
-        $modul->noKK = $request->input('noKK');
-        $modul->kelurahan = $request->input('kelurahan');
-        $modul->kecamatan = $request->input('kecamatan');
-        $modul->kotaKabupaten = $request->input('kotaKabupaten');
-        $modul->kodePos = $request->input('kodePos');
-        $modul->telp = $request->input('telp');
-        $modul->alamatTersebut = $request->input('alamatTersebut');
-        $modul->namaPemilikAlamat = $request->input('namaPemilikAlamat');
-        $modul->modeTransportasi = $request->input('modeTransportasi');
-        $modul->golonganDarah = $request->input('golonganDarah');
-        $modul->penyakit = $request->input('penyakit');
-        $modul->tempatDirawat = $request->input('tempatDirawat');
-        $modul->kelainanJasmani = $request->input('kelainanJasmani');
-        $modul->tinggiBadan = $request->input('tinggiBadan');
-        $modul->beratBadan = $request->input('beratBadan');
-        $modul->sdAsal = $request->input('sdAsal');
-        $modul->tanggalIjazah = $request->input('tanggalIjazah');
-        $modul->nomorIjazah = $request->input('nomorIjazah');
-        $modul->tanggalSkhun = $request->input('tanggalSkhun');
-        $modul->nomorSkhun = $request->input('nomorSkhun');
-        $modul->lamaBelajar = $request->input('lamaBelajar');
-        $modul->nisn = $request->input('nisn');
-        $modul->tipeSekolah = $request->input('tipeSekolah');
-        $modul->namaSekolah = $request->input('namaSekolah');
-        $modul->tanggalPindah = $request->input('tanggalPindah');
-        $modul->alasanPindah = $request->input('alasanPindah');
-        $modul->kesenian = $request->input('kesenian');
-        $modul->olahraga = $request->input('olahraga');
-        $modul->organisasi = $request->input('organisasi');
-        $modul->prestasiLainnya = $request->input('prestasiLainnya');
-        $modul->hobi = $request->input('hobi');
-        $modul->citaCita = $request->input('citaCita');
-        $modul->namaAyah = $request->input('namaAyah');
-        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
-        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
-        $modul->nikAyah = $request->input('nikAyah');
-        $modul->agamaAyah = $request->input('agamaAyah');
-        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
-        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
-        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
-        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
-        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
-        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
-        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
-        $modul->telpAyah = $request->input('telpAyah');
-        $modul->statusAyah = $request->input('statusAyah');
-        $modul->namaIbu = $request->input('namaIbu');
-        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
-        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
-        $modul->nikIbu = $request->input('nikIbu');
-        $modul->agamaIbu = $request->input('agamaIbu');
-        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
-        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
-        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
-        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
-        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
-        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
-        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
-        $modul->telpIbu = $request->input('telpIbu');
-        $modul->statusIbu = $request->input('statusIbu');
-        $modul->namaWali = $request->input('namaWali');
-        $modul->tempatLahirWali = $request->input('tempatLahirWali');
-        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
-        $modul->nikWali = $request->input('nikWali');
-        $modul->agamaWali = $request->input('agamaWali');
-        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
-        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
-        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
-        $modul->pekerjaanWali = $request->input('pekerjaanWali');
-        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
-        $modul->alamatWali = $request->input('alamatWali');
-        $modul->telpWali = $request->input('telpWali');
-        $data = $modul->store();
-        if ($data) {
-            session()->flash('success', 'Formulir Pendaftaran Berhasil Disimpan');
-        } else {
-            session()->flash('error', 'Formulir Pendaftaran Gagal Disimpan');
-        }
-        return to_route('pendaftaran');
-    }
-    public function update(Request $request)
-    {
-        $startYear = date('Y');
-        $endYear = $startYear + 1;
-        $modul = new Pendaftaran;
-        $modul->periode = $startYear.$endYear;
-        $modul->namaSiswa = $request->input('namaSiswa');
-        $modul->namaPanggilan = $request->input('namaPanggilan');
-        $modul->jenisKelamin = $request->input('jenisKelamin');
-        $modul->tempatLahir = $request->input('tempatLahir');
-        $modul->tanggalLahir = $request->input('tanggalLahir');
-        $modul->agama = $request->input('agama');
-        $modul->kewarganegaraan = $request->input('kewarganegaraan');
-        $modul->anakKeBerapa = $request->input('anakKeBerapa');
-        $modul->jmlKandung = $request->input('jmlKandung');
-        $modul->jmlTiri = $request->input('jmlTiri');
-        $modul->jmlAngkat = $request->input('jmlAngkat');
-        $modul->statusAnak = $request->input('statusAnak');
-        $modul->bahasa = $request->input('bahasa');
-        $modul->alamat = $request->input('alamat');
-        $modul->noKK = $request->input('noKK');
-        $modul->kelurahan = $request->input('kelurahan');
-        $modul->kecamatan = $request->input('kecamatan');
-        $modul->kotaKabupaten = $request->input('kotaKabupaten');
-        $modul->kodePos = $request->input('kodePos');
-        $modul->telp = $request->input('telp');
-        $modul->alamatTersebut = $request->input('alamatTersebut');
-        $modul->namaPemilikAlamat = $request->input('namaPemilikAlamat');
-        $modul->modeTransportasi = $request->input('modeTransportasi');
-        $modul->golonganDarah = $request->input('golonganDarah');
-        $modul->penyakit = $request->input('penyakit');
-        $modul->tempatDirawat = $request->input('tempatDirawat');
-        $modul->kelainanJasmani = $request->input('kelainanJasmani');
-        $modul->tinggiBadan = $request->input('tinggiBadan');
-        $modul->beratBadan = $request->input('beratBadan');
-        $modul->sdAsal = $request->input('sdAsal');
-        $modul->tanggalIjazah = $request->input('tanggalIjazah');
-        $modul->nomorIjazah = $request->input('nomorIjazah');
-        $modul->tanggalSkhun = $request->input('tanggalSkhun');
-        $modul->nomorSkhun = $request->input('nomorSkhun');
-        $modul->lamaBelajar = $request->input('lamaBelajar');
-        $modul->nisn = $request->input('nisn');
-        $modul->tipeSekolah = $request->input('tipeSekolah');
-        $modul->namaSekolah = $request->input('namaSekolah');
-        $modul->tanggalPindah = $request->input('tanggalPindah');
-        $modul->alasanPindah = $request->input('alasanPindah');
-        $modul->kesenian = $request->input('kesenian');
-        $modul->olahraga = $request->input('olahraga');
-        $modul->organisasi = $request->input('organisasi');
-        $modul->prestasiLainnya = $request->input('prestasiLainnya');
-        $modul->hobi = $request->input('hobi');
-        $modul->citaCita = $request->input('citaCita');
-        $modul->namaAyah = $request->input('namaAyah');
-        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
-        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
-        $modul->nikAyah = $request->input('nikAyah');
-        $modul->agamaAyah = $request->input('agamaAyah');
-        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
-        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
-        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
-        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
-        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
-        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
-        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
-        $modul->telpAyah = $request->input('telpAyah');
-        $modul->statusAyah = $request->input('statusAyah');
-        $modul->namaIbu = $request->input('namaIbu');
-        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
-        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
-        $modul->nikIbu = $request->input('nikIbu');
-        $modul->agamaIbu = $request->input('agamaIbu');
-        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
-        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
-        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
-        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
-        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
-        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
-        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
-        $modul->telpIbu = $request->input('telpIbu');
-        $modul->statusIbu = $request->input('statusIbu');
-        $modul->namaWali = $request->input('namaWali');
-        $modul->tempatLahirWali = $request->input('tempatLahirWali');
-        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
-        $modul->nikWali = $request->input('nikWali');
-        $modul->agamaWali = $request->input('agamaWali');
-        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
-        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
-        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
-        $modul->pekerjaanWali = $request->input('pekerjaanWali');
-        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
-        $modul->alamatWali = $request->input('alamatWali');
-        $modul->telpWali = $request->input('telpWali');
-        $data = $modul->update($request->input('idCalonSiswa'), $request->input('idOrangTuaWali'));
+        $modul->noForm = $request->no_form;
+        $data = $modul->detailFormulir();
         // dd($data);
-        if ($data) {
-            session()->flash('success', 'Formulir Pendaftaran Berhasil Diupdate');
-        } else {
-            session()->flash('error', 'Formulir Pendaftaran Gagal Diupdate');
-        }
-        return to_route('pendaftaran');
+        return Inertia::render('admin/pdf/StreamPdf',[
+            'datas'=>$data,
+        ]);
     }
 
 }

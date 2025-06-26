@@ -1,14 +1,10 @@
 import React,{useState} from 'react';
-import Flatpickr from "react-flatpickr";
 import { useForm } from "@inertiajs/react";
 import "flatpickr/dist/flatpickr.min.css";
 import "flatpickr/dist/themes/material_green.css";
-
-import { Indonesian } from "flatpickr/dist/l10n/id.js"; // Lokal Bahasa Indonesia
 import Modal from "../../UI/molecules/Modal";
 import { Label } from "../../UI/atoms/Label";
 import { InputForm } from '../../UI/molecules/InputForm';
-import InputSelect from "../../UI/atoms/InputSelect";
 import Select from 'react-select';
 
 
@@ -17,7 +13,7 @@ const TambahTransaksi = ({open,handleChangeOpen,datasUserOption,datasJenPembayar
     const { data, setData, post } = useForm({
         selectedUser: null,
         selectedPembayaran: null,
-        dibayarkan: ''
+        cicilan: ''
     });
 
     const optionsUser = datasUserOption.map(user =>({
@@ -41,23 +37,13 @@ const TambahTransaksi = ({open,handleChangeOpen,datasUserOption,datasJenPembayar
     const handleChangePembayaran = (e) => {
         setData({...data, selectedPembayaran: e});
     }
-    const handleChangeFormatRupiah = (e) => {
-        let value = e.target.value.replace(/\D/g, ''); // Hapus semua karakter non-digit
-
-        // Jika angka pertama 0 dan panjang lebih dari 1, hapus angka 0 di depan
-        if (value.length > 1 && value[0] === '0') {
-            // Cari digit pertama yang bukan 0
-            const firstNonZero = value.search(/[1-9]/);
-            if (firstNonZero !== -1) {
-                value = value.substring(firstNonZero);
-            } else {
-                value = '0'; // Jika semua 0, tetap 0
-            }
+    const handleChangeCicilan = (e) => {
+        const value = e.target.value.replace(/\D/g, ''); // Hanya ambil angka
+        if (value == '0'){
+            setData({...data, cicilan: ''}); // Jika 0, kosongkan input
+            return;
         }
-
-        // Tambahkan titik setiap 3 digit dari belakang
-        value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        setData({ ...data, [e.target.name]: value });
+        setData({...data, cicilan: value}); // Simpan sebagai angka tanpa format
     }
     const handleSubmitPeriode = (e) => {
         e.preventDefault();
@@ -107,16 +93,17 @@ return (
                             htmlFor="status"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                        Dibayarkan *
+                        Cicilan *
                         </Label>
                         <InputForm
                             type='text'
                             className='w-full bg-transparent'
                             name='dibayarkan'
                             required
-                            value={data.dibayarkan}
-                            onChange={handleChangeFormatRupiah}
-                            placeholder='Jumlah Yang Dibayarkan...'
+                            maxLength={1}
+                            value={data.cicilan}
+                            onChange={handleChangeCicilan}
+                            placeholder='Jumlah Berapa Kali Cicilan...'
                         />
                     <button
                         type="submit"

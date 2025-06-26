@@ -19,9 +19,12 @@ class PembayaranController extends Controller
     }
     public function store(Request $request)
     {
+        $startYear = date('Y');
+        $endYear = $startYear + 1;
         $modul = new Mpembayaran;
         $modul->nama_pembayaran = $request->namaPembayaran;
         $modul->total_pembayaran = preg_replace('/\./', '', $request->totalPembayaran);
+        $modul->periode = $startYear . $endYear;
         $data = $modul->store();
         if ($data) {
             session()->flash('success', 'Pembayaran berhasil ditambahkan');
@@ -33,6 +36,7 @@ class PembayaranController extends Controller
     public function destroy(Request $request)
     {
         $modul = new Mpembayaran;
+        // dd($request->all());
         $modul->id = $request->id;
         $data = $modul->destroy();
         if ($data) {

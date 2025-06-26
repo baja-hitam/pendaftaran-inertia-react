@@ -16,7 +16,7 @@ class Authentication
     }
     public function login()
     {
-        $query = "SELECT * FROM users WHERE email = :remail";
+        $query = "SELECT * FROM users WHERE email = :remail and level = '1'";
         $conn = DB::connection("mysql")->select($query, [
             'remail' => $this->email,
         ]);
@@ -29,7 +29,7 @@ class Authentication
     }
     public function login_admin()
     {
-        $query = "SELECT * FROM users WHERE email = :remail and level = '2'";
+        $query = "SELECT * FROM admin WHERE email = :remail and level = '2'";
         $conn = DB::connection("mysql")->select($query, [
             'remail' => $this->email,
         ]);

@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id('id_transaksi_pembayaran');
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_pembayaran');
-            $table->string('cperiode',8);
-            $table->date('tanggal_pembayaran');
-            $table->string('jumlah_pembayaran');
+            $table->string('nama_entry_admin',100)->nullable();
+            $table->string('periode',8);
+            $table->date('tanggal_dibayar')->nullable();
+            $table->string('jumlah_hrsbayar');
             $table->timestamps();
 
         });

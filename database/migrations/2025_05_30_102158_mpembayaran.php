@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('mpembayaran', function (Blueprint $table) {
             $table->id('id_pembayaran');
+            $table->string('periode', 8);
             $table->string('nama_pembayaran');
             $table->string('total_pembayaran');
             $table->timestamps();

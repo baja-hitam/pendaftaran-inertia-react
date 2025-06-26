@@ -6,11 +6,18 @@ import { toast } from "react-toastify";
 import { Label } from "../atoms/Label";
 
 export const FormDaftar = () => {
-  const {data, setData, post} = useForm({
+  const {data, setData, post,get} = useForm({
+    namalnkp: '',
     email: '',
     password: '',
+    notelp: '',
   });
-
+  function handleChangeNumber(e){
+    const cleanedValue = e.target.value.replace(/[^0-9]/g, '');
+    setData({
+      ...data,[e.target.name]:cleanedValue,
+    })
+  }
 const handleChangeFormDaftar = (e) => {
     setData({
       ...data,
@@ -19,11 +26,37 @@ const handleChangeFormDaftar = (e) => {
   }
 const submitDaftar = (e) => {
     e.preventDefault();
-    post("/register");
+    post("/otp");
   };
   return (
     <>
       <form onSubmit={submitDaftar}>
+      <div className="mb-2">
+          <Label label='Nama Lengkap *'>Nama Lengkap *</Label>
+          <InputForm
+          className={'lg:w-[250px]'}
+            placeholder="Masukkan Nama Lengkap"
+            type="text"
+            maxLength="100"
+            required
+            name="namalnkp"
+            value={data.namalnkp}
+            onChange={handleChangeFormDaftar}
+          />
+        </div>
+        <div className="mb-2">
+          <Label label='No Hp/Telepon *'>No Hp/Telepon *</Label>
+          <InputForm
+          className={'lg:w-[250px]'}
+            placeholder="Masukkan No Hp/Telepon"
+            type="text"
+            maxLength="13"
+            required
+            name="notelp"
+            value={data.notelp}
+            onChange={handleChangeNumber}
+          />
+        </div>
         <div className="mb-2">
           <Label label='Email Address *'>Email Address *</Label>
           <InputForm

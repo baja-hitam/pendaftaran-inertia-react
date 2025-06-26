@@ -11,7 +11,6 @@ const EditTransaksi = ({ open, row, handleChangeOpen,datasUserOption,datasJenPem
         id:'',
         selectedUser: null,
         selectedPembayaran: null,
-        dibayarkan: ''
     });
     useEffect(() => {
             setData({
@@ -22,9 +21,8 @@ const EditTransaksi = ({ open, row, handleChangeOpen,datasUserOption,datasJenPem
                 },
                 selectedPembayaran: {
                     value: row.id_pembayaran,
-                    label: row.jenis_pembayaran
+                    label: row.nama_pembayaran
                 },
-                dibayarkan: handleFormatRupiah(row.jumlah_pembayaran)
             });
     },[row]);
     const optionsUser = datasUserOption.map(user =>({

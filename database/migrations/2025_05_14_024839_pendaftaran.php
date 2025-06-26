@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('calon_siswa',function(Blueprint $table){
             $table->unsignedBigInteger('id_calon_siswa')->primary();
-            $table->unsignedBigInteger('id_user');
-            $table->string('cperiode',8);
+            $table->unsignedBigInteger('no_form');
             $table->string('nama_lengkap', 255);
             $table->string('nama_panggilan', 100);
             $table->char('jenis_kelamin', 1);
@@ -71,6 +70,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('calon_siswa');
     }
 };

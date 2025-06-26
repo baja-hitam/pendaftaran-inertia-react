@@ -3,9 +3,11 @@ import { Card } from "../../UI/organisms/Card";
 import React, { useState,useEffect } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
 import TemplateSidebar from "../../template/TemplateSidebar";
+import { toast,ToastContainer } from "react-toastify";
 
 
 const RiwayatPembayaran = ({datas}) => {
+    const { flash } = usePage().props;
     const handleChangeParseDate = (date) => {
         // console.log(date);
         date = new Date(date);
@@ -22,6 +24,20 @@ const RiwayatPembayaran = ({datas}) => {
             default: "transparent",
         },
     });
+
+    useEffect(() => {
+        if(flash.success != null){
+            toast.success(flash.success, {
+                autoClose: 500,
+                position: 'top-center'
+            });
+        }else if(flash.error != null){
+            toast.error(flash.error, {
+                autoClose: 500,
+                position: 'top-center'
+            });
+        }
+    },[flash])
 
     const customStyles = {
         rows: {
@@ -46,20 +62,19 @@ const RiwayatPembayaran = ({datas}) => {
         {
             name:"Nama Pembayaran",
             selector: (row) => row.nama_pembayaran,
+            wrap: true,
         },
         {
-            name: "Jumlah Yang Harus Dibayar",
-            selector: (row) => row.total_pembayaran,
-            format: (row) =>
-                new Intl.NumberFormat("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                }).format(row.total_pembayaran),
-        },
-        {
-            name: "Tanggal Dibayarkan",
-            selector: (row) => row.tanggal_pembayaran ? handleChangeParseDate(row.tanggal_pembayaran) : "-",
-        },
+            name: "Aksi",
+            cell: (row) => (
+                <button
+                    className="bg-blue-600 w-20 h-7 text-white rounded-md hover:bg-blue-700"
+                    onClick={() => router.get('/riwayat-pembayaran/detail', {id: row.id_pembayaran})}
+                >
+                    Detail
+                </button>
+            ),
+        }
     ];
 
     return (
@@ -86,6 +101,7 @@ const RiwayatPembayaran = ({datas}) => {
                     />
                 </Card>
             </div>
+            <ToastContainer />
         </div>
     );
 };

@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('Mperiode', function (Blueprint $table) {
-            $table->string('cperiode',8)->primary();
-            $table->date('dstart_date');
-            $table->date('dend_date');
-            $table->string('caktif',1)->default('T');
+            $table->string('periode',8)->primary();
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->string('aktif',1)->default('T');
             $table->timestamps();
         });
     }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('orang_tua_wali', function (Blueprint $table) {
             $table->unsignedBigInteger('id_orangtua_wali')->primary();
-            $table->unsignedBigInteger('id_calon_siswa');
+            $table->unsignedBigInteger('no_form');
             // Ayah
             $table->string('nama_ayah')->nullable();
             $table->string('tempat_lahir_ayah')->nullable();

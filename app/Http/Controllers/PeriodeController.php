@@ -21,7 +21,7 @@ class PeriodeController extends Controller
         $startYear = date('Y', strtotime($request->startDate));
         $endYear = $startYear + 1;
         $modul = new Mperiode;
-        $modul->cperiode = $startYear.$endYear;
+        $modul->periode = $startYear.$endYear;
         $modul->dstart_date = $request->startDate;
         $modul->dend_date = $request->endDate;
         $modul->caktif = $request->status;
@@ -43,7 +43,7 @@ class PeriodeController extends Controller
         $startYear = date('Y', strtotime($request->startDate));
         $endYear = $startYear + 1;
         $modul = new Mperiode;
-        $modul->cperiode = $startYear.$endYear;
+        $modul->periode = $startYear.$endYear;
         $modul->dstart_date = $request->startDate;
         $modul->dend_date = $request->endDate;
         $modul->caktif = $request->status;
@@ -59,7 +59,7 @@ class PeriodeController extends Controller
     {
         // dd($request);
         $modul = new Mperiode;
-        $modul->cperiode = $request->periode;
+        $modul->periode = $request->periode;
         $data = $modul->delete();
         if($data){
             session()->flash('success', 'Periode berhasil dihapus');

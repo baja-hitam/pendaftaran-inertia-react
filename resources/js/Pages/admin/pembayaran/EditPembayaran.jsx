@@ -13,7 +13,7 @@ const EditPembayaran = ({ open, row, handleChangeOpen }) => {
     });
     useEffect(() => {
             setData({
-                id: row.id,
+                id: row.id_pembayaran,
                 namaPembayaran: row.nama_pembayaran,
                 totalPembayaran: handleFormatRupiah(row.total_pembayaran.toString()),
             });

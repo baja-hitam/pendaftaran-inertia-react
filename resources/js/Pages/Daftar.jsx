@@ -13,7 +13,7 @@ const Daftar = () => {
         // console.log(flash.message);
         
         toast.error(flash.message, {
-          autoClose: 500,
+          autoClose: 1000,
           position: 'top-center'
         });
       }

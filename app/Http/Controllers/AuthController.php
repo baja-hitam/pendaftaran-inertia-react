@@ -18,8 +18,6 @@ class AuthController extends Controller
         return Inertia::render('admin/Login');
     }
     public function login(Request $request){
-        $startYear = date('Y');
-        $endYear = $startYear + 1;
         $modul = new Authentication;
         $modul1 = new Mperiode;
         $modul->email = $request->email;
@@ -30,13 +28,14 @@ class AuthController extends Controller
             $request->session()->flash('message', 'Email atau Password Salah');
             return back();
         }
-            $modul1->cperiode = $startYear.$endYear;
+            $modul1->periode = $data[0]->periode;
             $checkPeriode = $modul1->checkPeriode();
             if(empty($checkPeriode)){
                 $request->session()->flash('status', 'error');
                 $request->session()->flash('message', 'Periode pendaftaran belum dibuka, silahkan hubungi sekolah untuk informasi lebih lanjut');
                 return back();
             }
+            session(['periode'=> $data[0]->periode]);
             session(['user' => $data[0]->email]);
             session(['id_user'=>$data[0]->id_user]);
             session(['level' => $data[0]->level]);
@@ -53,8 +52,9 @@ class AuthController extends Controller
             return back();
         }
         session(['user' => $data[0]->email]);
-        session(['id_user'=>$data[0]->id_user]);
+        session(['id_user'=>$data[0]->id_admin]);
         session(['level' => $data[0]->level]);
+        session(['nama_lengkap' => $data[0]->nama_lengkap]);
         return to_route('admin.periode');
     }
 }

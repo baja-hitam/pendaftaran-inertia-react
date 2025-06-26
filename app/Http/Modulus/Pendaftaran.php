@@ -7,6 +7,7 @@ class Pendaftaran
     public $periode;
     public $namaPanggilan;
     public $jenisKelamin;
+    public $noForm;
     public $tempatLahir;
     public $tanggalLahir;
     public $agama;
@@ -100,6 +101,10 @@ class Pendaftaran
         return $this->idCalonSiswa;
     }
 
+    public function getNoForm()
+    {
+        return $this->noForm;
+    }
     public function getNamaAyah()
     {
         return $this->namaAyah;
@@ -496,7 +501,7 @@ class Pendaftaran
         return $this->citaCita;
     }
     public function checkDataCalonSiswa(){
-        $query = "SELECT id_calon_siswa FROM calon_siswa where id_user = :riduser AND cperiode = :rcperiode";
+        $query = "SELECT id_calon_siswa FROM calon_siswa where id_user = :riduser AND periode = :rcperiode";
         $conn = DB::connection('mysql')->select($query,[
             'riduser'=>session('id_user'),
             'rcperiode'=>$this->getPeriode(),
@@ -524,28 +529,27 @@ class Pendaftaran
 
         return $conn[0]->id_orangtua_wali + 1;
     }
-    public function getDaftarCalonSiswa(){
+    public function getDaftarFormulir(){
         $query = <<<EOD
-        SELECT * FROM calon_siswa
-        INNER JOIN orang_tua_wali ON calon_siswa.id_calon_siswa = orang_tua_wali.id_calon_siswa
-        WHERE cperiode = :rcperiode
+        SELECT * FROM formulir 
+        LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
+        LEFT JOIN orang_tua_wali ON formulir.no_form = orang_tua_wali.no_form
         EOD;
-        $conn = DB::connection('mysql')->select($query,[
-            'rcperiode'=>$this->getPeriode(),
-        ]);
+        $conn = DB::connection('mysql')->select($query);
         if(empty($conn)){
             return [];
         }
         return $conn;
     }
-    public function detailCalonSiswa(){
+    public function detailFormulir(){
         $query = <<<EOD
-        SELECT * FROM calon_siswa
-        INNER JOIN orang_tua_wali ON calon_siswa.id_calon_siswa = orang_tua_wali.id_calon_siswa
-        WHERE calon_siswa.id_calon_siswa = :ridcalonsiswa
+        SELECT * FROM formulir 
+        LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
+        LEFT JOIN orang_tua_wali ON formulir.no_form = orang_tua_wali.no_form
+        WHERE formulir.no_form = :rnoform
         EOD;
         $conn = DB::connection('mysql')->select($query,[
-            'ridcalonsiswa'=>$this->getIdCalonSiswa(),
+            'rnoform' => $this->getNoForm(),
         ]);
         if(empty($conn)){
             return [];
@@ -553,7 +557,12 @@ class Pendaftaran
         return $conn[0];
     }
     public function index(){
-        $query = "SELECT * FROM calon_siswa INNER JOIN orang_tua_wali ON calon_siswa.id_calon_siswa = orang_tua_wali.id_calon_siswa WHERE calon_siswa.id_user = :riduser AND calon_siswa.cperiode = :rcperiode";
+        $query = <<<EOD
+        SELECT formulir.no_form as no_formulir,calon_siswa.*,orang_tua_wali.* FROM formulir
+        LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
+        LEFT JOIN orang_tua_wali ON formulir.no_form = orang_tua_wali.no_form
+        where periode = :rcperiode AND id_user = :riduser
+        EOD;
         $conn = DB::connection('mysql')->select($query,[
             'riduser'=>session('id_user'),
             'rcperiode'=>$this->getPeriode(),
@@ -563,16 +572,42 @@ class Pendaftaran
         }
         return $conn[0];
     }
+    public function getNoFormulir(){
+        $query = "SELECT no_form FROM formulir where id_user = :riduser AND periode = :rcperiode";
+        $conn = DB::connection('mysql')->select($query,[
+            'riduser'=>session('id_user'),
+            'rcperiode'=>$this->getPeriode(),
+        ]);
+        if(empty($conn)){
+            return [];
+        }
+        return $conn[0]->no_form;
+    }
+    public function store_formulir(){
+        $no_formulir = $this->getNoFormulir();
+        if(!empty($no_formulir)){
+            return $no_formulir;
+        }
+        $query = "INSERT INTO formulir (id_user, periode, created_at, updated_at) values (:riduser, :rcperiode, NOW(), NOW())";
+        $conn = DB::connection('mysql')->insert($query,[
+            'riduser' => session('id_user'),
+            'rcperiode' => $this->getPeriode(),
+        ]);
+        if(!$conn){
+            return [];
+        }
+        $no_formulir = $this->getNoFormulir();
+        return $no_formulir;
+    }
     public function store(){
         $id_calon_siswa = $this->counterIdCalonSiswa();
         $query = <<<EOD
-        INSERT INTO calon_siswa ( `id_calon_siswa`,`id_user`, `cperiode`, `nama_lengkap`, `nama_panggilan`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `agama`, `kewarganegaraan`, `anak_ke`, `jumlah_saudara_kandung`, `jumlah_saudara_tiri`, `jumlah_saudara_angkat`, `status_anak`, `bahasa_sehari_hari`, `alamat`, `no_kk`, `kelurahan`, `kecamatan`, `kota`, `kode_pos`, `nomor_telepon`, `tempat_alamat`, `nama_pemilik_tempat_alamat`, `jarak_ke_sekolah`, `metode_transportasi`, `golongan_darah`, `riwayat_rawat`, `riwayat_penyakit`, `kelainan_jasmani`, `tinggi_badan`, `berat_badan`, `nama_sekolah_asal`, `tanggal_ijazah`, `nomor_ijazah`, `tanggal_skhun`, `nomor_skhun`, `lama_belajar`, `nisn`, `tipe_riwayat_sekolah`, `nama_riwayat_sekolah`, `tanggal_pindah`, `alasan_pindah`, `kesenian`, `olahraga`, `organisasi`, `prestasi_lainnya`,`hobi`,`cita_cita`, `created_at`, `updated_at`) 
-        VALUES (:ridcalonsiswa,:riduser, :rcperiode, :rnamalengkap, :rnamapanggilan, :rjeniskelamin, :rtempatlahir, :rtanggallahir, :ragama, :rkewarganegaraan, :ranakke, :rjumlahsaudarakandung, :rjumlahsaudaratiri, :rjumlahsaudaraangkat, :rstatusanak, :rbahasaseharihari, :ralamat, :rnokk, :rkelurahan, :rkecamatan, :rkota, :rkodepos, :rnomortelepon, :rtempatalamat, :rnamapemiliktempatalamat, :rjarakkesekolah, :rmetodetransportasi, :rgolongandarah, :rriwayatrawat, :rriwayatpenyakit, :rkelainanhasmani, :rtinggibadan, :rberatbadan, :rnamasekolahasal, :rtanggalijazah, :rnomorijazah, :rtanggalskhun, :rnomorskhun, :rlamabelajar, :rnisn, :rtiperiwayatsekolah, :rnamariwayatsekolah, :rtanggalpindah, :ralasanpindah, :rkesenian, :rolahraga, :rorganisasi, :rprestasilainnya, :rhobi, :rcitaCita, :rcreatedat, :rupdatedat)
+        INSERT INTO calon_siswa ( `id_calon_siswa`, `no_form`, `nama_lengkap`, `nama_panggilan`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `agama`, `kewarganegaraan`, `anak_ke`, `jumlah_saudara_kandung`, `jumlah_saudara_tiri`, `jumlah_saudara_angkat`, `status_anak`, `bahasa_sehari_hari`, `alamat`, `no_kk`, `kelurahan`, `kecamatan`, `kota`, `kode_pos`, `nomor_telepon`, `tempat_alamat`, `nama_pemilik_tempat_alamat`, `jarak_ke_sekolah`, `metode_transportasi`, `golongan_darah`, `riwayat_rawat`, `riwayat_penyakit`, `kelainan_jasmani`, `tinggi_badan`, `berat_badan`, `nama_sekolah_asal`, `tanggal_ijazah`, `nomor_ijazah`, `tanggal_skhun`, `nomor_skhun`, `lama_belajar`, `nisn`, `tipe_riwayat_sekolah`, `nama_riwayat_sekolah`, `tanggal_pindah`, `alasan_pindah`, `kesenian`, `olahraga`, `organisasi`, `prestasi_lainnya`,`hobi`,`cita_cita`, `created_at`, `updated_at`) 
+        VALUES (:ridcalonsiswa, :rnoform, :rnamalengkap, :rnamapanggilan, :rjeniskelamin, :rtempatlahir, :rtanggallahir, :ragama, :rkewarganegaraan, :ranakke, :rjumlahsaudarakandung, :rjumlahsaudaratiri, :rjumlahsaudaraangkat, :rstatusanak, :rbahasaseharihari, :ralamat, :rnokk, :rkelurahan, :rkecamatan, :rkota, :rkodepos, :rnomortelepon, :rtempatalamat, :rnamapemiliktempatalamat, :rjarakkesekolah, :rmetodetransportasi, :rgolongandarah, :rriwayatrawat, :rriwayatpenyakit, :rkelainanhasmani, :rtinggibadan, :rberatbadan, :rnamasekolahasal, :rtanggalijazah, :rnomorijazah, :rtanggalskhun, :rnomorskhun, :rlamabelajar, :rnisn, :rtiperiwayatsekolah, :rnamariwayatsekolah, :rtanggalpindah, :ralasanpindah, :rkesenian, :rolahraga, :rorganisasi, :rprestasilainnya, :rhobi, :rcitaCita, :rcreatedat, :rupdatedat)
         EOD;
         $conn = DB::connection('mysql')->insert($query,[
             'ridcalonsiswa' => $id_calon_siswa,
-            'riduser' => session('id_user'),
-            'rcperiode' => $this->getPeriode(),
+            'rnoform' => $this->getNoForm(),
             'rnamalengkap' => $this->getNamaSiswa(),
             'rnamapanggilan' => $this->getNamaPanggilan(),
             'rjeniskelamin' => $this->getJenisKelamin(),
@@ -623,58 +658,70 @@ class Pendaftaran
             'rcreatedat' => now(),
             'rupdatedat' => now(),
         ]);
-        if($conn){
-            $query = "INSERT INTO orang_tua_wali (id_orangtua_wali,id_calon_siswa, nama_ayah, tempat_lahir_ayah, tanggal_lahir_ayah, nik_ayah, agama_ayah, kewarganegaraan_ayah, pendidikan_terakhir_ayah, ijazah_tertinggi_ayah, pekerjaan_ayah, alamat_pekerjaan_ayah, penghasilan_ayah, alamat_rumah_ayah, telp_ayah, status_ayah, nama_ibu, tempat_lahir_ibu, tanggal_lahir_ibu, nik_ibu, agama_ibu, kewarganegaraan_ibu, pendidikan_terakhir_ibu, ijazah_tertinggi_ibu, pekerjaan_ibu, alamat_pekerjaan_ibu, penghasilan_ibu, alamat_rumah_ibu, telp_ibu, status_ibu, nama_wali, tempat_lahir_wali, tanggal_lahir_wali, nik_wali, agama_wali, kewarganegaraan_wali, hubungan_keluarga_wali, ijazah_tertinggi_wali, pekerjaan_wali, penghasilan_wali, alamat_wali, telp_wali) VALUES (:ridorangtuawali,:ridcalonsiswa,:rnamaayah,:rtempatlahirayah,:rtanggallahirayah,:rnikayah,:ragamaayah,:rkewarganegaraanayah,:rpendidikanterakhirayah,:rijazahtertinggiahya,:rpekerjaanayah,:ralamatpekerjaanayah,:rpenghasilanayah,:ralamatrumahayah,:rtelpayah,:rstatusayah,:rnamaibu,:rtempatlahiribu,:rtanggallahiribu,:rnikibu,:ragamaibu,:rkewarganegaraanibu,:rpendidikanterakhiribu,:rijazahtertinggiibu,:rpekerjaanibu,:ralamatpekerjaanibu,:rpenghasilanibu,:ralamatrumahuibu,:rtelpibu,:rstatusibu,:rnamawali,:rtempatlahirwali,:rtanggallahirwali,:rnikwali,:ragamawali,:rkewarganegaraanwali,:rhubungankeluargawali,:rijazahtertinggiwali,:rpekerjaanwali,:rpenghasilanwali,:ralamatwali,:rtelpwali)";
-            $conn = DB::connection('mysql')->insert($query,[
-                'ridorangtuawali' => $this->counterIdOrangTuaWali(),
-                'ridcalonsiswa' => $id_calon_siswa,
-                'rnamaayah' => $this->getNamaAyah(),
-                'rtempatlahirayah' => $this->getTempatLahirAyah(),
-                'rtanggallahirayah' => $this->getTanggalLahirAyah(),
-                'rnikayah' => $this->getNikAyah(),
-                'ragamaayah' => $this->getAgamaAyah(),
-                'rkewarganegaraanayah' => $this->getKewarganegaraanAyah(),
-                'rpendidikanterakhirayah' => $this->getPendidikanTerakhirAyah(),
-                'rijazahtertinggiahya' => $this->getIjazahTertinggiAyah(),
-                'rpekerjaanayah' => $this->getPekerjaanAyah(),
-                'ralamatpekerjaanayah' => $this->getAlamatPekerjaanAyah(),
-                'rpenghasilanayah' => $this->getPenghasilanAyah(),
-                'ralamatrumahayah' => $this->getAlamatRumahAyah(),
-                'rtelpayah' => $this->getTelpAyah(),
-                'rstatusayah' => $this->getStatusAyah(),
-
-                'rnamaibu' => $this->getNamaIbu(),
-                'rtempatlahiribu' => $this->getTempatLahirIbu(),
-                'rtanggallahiribu' => $this->getTanggalLahirIbu(),
-                'rnikibu' => $this->getNikIbu(),
-                'ragamaibu' => $this->getAgamaIbu(),
-                'rkewarganegaraanibu' => $this->getKewarganegaraanIbu(),
-                'rpendidikanterakhiribu' => $this->getPendidikanTerakhirIbu(),
-                'rijazahtertinggiibu' => $this->getIjazahTertinggiIbu(),
-                'rpekerjaanibu' => $this->getPekerjaanIbu(),
-                'ralamatpekerjaanibu' => $this->getAlamatPekerjaanIbu(),
-                'rpenghasilanibu' => $this->getPenghasilanIbu(),
-                'ralamatrumahuibu' => $this->getAlamatRumahIbu(),
-                'rtelpibu' => $this->getTelpIbu(),
-                'rstatusibu' => $this->getStatusIbu(),
-                'rnamawali' => $this->getNamaWali(),
-                'rtempatlahirwali' => $this->getTempatLahirWali(),
-                'rtanggallahirwali' => $this->getTanggalLahirWali(),
-                'rnikwali' => $this->getNikWali(),
-                'ragamawali' => $this->getAgamaWali(),
-                'rkewarganegaraanwali' => $this->getKewarganegaraanWali(),
-                'rhubungankeluargawali' => $this->getHubunganKeluargaWali(),
-                'rijazahtertinggiwali' => $this->getIjazahTertinggiWali(),
-                'rpekerjaanwali' => $this->getPekerjaanWali(),
-                'rpenghasilanwali' => $this->getPenghasilanWali(),
-                'ralamatwali' => $this->getAlamatWali(),
-                'rtelpwali' => $this->getTelpWali(),
-            ]);
-            return $conn;
-        }
         return $conn;
     }
-    public function update($id_calon_siswa,$id_orangtua_wali)
+    public function store_orang_tua_wali(){
+        $id_orangtua_wali = $this->counterIdOrangTuaWali();
+        $query = <<<EOD
+        INSERT INTO orang_tua_wali (id_orangtua_wali, no_form, nama_ayah, tempat_lahir_ayah, tanggal_lahir_ayah, nik_ayah, agama_ayah, kewarganegaraan_ayah, pendidikan_terakhir_ayah, ijazah_tertinggi_ayah, pekerjaan_ayah, alamat_pekerjaan_ayah, penghasilan_ayah, alamat_rumah_ayah, telp_ayah, status_ayah,
+            nama_ibu, tempat_lahir_ibu, tanggal_lahir_ibu, nik_ibu, agama_ibu, kewarganegaraan_ibu, pendidikan_terakhir_ibu, ijazah_tertinggi_ibu, pekerjaan_ibu, alamat_pekerjaan_ibu, penghasilan_ibu, alamat_rumah_ibu, telp_ibu, status_ibu,
+            nama_wali, tempat_lahir_wali,tanggal_lahir_wali ,nik_wali ,agama_wali ,kewarganegaraan_wali ,hubungan_keluarga_wali ,ijazah_tertinggi_wali ,pekerjaan_wali ,penghasilan_wali ,alamat_wali ,telp_wali,
+            created_at, updated_at)
+        VALUES (:ridorangtuwali,:rnoform,:rnamaayah,:rtempatlahirayah,:rtanggallahirayah,:rnikayah,:ragamaayah,:rkewarganegaraanayah,:rpendidikanterakhirayah,:rijazahtertinggiahya,:rpekerjaanayah,:ralamatpekerjaanayah,:rpenghasilanayah,:ralamatrumahayah,:rtelpayah,:rstatusayah,
+            :rnamaibu,:rtempatlahiribu,:rtanggallahiribu,:rnikibu,:ragamaibu,:rkewarganegaraanibu,:rpendidikanterakhiribu,:rijazahtertinggiibu,:rpekerjaanibu,:ralamatpekerjaanibu,:rpenghasilanibu,:ralamatrumahiubu,:rtelpibu,:rstatusibu,
+            :rnamawali,:rtempatlahirwali,:rtanggallahirwali,:rnikwali,:ragamawali,:rkewarganegaraanwali,:rhubungankeluargawali,:rijazahtertinggiwali,:rpekerjaanwali,:rpenghasilanwali,:ralamatwali,:rtelpwali,
+            :rcreatedat, :rupdatedat)
+        EOD;
+        $conn = DB::connection('mysql')->insert($query,[
+            'ridorangtuwali' => $id_orangtua_wali,
+            'rnoform' => $this->getNoForm(),
+            'rnamaayah' => $this->getNamaAyah(),
+            'rtempatlahirayah' => $this->getTempatLahirAyah(),
+            'rtanggallahirayah' => $this->getTanggalLahirAyah(),
+            'rnikayah' => $this->getNikAyah(),
+            'ragamaayah' => $this->getAgamaAyah(),
+            'rkewarganegaraanayah' => $this->getKewarganegaraanAyah(),
+            'rpendidikanterakhirayah' => $this->getPendidikanTerakhirAyah(),
+            'rijazahtertinggiahya' => $this->getIjazahTertinggiAyah(),
+            'rpekerjaanayah' => $this->getPekerjaanAyah(),
+            'ralamatpekerjaanayah' => $this->getAlamatPekerjaanAyah(),
+            'rpenghasilanayah' => $this->getPenghasilanAyah(),
+            'ralamatrumahayah' => $this->getAlamatRumahAyah(),
+            'rtelpayah' => $this->getTelpAyah(),
+            'rstatusayah' => $this->getStatusAyah(),
+
+            'rnamaibu' => $this->getNamaIbu(),
+            'rtempatlahiribu' => $this->getTempatLahirIbu(),
+            'rtanggallahiribu' => $this->getTanggalLahirIbu(),
+            'rnikibu' => $this->getNikIbu(),
+            'ragamaibu' => $this->getAgamaIbu(),
+            'rkewarganegaraanibu' => $this->getKewarganegaraanIbu(),
+            'rpendidikanterakhiribu' => $this->getPendidikanTerakhirIbu(),
+            'rijazahtertinggiibu' => $this->getIjazahTertinggiIbu(),
+            'rpekerjaanibu' => $this->getPekerjaanIbu(),
+            'ralamatpekerjaanibu' => $this->getAlamatPekerjaanIbu(),
+            'rpenghasilanibu' => $this->getPenghasilanIbu(),
+            'ralamatrumahiubu' => $this->getAlamatRumahIbu(),
+            'rtelpibu' => $this->getTelpIbu(),
+            'rstatusibu' => $this->getStatusIbu(),
+            'rnamawali' => $this->getNamaWali(),
+            'rtempatlahirwali' => $this->getTempatLahirWali(),
+            'rtanggallahirwali' => $this->getTanggalLahirWali(),
+            'rnikwali' => $this->getNikWali(),
+            'ragamawali' => $this->getAgamaWali(),
+            'rkewarganegaraanwali' => $this->getKewarganegaraanWali(),
+            'rhubungankeluargawali' => $this->getHubunganKeluargaWali(),
+            'rijazahtertinggiwali' => $this->getIjazahTertinggiWali(),
+            'rpekerjaanwali' => $this->getPekerjaanWali(),
+            'rpenghasilanwali' => $this->getPenghasilanWali(),
+            'ralamatwali' => $this->getAlamatWali(),
+            'rtelpwali' => $this->getTelpWali(),
+            'rcreatedat' => now(),
+            'rupdatedat' => now(),
+        ]);
+        return $conn;
+    }
+    public function update($id_calon_siswa)
     {
         // return $id_calon_siswa;
         $query = <<<EOD
@@ -781,8 +828,12 @@ class Pendaftaran
             'rupdatedat' => now(),
             'ridcalonsiswa' => $id_calon_siswa,
         ]);
-
-        $queryOrtu = <<<EOD
+        // dd($resultOrtu);
+        return $result;
+    }
+    public function updateOrangTuaWali($id_orangtua_wali)
+    {
+        $query = <<<EOD
         UPDATE orang_tua_wali SET
             nama_ayah = :rnamaayah,
             tempat_lahir_ayah = :rtempatlahirayah,
@@ -798,6 +849,7 @@ class Pendaftaran
             alamat_rumah_ayah = :ralamatrumahayah,
             telp_ayah = :rtelpayah,
             status_ayah = :rstatusayah,
+
             nama_ibu = :rnamaibu,
             tempat_lahir_ibu = :rtempatlahiribu,
             tanggal_lahir_ibu = :rtanggallahiribu,
@@ -809,25 +861,26 @@ class Pendaftaran
             pekerjaan_ibu = :rpekerjaanibu,
             alamat_pekerjaan_ibu = :ralamatpekerjaanibu,
             penghasilan_ibu = :rpenghasilanibu,
-            alamat_rumah_ibu = :ralamatrumahuibu,
+            alamat_rumah_ibu = :ralamatrumahiubu,
             telp_ibu = :rtelpibu,
             status_ibu = :rstatusibu,
-            nama_wali = :rnamawali,
-            tempat_lahir_wali = :rtempatlahirwali,
-            tanggal_lahir_wali = :rtanggallahirwali,
-            nik_wali = :rnikwali,
-            agama_wali = :ragamawali,
-            kewarganegaraan_wali = :rkewarganegaraanwali,
-            hubungan_keluarga_wali = :rhubungankeluargawali,
-            ijazah_tertinggi_wali = :rijazahtertinggiwali,
-            pekerjaan_wali = :rpekerjaanwali,
-            penghasilan_wali = :rpenghasilanwali,
-            alamat_wali = :ralamatwali,
-            telp_wali = :rtelpwali
-        WHERE id_calon_siswa = :ridcalonsiswa and id_orangtua_wali = :ridorangtuawali
-        EOD;
 
-        $resultOrtu = DB::connection('mysql')->update($queryOrtu, [
+            nama_wali = :rnamawali,
+            tempat_lahir_wali= :rtempatlahirwali,
+            tanggal_lahir_wali= :rtanggallahirwali,
+            nik_wali= :rnikwali,
+            agama_wali= :ragamawali,
+            kewarganegaraan_wali= :rkewarganegaraanwali,
+            hubungan_keluarga_wali= :rhubungankeluargawali,
+            ijazah_tertinggi_wali= :rijazahtertinggiwali,
+            pekerjaan_wali= :rpekerjaanwali,
+            penghasilan_wali= :rpenghasilanwali,
+            alamat_wali= :ralamatwali,
+            telp_wali= :rtelpwali,
+            updated_at = :rupdatedat
+        WHERE id_orangtua_wali = :ridorangtuwali
+    EOD;
+        $result = DB::connection('mysql')->update($query, [
             'rnamaayah' => $this->getNamaAyah(),
             'rtempatlahirayah' => $this->getTempatLahirAyah(),
             'rtanggallahirayah' => $this->getTanggalLahirAyah(),
@@ -842,6 +895,7 @@ class Pendaftaran
             'ralamatrumahayah' => $this->getAlamatRumahAyah(),
             'rtelpayah' => $this->getTelpAyah(),
             'rstatusayah' => $this->getStatusAyah(),
+
             'rnamaibu' => $this->getNamaIbu(),
             'rtempatlahiribu' => $this->getTempatLahirIbu(),
             'rtanggallahiribu' => $this->getTanggalLahirIbu(),
@@ -853,7 +907,7 @@ class Pendaftaran
             'rpekerjaanibu' => $this->getPekerjaanIbu(),
             'ralamatpekerjaanibu' => $this->getAlamatPekerjaanIbu(),
             'rpenghasilanibu' => $this->getPenghasilanIbu(),
-            'ralamatrumahuibu' => $this->getAlamatRumahIbu(),
+            'ralamatrumahiubu' => $this->getAlamatRumahIbu(),
             'rtelpibu' => $this->getTelpIbu(),
             'rstatusibu' => $this->getStatusIbu(),
             'rnamawali' => $this->getNamaWali(),
@@ -868,11 +922,11 @@ class Pendaftaran
             'rpenghasilanwali' => $this->getPenghasilanWali(),
             'ralamatwali' => $this->getAlamatWali(),
             'rtelpwali' => $this->getTelpWali(),
-            'ridcalonsiswa' => $id_calon_siswa,
-            'ridorangtuawali' => $id_orangtua_wali,
+            'rupdatedat' => now(),
+            'ridorangtuwali' => $id_orangtua_wali,
         ]);
-        // dd($resultOrtu);
-        return $result && $resultOrtu;
+        // dd($result);
+        return $result;
     }
 }
 ?>

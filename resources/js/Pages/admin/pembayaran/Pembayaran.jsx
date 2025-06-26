@@ -1,8 +1,5 @@
 import { Head, usePage, router } from "@inertiajs/react";
-import Sidebar from "../../UI/organisms/Sidebar";
-import { Menu } from "../../UI/molecules/Menu";
-import { IconDashboard } from "../../UI/atoms/IconDashboard";
-import { IconForm } from "../../UI/atoms/IconForm";
+import SidebarAdmin from "../SidebarAdmin";
 import { Card } from "../../UI/organisms/Card";
 import React, { useState,useEffect } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
@@ -95,6 +92,10 @@ const Pembayaran = ({datas}) => {
             selector: (row) => row.nama_pembayaran,
         },
         {
+            name: "Periode",
+            selector: (row) => row.periode.slice(0,4) + "/" + row.periode.slice(4),
+        },
+        {
             name: "Total Pembayaran",
             selector: (row) => row.total_pembayaran,
             format: (row) => new Intl.NumberFormat('id-ID', {
@@ -106,7 +107,7 @@ const Pembayaran = ({datas}) => {
             name: "Aksi",
             cell: (row) => (<div className="flex flex-row gap-x-2"> 
                 <button className="bg-blue-600 w-16 h-7 text-white rounded-md hover:bg-blue-700" onClick={() => handleOpenEdit(row)}>Edit</button>
-                <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeletePembayaran(row.id)}>Hapus</button>
+                <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeletePembayaran(row.id_pembayaran)}>Hapus</button>
                 </div>)
         }
     ];
@@ -116,30 +117,14 @@ const Pembayaran = ({datas}) => {
             <Head>
                 <title>Pembayaran</title>
             </Head>
-            <Sidebar>
-                <Menu text="Dashboard" link="/">
-                    <IconDashboard />
-                </Menu>
-                <Menu text="Master Periode" link="/admin/periode">
-                    <IconForm />
-                </Menu>
-                <Menu text="Master Pembayaran" link="/admin/pembayaran">
-                    <IconForm />
-                </Menu>
-                <Menu text="Transaksi Pembayaran" link="/admin/transaksi-pembayaran">
-                    <IconForm />
-                </Menu>
-                <Menu text="Daftar Calon Siswa" link="/admin/calon-siswa">
-                    <IconForm />
-                </Menu>
-            </Sidebar>
+            <SidebarAdmin/>
             <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
                     Master Pembayaran
                 </p>
                 <Card
                     className={
-                        "w-[95%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[70%] xl:w-[50%]"
+                        "w-[98%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[90%] lg:w-[90%] xl:w-[60%]"
                     }
                 >
                     <ButtonLink

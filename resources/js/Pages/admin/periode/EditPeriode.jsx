@@ -12,9 +12,9 @@ import InputSelect from "../../UI/atoms/InputSelect";
 const EditPeriode = ({open,row,handleChangeOpen})=>{
     const [error, setError] = useState(null);
     const {data, setData, post} = useForm({
-        startDate: row?.dstart_date,
-        endDate: row?.dend_date,
-        status: row?.caktif,
+        startDate: row?.start_date,
+        endDate: row?.end_date,
+        status: row?.aktif,
     });
     // console.log(data);
     
