@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('status_anak',25)->nullable();
             $table->string('bahasa_sehari_hari', 100);
             $table->text('alamat');
-            $table->string('no_kk', 20);
+            $table->string('no_kk', 255);
             $table->string('kelurahan', 100);
             $table->string('kecamatan', 100);
             $table->string('kota', 100);

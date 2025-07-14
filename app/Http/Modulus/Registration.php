@@ -10,7 +10,6 @@ class Registration
     public $nama_lengkap;
     public $no_telp;
     public $password;
-    public $periode;
 
     public function getEmail(){
         return $this->email;
@@ -24,9 +23,6 @@ class Registration
     public function getPassword(){
         return $this->password;
     }
-    public function getPeriode(){
-        return $this->periode;
-    }
     public function checkEmail(){
         $query = "SELECT * FROM users WHERE email = :remail";
         $conn = DB::connection(name: "mysql")->select($query, [
@@ -36,11 +32,10 @@ class Registration
     }
     public function register()
     {
-        $query = "INSERT INTO users (email, nama_lengkap, no_telp, periode, password,level,created_at,updated_at) VALUES (:remail,:rnamalnkp,:rnotelp, :rperiode, :rpassword,:rlevel,NOW(), NOW())";
+        $query = "INSERT INTO users (email, nama_lengkap, no_telp, password,level,created_at,updated_at) VALUES (:remail,:rnamalnkp,:rnotelp, :rpassword,:rlevel,NOW(), NOW())";
         $conn = DB::connection("mysql")->insert($query, [
             'remail' => $this->getEmail(),
             'rnamalnkp' => $this->getNamaLengkap(),
-            'rperiode' => $this->getPeriode(),
             'rnotelp' => $this->getNoTelp(),
             'rpassword' => Hash::make($this->password),
             'rlevel' => '1'

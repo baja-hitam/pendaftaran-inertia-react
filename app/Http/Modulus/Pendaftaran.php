@@ -500,6 +500,18 @@ class Pendaftaran
     {
         return $this->citaCita;
     }
+    public function getAllFormulir(){
+        $query = <<<EOD
+        SELECT formulir.no_form,calon_siswa.nama_lengkap,orang_tua_wali.nama_ayah,orang_tua_wali.nama_ibu,orang_tua_wali.nama_wali FROM formulir
+        LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
+        left join orang_tua_wali on formulir.no_form = orang_tua_wali.no_form
+        EOD;
+        $conn = DB::connection('mysql')->select($query);
+        if(empty($conn)){
+            return [];
+        }
+        return $conn;
+    }
     public function checkDataCalonSiswa(){
         $query = "SELECT id_calon_siswa FROM calon_siswa where id_user = :riduser AND periode = :rcperiode";
         $conn = DB::connection('mysql')->select($query,[
@@ -510,6 +522,16 @@ class Pendaftaran
             return [];
         }
         return $conn[0]->id_calon_siswa;
+    }
+    public function getJumlahPendaftaran(){
+        $query = "SELECT COUNT(no_form) as jumlah_pendaftar, periode FROM formulir where periode = :rcperiode GROUP BY periode";
+        $conn = DB::connection('mysql')->select($query,[
+            'rcperiode'=>$this->getPeriode(),
+        ]);
+        if(empty($conn)){
+            return [];
+        }
+        return $conn;
     }
     public function counterIdCalonSiswa(){
         $query = "SELECT id_calon_siswa FROM calon_siswa order by id_calon_siswa desc";

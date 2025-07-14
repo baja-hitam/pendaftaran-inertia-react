@@ -18,7 +18,7 @@ class AuthSession
         if (session('user') && session('level') == '1') {
             return $next($request);
         }else{
-            return redirect('/login');
+            return redirect('/');
         }
     }
 }

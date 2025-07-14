@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('no_telp',13)->nullable();
             $table->string('email');
             $table->string('password');
-            $table->string('periode',8)->nullable();
             $table->string('level',1);
             $table->timestamps();
         });

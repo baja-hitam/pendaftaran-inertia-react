@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('transaksi_pembayaran', function (Blueprint $table) {
             $table->id('id_transaksi_pembayaran');
-            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_user')->nullable();
+            $table->unsignedBigInteger('no_form')->nullable();
             $table->unsignedBigInteger('id_pembayaran');
             $table->string('nama_entry_admin',100)->nullable();
             $table->string('periode',8);

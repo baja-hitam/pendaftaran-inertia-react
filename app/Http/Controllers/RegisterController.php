@@ -47,8 +47,6 @@ class RegisterController extends Controller
     }
     public function store(Request $request)
     {
-        $startYear = date('Y');
-        $endYear = $startYear + 1;
         $user = session('user');
         $otp = (new Otp)->validate($user['email'], $request->otp);
         if (!$otp) {
@@ -59,7 +57,6 @@ class RegisterController extends Controller
         $modul = new Registration;
         $modul->email = $user['email'];
         $modul->password = $user['password'];
-        $modul->periode = $startYear.$endYear; 
         $modul->nama_lengkap = $user['namalnkp'];
         $modul->no_telp = $user['notelp'];
         $result = $modul->register();
@@ -68,6 +65,7 @@ class RegisterController extends Controller
             $request->session()->flash('message', 'Anda Gagal Mendaftar');
             return to_route('register');
         }
+        session()->forget('user');
         $request->session()->flash('status', 'success');
         $request->session()->flash('message', 'Anda Berhasil Mendaftar');
         return to_route('login');

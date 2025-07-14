@@ -4,20 +4,23 @@ import { useForm } from "@inertiajs/react";
 import Modal from "../../UI/molecules/Modal";
 import { Label } from "../../UI/atoms/Label";
 import { InputForm } from '../../UI/molecules/InputForm';
+import InputSelect from "../../UI/atoms/InputSelect";
 
 const EditPembayaran = ({ open, row, handleChangeOpen }) => {
     const { data, setData, post } = useForm({
         id: '',
         namaPembayaran: '',
         totalPembayaran: '',
+        status: '',
     });
     useEffect(() => {
             setData({
                 id: row.id_pembayaran,
                 namaPembayaran: row.nama_pembayaran,
                 totalPembayaran: handleFormatRupiah(row.total_pembayaran.toString()),
+                status: row.aktif,
             });
-    },[row]);
+    },[]);
     const handleFormatRupiah = (value) => {
         // Jika angka pertama 0 dan panjang lebih dari 1, hapus angka 0 di depan
         if (value.length > 1 && value[0] === "0") {
@@ -34,6 +37,11 @@ const EditPembayaran = ({ open, row, handleChangeOpen }) => {
         value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         return value;
     };
+        
+    const options = [
+        { label: "Aktif", value: "T" },
+        { label: "Tidak Aktif", value: "F" },
+    ];
     const handleChangePembayaran = (e) => {
         setData({ ...data, [e.target.name]: e.target.value });
     };
@@ -99,6 +107,20 @@ const EditPembayaran = ({ open, row, handleChangeOpen }) => {
                     placeholder="Total Pembayaran"
                     required
                     maxLength={10}
+                />
+                <Label
+                    htmlFor="status"
+                    className="block mb-2 text-sm font-medium text-gray-700"
+                >
+                    Pilih Status Master Pembayaran *
+                </Label>
+                <InputSelect
+                    label="Pilih Bulan"
+                    name="status"
+                    value={data.status}
+                    onChange={handleChangePembayaran}
+                    options={options}
+                    className="w-60"
                 />
                 <button
                     type="submit"

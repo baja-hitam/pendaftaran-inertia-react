@@ -5,7 +5,7 @@ import Sidebar from "../UI/organisms/Sidebar";
 const TemplateSidebar = () => {
     return(
         <Sidebar>
-        <Menu text='Dashboard' link='/'>
+        <Menu text='Dashboard' link='/dashboard'>
           <IconDashboard/>
         </Menu>
         <Menu text='Formulir Pendaftaran' link='/pendaftaran'>

@@ -38,6 +38,7 @@ const handleChangeParseTime = (time) => {
                     <div key={index} className="mt-4">
                         <p className="text-md font-poppins text-gray-800 font-bold">{index+1}. {ujian.nama_ujian}</p>
                         <table>
+                          <thead>
                           <tr>
                             <td>
                               <p className="text-md font-poppins text-gray-800">Tanggal Ujian</p>
@@ -47,6 +48,8 @@ const handleChangeParseTime = (time) => {
                               <p className="text-md font-poppins text-gray-800">{handleChangeParseDate(ujian.tanggal_ujian)}</p>
                             </td>
                           </tr>
+                          </thead>
+                          <tbody>
                           <tr>
                             <td>
                               <p className="text-md font-poppins text-gray-800">Ruang Ujian</p>
@@ -74,6 +77,7 @@ const handleChangeParseTime = (time) => {
                               <p className="text-md font-poppins text-gray-800">{handleChangeParseTime(ujian.waktu_selesai)}</p>
                             </td>
                           </tr>
+                          </tbody>
                         </table>
                     </div>
                   ))

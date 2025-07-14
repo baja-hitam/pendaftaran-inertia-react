@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useEffect, useState} from 'react';
 import { useForm } from "@inertiajs/react";
 import "flatpickr/dist/flatpickr.min.css";
 import "flatpickr/dist/themes/material_green.css";
@@ -9,16 +9,21 @@ import Select from 'react-select';
 
 
 
-const TambahTransaksi = ({open,handleChangeOpen,datasUserOption,datasJenPembayaranOption}) => {
+const TambahTransaksi = ({open,handleChangeOpen,datasUserOption,datasJenPembayaranOption,datasFormulirOption}) => {
     const { data, setData, post } = useForm({
         selectedUser: null,
         selectedPembayaran: null,
+        selectedFormulir: null,
         cicilan: ''
     });
 
     const optionsUser = datasUserOption.map(user =>({
         value: user.id_user,
         label: user.email
+    }));
+    const optionsFormulir = datasFormulirOption.map(form =>({
+        value: form.no_form,
+        label: form.nama_lengkap+' - '+ form.nama_ayah+' - '+ form.nama_ibu+' - '+ form.nama_wali
     }));
     const optionsJenPembayaran = datasJenPembayaranOption.map(jen =>({
         value: jen.id_pembayaran,
@@ -37,6 +42,9 @@ const TambahTransaksi = ({open,handleChangeOpen,datasUserOption,datasJenPembayar
     const handleChangePembayaran = (e) => {
         setData({...data, selectedPembayaran: e});
     }
+    const handleChangeFormulir = (e) => {
+        setData({...data, selectedFormulir: e});
+    }
     const handleChangeCicilan = (e) => {
         const value = e.target.value.replace(/\D/g, ''); // Hanya ambil angka
         if (value == '0'){
@@ -45,10 +53,10 @@ const TambahTransaksi = ({open,handleChangeOpen,datasUserOption,datasJenPembayar
         }
         setData({...data, cicilan: value}); // Simpan sebagai angka tanpa format
     }
+
     const handleSubmitPeriode = (e) => {
         e.preventDefault();
 
-        // console.log(data);
         handleChangeOpen(false);
         post('/admin/transaksi-pembayaran/store');
     }
@@ -61,6 +69,22 @@ return (
                     className="w-[90%] sm:w-[80%] lg:w-[70%] xl:w-[40%] p-6 bg-white rounded-lg shadow-lg"
                 >
                     <form onSubmit={handleSubmitPeriode}>
+                        <Label
+                            htmlFor="jenPembayaran"
+                            className="block mb-2 text-sm font-medium text-gray-700"
+                        >
+                        Jenis Pembayaran *
+                        </Label>
+                        <Select
+                        options={optionsJenPembayaran}
+                        required
+                        value={data.selectedPembayaran}
+                        onChange={handleChangePembayaran}
+                        placeholder="Pilih Pembayaran..."
+                        isSearchable
+                        />
+                        {data.selectedPembayaran?.value == 1 && (
+                        <>
                         <Label
                             htmlFor="emailUser"
                             className="block mb-2 text-sm font-medium text-gray-700"
@@ -75,18 +99,22 @@ return (
                         required
                         isSearchable
                         />
+                        </>
+                        )}
+                        {data.selectedPembayaran != null && data.selectedPembayaran?.value != 1 && (
+                        <>
                         <Label
-                            htmlFor="jenPembayaran"
+                            htmlFor="emailUser"
                             className="block mb-2 text-sm font-medium text-gray-700"
                         >
-                        Jenis Pembayaran *
+                        Nama Siswa *
                         </Label>
                         <Select
-                        options={optionsJenPembayaran}
+                        options={optionsFormulir}
+                        value={data.selectedFormulir}
+                        onChange={handleChangeFormulir}
+                        placeholder="Pilih Siswa...."
                         required
-                        value={data.selectedPembayaran}
-                        onChange={handleChangePembayaran}
-                        placeholder="Pilih Pembayaran..."
                         isSearchable
                         />
                         <Label
@@ -105,6 +133,8 @@ return (
                             onChange={handleChangeCicilan}
                             placeholder='Jumlah Berapa Kali Cicilan...'
                         />
+                        </>
+                        )}
                     <button
                         type="submit"
                         className="bg-[#226F54] hover:bg-[#265944] active:bg-[#226F54] cursor-pointer text-[#e4e7eb] font-poppins mt-4 py-2 px-4 rounded-[7px]"

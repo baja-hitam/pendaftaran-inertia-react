@@ -7,7 +7,7 @@ class Mpembayaran
     public $id;
     public $nama_pembayaran;
     public $total_pembayaran;
-    public $periode;
+    public $aktif;
 
 
     public function getNamaPembayaran()
@@ -22,9 +22,9 @@ class Mpembayaran
     {
         return $this->id;
     }
-    public function getPeriode()
+    public function getAktif()
     {
-        return $this->periode;
+        return $this->aktif;
     }
     public function getAllPembayaran()
     {
@@ -37,11 +37,11 @@ class Mpembayaran
     }
     public function store()
     {
-        $query = "INSERT INTO mpembayaran (nama_pembayaran, periode, total_pembayaran, created_at, updated_at) VALUES (:rnama_pembayaran, :rperiode, :rtotal_pembayaran, NOW(), NOW())";
+        $query = "INSERT INTO mpembayaran (nama_pembayaran, total_pembayaran, aktif, created_at, updated_at) VALUES (:rnama_pembayaran, :rtotal_pembayaran, :raktif, NOW(), NOW())";
         $conn = DB::connection("mysql")->insert($query, [
             'rnama_pembayaran' => $this->getNamaPembayaran(),
-            'rperiode' => $this->getPeriode(),
-            'rtotal_pembayaran' => $this->getTotalPembayaran()
+            'rtotal_pembayaran' => $this->getTotalPembayaran(),
+            'raktif' => $this->getAktif()
         ]);
         return $conn;
     }
@@ -55,11 +55,12 @@ class Mpembayaran
     }
     public function update()
     {
-        $query = "UPDATE mpembayaran SET nama_pembayaran = :rnama_pembayaran, total_pembayaran = :rtotal_pembayaran, updated_at = NOW() WHERE id_pembayaran = :rid";
+        $query = "UPDATE mpembayaran SET nama_pembayaran = :rnama_pembayaran, aktif = :raktif, total_pembayaran = :rtotal_pembayaran, updated_at = NOW() WHERE id_pembayaran = :rid";
         $conn = DB::connection("mysql")->update($query, [
             'rnama_pembayaran' => $this->getNamaPembayaran(),
             'rtotal_pembayaran' => $this->getTotalPembayaran(),
-            'rid' => $this->getId()
+            'rid' => $this->getId(),
+            'raktif' => $this->getAktif()
         ]);
         return $conn;
     }

@@ -13,18 +13,18 @@ class PembayaranController extends Controller
     {
         $modul = new Mpembayaran;
         $data = $modul->getAllPembayaran();
+        // dd($data);
         return inertia('admin/pembayaran/Pembayaran', [
             'datas' => $data
         ]);
     }
     public function store(Request $request)
     {
-        $startYear = date('Y');
-        $endYear = $startYear + 1;
+        // dd($request->all());
         $modul = new Mpembayaran;
         $modul->nama_pembayaran = $request->namaPembayaran;
         $modul->total_pembayaran = preg_replace('/\./', '', $request->totalPembayaran);
-        $modul->periode = $startYear . $endYear;
+        $modul->aktif = $request->status;
         $data = $modul->store();
         if ($data) {
             session()->flash('success', 'Pembayaran berhasil ditambahkan');
@@ -48,9 +48,11 @@ class PembayaranController extends Controller
     }
     public function update(Request $request)
     {
+        // dd($request->all());
         $modul = new Mpembayaran;
         $modul->id = $request->id;
         $modul->nama_pembayaran = $request->namaPembayaran;
+        $modul->aktif = $request->status;
         $modul->total_pembayaran = preg_replace('/\./', '', $request->totalPembayaran);
         $data = $modul->update();
         if ($data) {

@@ -9,52 +9,20 @@ import SidebarAdmin from "../SidebarAdmin";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
-const Nilai = ({datas,optionUjian}) => {
-    const [tambahMode, setTambahMode] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [dataEdit, setDataEdit] = useState(null);
-    const MySwal = withReactContent(Swal);
-    const { flash } = usePage().props;
-
-    const handleOpenModalTambah = (o) => {
-        setTambahMode(o);
+const Nilai = ({datas}) => {
+    const handleChangeParseDate = (date) => {
+        // console.log(date);
+        date = new Date(date);
+        const tanggal = new Intl.DateTimeFormat("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        }).format(date);
+        return tanggal;
     }
-    const handleOpenModalEdit = (row)=>{
-        setDataEdit(row);
-        setEditMode(true);
-    }
-    const handleCloseModalEdit = () => {
-        setEditMode(false);
-    }
-        const handleDeleteUjian = (id) => {
-            MySwal.fire({
-                title: <strong>Konfirmasi</strong>,
-                html: <i>Apakah kamu yakin ingin menghapus data ini?</i>,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // console.log(periode);
-                    
-                    router.post('/admin/ujian/destroy',{idUjian: id});
-                }
-            });
+        const handleDetailEntri = (no_peserta) => {
+            router.get('/admin/nilai/detail',{no_peserta: no_peserta});
         }
-        useEffect(() => {
-            if(flash.success != null){
-                toast.success(flash.success, {
-                    autoClose: 500,
-                    position: 'top-center'
-                });
-            }else if(flash.error != null){
-                toast.error(flash.error, {
-                    autoClose: 500,
-                    position: 'top-center'
-                });
-            }
-        },[flash])
     createTheme("custom", {
             background: {
                 default: "transparent",
@@ -81,6 +49,34 @@ const Nilai = ({datas,optionUjian}) => {
         };
     
         const columns = [
+            {
+                name: "No Peserta",
+                selector: (row) => row.no_peserta,
+            },
+            {
+                name: "Nama Lengkap",
+                selector: (row) => row.nama_lengkap,
+            },
+            {
+                name: "Jenis Kelamin",
+                selector: (row) => row.jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan',
+            },
+            {
+                name: "Tempat Lahir",
+                selector: (row) => row.tempat_lahir,
+            },
+            {
+                name: "Tanggal Lahir",
+                selector: (row) => handleChangeParseDate(row.tanggal_lahir),
+            },
+            {
+                name: "Aksi",
+                cell: (row) => (
+                    <div className="flex flex-row gap-x-2">
+                        <button className="bg-blue-600 w-20 h-7 text-white rounded-md hover:bg-blue-700" onClick={()=>handleDetailEntri(row.no_peserta)}>Detail</button>
+                    </div>
+                ),
+            }
         ];
 
     return (
@@ -95,32 +91,19 @@ const Nilai = ({datas,optionUjian}) => {
                 </p>
                 <Card
                     className={
-                        "w-[98%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[60%] xl:w-[40%]"
+                        "w-[98%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[60%] xl:w-[60%]"
                     }
                 >
-                    <ButtonLink
-                        handleOpen={handleOpenModalTambah}
-                        className="text-sm py-2"
-                    >
-                        Tambah Nilai
-                    </ButtonLink>
-                    {/* <DataTable
+                    <DataTable
                         columns={columns}
                         data={datas}
                         theme="custom"
                         customStyles={customStyles}
                         pagination
-                        noDataComponent={<i>Tidak Ada Ujian</i>}
-                    /> */}
+                        noDataComponent={<i>Tidak Ada Peserta Ujian</i>}
+                    />
                 </Card>
                 <ToastContainer/>
-                {tambahMode && (
-                    <TambahNilai
-                        optionUjian={optionUjian}
-                        open={tambahMode}
-                        handleChangeOpen={handleOpenModalTambah}
-                    />
-                )}
             </div>
         </div>
     );

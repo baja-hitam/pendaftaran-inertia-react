@@ -1,4 +1,4 @@
-import { Head, usePage, router } from "@inertiajs/react";
+import { Head, usePage, router, useForm } from "@inertiajs/react";
 import { Card } from "../../UI/organisms/Card";
 import React, { useState,useEffect } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
@@ -15,14 +15,17 @@ import { InputForm } from '../../UI/molecules/InputForm';
 import EditTransaksi from "./EditTransaksi";
 
 
-const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,search,tahun,datasPeriodeOption}) => {
+const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jenPembayaran,search,tahun,datasPeriodeOption,datasFormulirOption}) => {
     const [tambahMode, setTambahMode] = useState(false);
     // const [editMode, setEditMode] = useState(false);
     // const [dataEdit, setDataEdit] = useState(null);
     const MySwal = withReactContent(Swal);
     // State untuk search query dan debounced query
-    const [periode, setPeriode] = useState(tahun);
-    const [query, setQuery] = useState(search);
+    const {data,setData,get} = useForm({
+        user: search ?? '',
+        periode: tahun ?? '',
+        jenPembayaran : jenPembayaran ?? '', // Default ke Jenis Pembayaran 1
+    });
     // State untuk debounced search
     const [debounceTimeout, setDebounceTimeout] = useState(null);
     const { flash } = usePage().props;
@@ -37,14 +40,12 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,sea
         value: user.periode,
         label: user.periode.slice(0, 4) + "/" + user.periode.slice(4)
     }));
-    // const handleOpenEdit = (row)=>{
-    //     setDataEdit(row);
-    //     setEditMode(true);
-    // }
-
-    // const handleCloseEdit = () => {
-    //     setEditMode(false);
-    // }
+    const optionsJenPembayaran = datasJenPembayaranOption.map(jenpem => ({
+        value: jenpem.id_pembayaran,
+        label: jenpem.nama_pembayaran
+    }))
+    // console.log(optionsJenPembayaran);
+    
     useEffect(() => {
         if(flash.success != null){
             toast.success(flash.success, {
@@ -61,44 +62,23 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,sea
 
     const handleSearchChange = (e) => {
         const searchValue = e.target.value;
-        setQuery(searchValue);
-        
-        // Clear timeout sebelumnya jika ada
-        if (debounceTimeout) {
-            clearTimeout(debounceTimeout);
-        }
-        // console.log(query);
-        
-        
-        // Set timeout baru untuk delay 500ms setelah user berhenti mengetik
-        const newTimeout = setTimeout(() => {
-            router.get('/admin/transaksi-pembayaran/search', 
-                { user: searchValue, periode: periode},
-            );
-        }, 500);
-        
-        setDebounceTimeout(newTimeout);
+        setData({ ...data, user: searchValue });
     };
     const handleSearchChangePeriode = (e) => {
         const searchValue = e.target.value;
-        setPeriode(searchValue);
-        
-        // Clear timeout sebelumnya jika ada
-        if (debounceTimeout) {
-            clearTimeout(debounceTimeout);
-        }
-        // console.log(periode);
-        
-        
-        // Set timeout baru untuk delay 500ms setelah user berhenti mengetik
-        const newTimeout = setTimeout(() => {
-            router.get('/admin/transaksi-pembayaran/search', 
-                { user: query, periode: searchValue },
-            );
-        }, 500);
-        
-        setDebounceTimeout(newTimeout);
+        setData({ ...data, periode: searchValue });
     };
+    const handleChangeJenPembayaran = (e) => {
+        const searchValue = e.target.value;
+        setData({ ...data, jenPembayaran: searchValue });
+    }
+    const handleSearch = (e) => {
+        e.preventDefault();
+        
+        // console.log(data);
+        
+        get('/admin/transaksi-pembayaran/search');
+    }
 
     const handleChangeParseDate = (date) => {
         // console.log(date);
@@ -187,14 +167,18 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,sea
     const columns = [
         {
             name: "Email",
-            selector: (row)=> row.email,
+            selector: (row)=> row.email ?? '-',
             wrap: true,
         },
         {
-            name: "Nama",
-            selector: (row) => row.nama_lengkap,
+            name: "Nama User",
+            selector: (row) => row.nama_lengkap ?? '-',
             wrap: true,
-
+        },
+        {
+            name: "Nama Siswa",
+            selector: (row) => row.nama_siswa ?? '-',
+            wrap: true,
         },
         {
             name: "Periode",
@@ -203,6 +187,7 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,sea
         {
             name: "Jenis Pembayaran",
             selector: (row) => row.nama_pembayaran,
+            wrap: true,
         },
         {
             name: "Jumlah Harus Dibayar",
@@ -223,11 +208,10 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,sea
         {
             name: "Aksi",
             cell: (row) => row.tanggal_dibayar == null ? (<div className="flex flex-row gap-x-2"> 
-                <button className="bg-blue-600 w-20 h-7 text-white rounded-md hover:bg-blue-700" onClick={() => handleKonfirmasiPembayaran(row.id_transaksi_pembayaran)}>Dibayarkan</button>
-                <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeleteTransaksi(row.id_transaksi_pembayaran)}>Hapus</button>
+                <button className="bg-blue-600 w-20 h-7 text-white rounded-md hover:bg-blue-700" onClick={() => handleKonfirmasiPembayaran(row.id_transaksi_pembayaran)}>Lunas</button>
+                {/* <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeleteTransaksi(row.id_transaksi_pembayaran)}>Hapus</button> */}
                 </div>) : (<div className="flex flex-row gap-x-2"> 
-                <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700   " onClick={() => handleKonfirmasiBatalPembayaran(row.id_transaksi_pembayaran)}>Batal</button>
-                <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeleteTransaksi(row.id_transaksi_pembayaran)}>Hapus</button>
+                {/* <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeleteTransaksi(row.id_transaksi_pembayaran)}>Hapus</button> */}
                 </div>)
         }
     ];
@@ -253,22 +237,34 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,sea
                     >
                         Tambah Transaksi Pembayaran
                     </ButtonLink>
-                        <InputSelect
-                            options={optionsPeriode}
-                            className='w-full mt-4 xl:w-3/12'
-                            name='periode'
-                            onChange={handleSearchChangePeriode}
-                            value={periode}
+                        <form onSubmit={handleSearch} className="flex flex-col pt-4 lg:flex-row lg:items-center lg:gap-x-2">
+                            <InputSelect
+                                options={optionsJenPembayaran}
+                                className='w-full mb-2 lg:w-[250px]'
+                                name='jenPembayaran'
+                                required
+                                onChange={handleChangeJenPembayaran}
+                                value={data.jenPembayaran}
                             />
-                        <InputForm
-                            type='text'
-                            className='w-full mt-4 xl:w-3/12'
-                            name='search'
-                            required
-                            value={query}
-                            onChange={handleSearchChange}
-                            placeholder='Cari Email ....'
-                        />
+                            <InputSelect
+                                options={optionsPeriode}
+                                className='w-full mb-2 lg:w-[150px]'
+                                name='periode'
+                                onChange={handleSearchChangePeriode}
+                                value={data.periode}
+                                />
+                            <InputForm
+                                type='text'
+                                className='w-full lg:w-[200px]'
+                                name='search'
+                                value={data.user}
+                                onChange={handleSearchChange}
+                                placeholder='Cari Email / Nama Siswa ....'
+                            />
+                            <button type="submit" className="mb-2 bg-[#226F54] hover:bg-[#265944] active:bg-[#226F54] cursor-pointer text-[#e4e7eb] font-poppins mt-4 py-1 px-4 rounded-[7px] lg:mt-0 lg:ml-2">
+                                Search
+                            </button>
+                        </form>
                     <DataTable
                         columns={columns}
                         data={datas}
@@ -279,7 +275,7 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,sea
                     />
                 </Card>
                 <ToastContainer/>
-                {tambahMode && (<TambahTransaksi open={tambahMode} handleChangeOpen={handleOpenModalTambah} datasUserOption={datasUserOption} datasJenPembayaranOption={datasJenPembayaranOption}/>)}
+                {tambahMode && (<TambahTransaksi open={tambahMode} datasFormulirOption={datasFormulirOption} handleChangeOpen={handleOpenModalTambah} datasUserOption={datasUserOption} datasJenPembayaranOption={datasJenPembayaranOption}/>)}
                 {/* {editMode && (<EditTransaksi open={editMode} row={dataEdit} handleChangeOpen={handleCloseEdit} datasUserOption={datasUserOption} datasJenPembayaranOption={datasJenPembayaranOption}/>)} */}
             </div>
         </div>

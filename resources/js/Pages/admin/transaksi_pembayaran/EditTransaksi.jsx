@@ -24,7 +24,7 @@ const EditTransaksi = ({ open, row, handleChangeOpen,datasUserOption,datasJenPem
                     label: row.nama_pembayaran
                 },
             });
-    },[row]);
+    },[]);
     const optionsUser = datasUserOption.map(user =>({
         value: user.id_user,
         label: user.email

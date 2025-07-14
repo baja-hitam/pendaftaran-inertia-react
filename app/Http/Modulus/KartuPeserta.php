@@ -40,6 +40,18 @@ class KartuPeserta
         $no_peserta = $periode.$nilai_awal;
         return $no_peserta;
     }
+    public function getAllKartuPeserta(){
+        $query = <<<EOD
+            SELECT a.no_peserta, c.nama_lengkap, c.jenis_kelamin, c.tempat_lahir, c.tanggal_lahir, b.periode
+            FROM kartu_peserta a
+            INNER JOIN formulir b
+            ON a.no_form = b.no_form
+            INNER JOIN calon_siswa c
+            ON a.no_form = c.no_form
+        EOD;
+        $result = DB::connection('mysql')->select($query);
+        return $result;
+    }
     public function checkCalonSiswa(){
         $query = <<<EOD
             SELECT * 
@@ -63,6 +75,31 @@ class KartuPeserta
         EOD;
         $result = DB::connection('mysql')->select($query, [
             'no_form' => $this->getNoForm()
+        ]);
+        return $result[0];
+    }
+    public function getKartuPesertaByNoPeserta($no_peserta){
+        $query = <<<EOD
+            SELECT 
+            b.periode,
+            a.no_peserta,
+            c.nama_lengkap,
+            c.jenis_kelamin,
+            c.tempat_lahir,
+            c.tanggal_lahir,
+            a.id_kartu_peserta,
+            b.no_form,
+            b.id_user,
+            c.id_calon_siswa
+            FROM kartu_peserta a
+            INNER JOIN formulir b
+            ON a.no_form = b.no_form
+            INNER JOIN calon_siswa c
+            ON b.no_form = c.no_form
+            WHERE a.no_peserta = :no_peserta
+        EOD;
+        $result = DB::connection('mysql')->select($query, [
+            'no_peserta' => $no_peserta
         ]);
         return $result[0];
     }

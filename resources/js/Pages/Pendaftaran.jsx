@@ -33,7 +33,7 @@ const Pendaftaran = ({datas,statusPembayaran}) => {
                 allowOutsideClick: false, // Tambahkan ini agar tidak bisa di-close jika klik di luar
             }).then((result) => {
                 if (result.isConfirmed) {
-                    router.get('/');
+                    router.get('/dashboard');
                 }
             });
         }

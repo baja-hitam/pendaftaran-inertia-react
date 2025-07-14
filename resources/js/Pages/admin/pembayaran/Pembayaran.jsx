@@ -92,16 +92,16 @@ const Pembayaran = ({datas}) => {
             selector: (row) => row.nama_pembayaran,
         },
         {
-            name: "Periode",
-            selector: (row) => row.periode.slice(0,4) + "/" + row.periode.slice(4),
-        },
-        {
             name: "Total Pembayaran",
             selector: (row) => row.total_pembayaran,
             format: (row) => new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR',
             }).format(row.total_pembayaran),
+        },
+        {
+            name: "Status",
+            selector: (row) => row.aktif == 'T' ? 'Aktif' : 'Tidak Aktif',
         },
         {
             name: "Aksi",

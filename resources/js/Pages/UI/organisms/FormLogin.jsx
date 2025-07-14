@@ -23,7 +23,7 @@ export const FormLogin = () => {
       <form onSubmit={submitLogin}>
         <div className="mb-2">
           <Label label='Email Address *'>Email Address *</Label>
-          <InputForm
+          <InputFormcodeco
             className={'lg:w-[250px]'}
             placeholder="Masukkan Email"
             type="email"

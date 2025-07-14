@@ -6,7 +6,7 @@ import { IconForm } from "../UI/atoms/IconForm";
 const SidebarAdmin = () => {
     return (
         <Sidebar>
-        <Menu text="Dashboard" link="/">
+        <Menu text="Dashboard" link="/admin/dashboard">
             <IconDashboard />
         </Menu>
         <Menu text="Entri Master Periode" link="/admin/periode">

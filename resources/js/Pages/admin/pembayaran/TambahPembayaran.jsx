@@ -3,6 +3,7 @@ import { useForm } from "@inertiajs/react";
 import Modal from "../../UI/molecules/Modal";
 import { Label } from "../../UI/atoms/Label";
 import { InputForm } from '../../UI/molecules/InputForm';
+import InputSelect from "../../UI/atoms/InputSelect";
 
 
 
@@ -10,10 +11,15 @@ const TambahPembayaran = ({open,handleChangeOpen}) => {
     const {data, setData, post} = useForm({
         namaPembayaran: "",
         totalPembayaran: "",
+        status: "",
     });
     const handleChangePembayaran = (e) => {
         setData({...data, [e.target.name]: e.target.value});
     }
+    const options = [
+        { label: "Aktif", value: "T" },
+        { label: "Tidak Aktif", value: "F" },
+    ];
     const handleChangeFormatRupiah = (e) => {
         let value = e.target.value.replace(/\D/g, ''); // Hapus semua karakter non-digit
 
@@ -77,6 +83,21 @@ return (
                             placeholder="Total Pembayaran"
                             required
                             maxLength={10}
+                        />
+                        <Label
+                            htmlFor="status"
+                            className="block mb-2 text-sm font-medium text-gray-700"
+                        >
+                        Pilih Status Master Pembayaran *
+                        </Label>
+                        <InputSelect
+                            label="Pilih Bulan"
+                            name="status"
+                            value={data.status}
+                            onChange={handleChangePembayaran}
+                            options={options}
+                            required
+                            className="w-60"
                         />
                     <button
                         type="submit"

@@ -10,69 +10,47 @@ import { Label } from "../../UI/atoms/Label";
 import Select from 'react-select';
 
 
-const TambahNilai = ({open,handleChangeOpen,optionUjian,noPeserta}) => {
+const EditNilai = ({open,handleChangeOpen,optionUjian,row,noPeserta}) => {
     const [error, setError] = useState(null);
-    const [count,setCount] = useState(1);
-    const {data, setData, post} = useForm([
-        {
-            selectedUjian: null,
-            nilai: 0,
-            noPeserta: noPeserta
-        }
-    ]);
+    const {data, setData, post} = useForm({
+        selectedUjian: {value: row.id_ujian, label: row.nama_ujian},
+        nilai: row.nilai,
+        idNilai: row.id_nilai,
+        noPeserta: noPeserta
+    });
     const MySwal = withReactContent(Swal);
     const optionsUjian = optionUjian.map(ujian =>({
         value: ujian.id_ujian,
         label: ujian.nama_ujian
     }));
-    const handleSelectUjian = (e,index) => {
-        const newData = [...data];
-        newData[index].selectedUjian = e;
+    const handleSelectUjian = (e) => {
+        const newData = {...data};
+        newData.selectedUjian = e;
         setData(newData);
     }
-    const handleChangeNilai = (e,index)=>{
+    const handleChangeNilai = (e)=>{
         let value = e.target.value.replace(/\D/g, ''); // Hanya ambil angka
-        const newData = [...data];
-        // Jika angka pertama 0 dan panjang lebih dari 1, hapus angka 0 di depan
-        if (value.length > 1 && value[0] === "0") {
-            // Cari digit pertama yang bukan 0
-            const firstNonZero = value.search(/[1-9]/);
-            if (firstNonZero !== -1) {
-                value = value.substring(firstNonZero);
-            } else {
-                value = "0"; // Jika semua 0, tetap 0
-            }
-        }
-        if (value > 100 || value < 0 || value === '') {
-            value = 0; // Jika nilai lebih dari 100 atau kurang dari 0, set ke 0
-        }
-        newData[index].nilai = value;
-        setData(newData);
-    }
-    const handleAdd = () => {
-        setData([...data, { selectedUjian: null, nilai: '',noPeserta: noPeserta }]);
-        setCount(count + 1);
-    }
-    const handleRemove = () => {
-        if (data.length > 1) {
-            const newData = [...data];
-            newData.pop();
-            setData(newData);
-            setCount(count - 1);
-        } else {
-            MySwal.fire({
-                icon: 'warning',
-                title: 'Tidak Bisa Menghapus',
-                text: 'Minimal harus ada satu baris entri nilai.',
-            });
-        }
+                // Jika angka pertama 0 dan panjang lebih dari 1, hapus angka 0 di depan
+                if (value.length > 1 && value[0] === "0") {
+                    // Cari digit pertama yang bukan 0
+                    const firstNonZero = value.search(/[1-9]/);
+                    if (firstNonZero !== -1) {
+                        value = value.substring(firstNonZero);
+                    } else {
+                        value = "0"; // Jika semua 0, tetap 0
+                    }
+                }
+                if (value > 100 || value < 0 || value === '') {
+                    value = 0; // Jika nilai lebih dari 100 atau kurang dari 0, set ke 0
+                }
+        setData({...data, nilai: value});
     }
     const handleSubmitNilai = (e) => {
         e.preventDefault();
         // Validasi tanggal
         // console.log(data);
-        handleChangeOpen(false);
-        post('/admin/nilai/store')
+        handleChangeOpen();
+        post('/admin/nilai/update')
     }
     const colorStyles = {
         control: (styles) => ({
@@ -85,13 +63,11 @@ const TambahNilai = ({open,handleChangeOpen,optionUjian,noPeserta}) => {
 return (
                 <Modal
                     isOpen={open}
-                    onClose={() => handleChangeOpen(false)}
-                    title="Form Entri Nilai"
+                    onClose={handleChangeOpen}
+                    title="Form Update Nilai"
                     className="w-[90%] sm:w-[80%] lg:w-[70%] xl:w-[40%] p-6 bg-white rounded-lg shadow-lg"
                 >
                     <form onSubmit={handleSubmitNilai}>
-                        {data.map((item, index) => (
-                            <div key={index} className="mb-4">
                                 <Label
                                 htmlFor="ujian"
                                 className="block mb-2 text-sm font-medium text-gray-700"
@@ -100,9 +76,9 @@ return (
                                 </Label>
                                 <Select
                                 options={optionsUjian}
-                                value={item.selectedUjian}
+                                value={data.selectedUjian}
                                 styles={colorStyles}
-                                onChange={(e) => handleSelectUjian(e, index)}
+                                onChange={handleSelectUjian}
                                 />
                                 <Label
                                     htmlFor="nilai"
@@ -116,23 +92,19 @@ return (
                                     name='nilai'
                                     required
                                     maxLength={3}
-                                    value={item.nilai}
-                                    onChange={(e) => handleChangeNilai(e, index)}
+                                    value={data.nilai}
+                                    onChange={handleChangeNilai}
                                     placeholder='Nilai...'
                                 />
-                            </div>
-                        ))}
                     <button
                         type="submit"
                         className="bg-[#226F54] hover:bg-[#265944] active:bg-[#226F54] cursor-pointer text-[#e4e7eb] font-poppins mt-4 py-2 px-4 rounded-[7px]"
                     >
                         Simpan
                     </button>
-                    {count < 3 && (<button type="button"  onClick={handleAdd} className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 ml-2 cursor-pointer text-white font-poppins mt-4 py-2 px-4 rounded-[7px]">Tambah Baris</button>)}
-                    {count > 0 && (<button type="button"  onClick={handleRemove} className="bg-red-500 hover:bg-red-600 active:bg-red-700 ml-2 cursor-pointer text-white font-poppins mt-4 py-2 px-4 rounded-[7px]">Hapus Baris</button>)}
                     </form>
                 </Modal>
 )
 }
 
-export default TambahNilai;
+export default EditNilai;

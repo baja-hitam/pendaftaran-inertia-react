@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Helper\Helper;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Modulus\Pendaftaran;
@@ -12,8 +13,15 @@ class PendaftaranSiswa extends Controller
     public function index()
     {
         $modul = new Pendaftaran;
+        $modul1 = new Helper;
         $modul->periode = session('periode');
         $data = $modul->index();
+        if(!empty($data) && isset($data->no_kk)){
+            $data->no_kk = $modul1->decrypt($data->no_kk);
+            $data->nik_ayah = $modul1->decrypt($data->nik_ayah);
+            $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
+        }
+        // $data->noKK = $modul1->decrypt();
         // dd($data);
         $modul1 = new Tpembayaran;
         $modul1->periode = session('periode');
@@ -35,6 +43,8 @@ class PendaftaranSiswa extends Controller
     
     public function store(Request $request)
     {
+        $rsa = new Helper;
+        // dd($encrypt);
         $modul = new Pendaftaran;
         $modul->periode = session('periode');
         $modul->namaSiswa = $request->input('namaSiswa');
@@ -51,7 +61,7 @@ class PendaftaranSiswa extends Controller
         $modul->statusAnak = $request->input('statusAnak');
         $modul->bahasa = $request->input('bahasa');
         $modul->alamat = $request->input('alamat');
-        $modul->noKK = $request->input('noKK');
+        $modul->noKK = $rsa->encrypt($request->input('noKK'));
         $modul->kelurahan = $request->input('kelurahan');
         $modul->kecamatan = $request->input('kecamatan');
         $modul->kotaKabupaten = $request->input('kotaKabupaten');
@@ -99,11 +109,12 @@ class PendaftaranSiswa extends Controller
     }
     public function store_ortu(Request $request){
         $modul = new Pendaftaran;
+        $rsa = new Helper;
         $modul->periode = session('periode');
         $modul->namaAyah = $request->input('namaAyah');
         $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
         $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
-        $modul->nikAyah = $request->input('nikAyah');
+        $modul->nikAyah = $rsa->encrypt($request->input('nikAyah'));
         $modul->agamaAyah = $request->input('agamaAyah');
         $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
         $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
@@ -117,7 +128,7 @@ class PendaftaranSiswa extends Controller
         $modul->namaIbu = $request->input('namaIbu');
         $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
         $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
-        $modul->nikIbu = $request->input('nikIbu');
+        $modul->nikIbu = $rsa->encrypt($request->input('nikIbu'));
         $modul->agamaIbu = $request->input('agamaIbu');
         $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
         $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
@@ -131,7 +142,7 @@ class PendaftaranSiswa extends Controller
         $modul->namaWali = $request->input('namaWali');
         $modul->tempatLahirWali = $request->input('tempatLahirWali');
         $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
-        $modul->nikWali = $request->input('nikWali');
+        $modul->nikWali = $rsa->encrypt($request->input('nikWali'));
         $modul->agamaWali = $request->input('agamaWali');
         $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
         $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
@@ -157,6 +168,7 @@ class PendaftaranSiswa extends Controller
     public function update(Request $request)
     {
         $modul = new Pendaftaran;
+        $rsa = new Helper;
         $modul->namaSiswa = $request->input('namaSiswa');
         $modul->namaPanggilan = $request->input('namaPanggilan');
         $modul->jenisKelamin = $request->input('jenisKelamin');
@@ -171,7 +183,7 @@ class PendaftaranSiswa extends Controller
         $modul->statusAnak = $request->input('statusAnak');
         $modul->bahasa = $request->input('bahasa');
         $modul->alamat = $request->input('alamat');
-        $modul->noKK = $request->input('noKK');
+        $modul->noKK = $rsa->encrypt($request->input('noKK'));
         $modul->kelurahan = $request->input('kelurahan');
         $modul->kecamatan = $request->input('kecamatan');
         $modul->kotaKabupaten = $request->input('kotaKabupaten');
@@ -255,10 +267,11 @@ class PendaftaranSiswa extends Controller
     public function update_ortu(Request $request)
     {
         $modul = new Pendaftaran;
+        $rsa = new Helper;
         $modul->namaAyah = $request->input('namaAyah');
         $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
         $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
-        $modul->nikAyah = $request->input('nikAyah');
+        $modul->nikAyah = $rsa->encrypt($request->input('nikAyah'));
         $modul->agamaAyah = $request->input('agamaAyah');
         $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
         $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
@@ -272,7 +285,7 @@ class PendaftaranSiswa extends Controller
         $modul->namaIbu = $request->input('namaIbu');
         $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
         $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
-        $modul->nikIbu = $request->input('nikIbu');
+        $modul->nikIbu = $rsa->encrypt($request->input('nikIbu'));
         $modul->agamaIbu = $request->input('agamaIbu');
         $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
         $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
@@ -286,7 +299,7 @@ class PendaftaranSiswa extends Controller
         $modul->namaWali = $request->input('namaWali');
         $modul->tempatLahirWali = $request->input('tempatLahirWali');
         $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
-        $modul->nikWali = $request->input('nikWali');
+        $modul->nikWali = $rsa->encrypt($request->input('nikWali'));
         $modul->agamaWali = $request->input('agamaWali');
         $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
         $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');

@@ -12,12 +12,29 @@ class AuthController extends Controller
     //
 
     public function index(){
+        if(session('user')){
+            if(session('level') == '2'){
+                return to_route('admin.dashboard');
+            }else{
+                return to_route('dashboard');
+            }
+        }
         return Inertia::render('Login');
     }
     public function indexAdmin(){
+        if(session('user')){
+            if(session('level') == '2'){
+                return to_route('admin.dashboard');
+            }else{
+                return to_route('dashboard');
+            }
+        }
         return Inertia::render('admin/Login');
     }
     public function login(Request $request){
+        $startYear = date('Y');
+        $endYear = $startYear + 1;
+        $periode = $startYear . $endYear;
         $modul = new Authentication;
         $modul1 = new Mperiode;
         $modul->email = $request->email;
@@ -28,14 +45,14 @@ class AuthController extends Controller
             $request->session()->flash('message', 'Email atau Password Salah');
             return back();
         }
-            $modul1->periode = $data[0]->periode;
+            $modul1->periode = $periode;
             $checkPeriode = $modul1->checkPeriode();
             if(empty($checkPeriode)){
                 $request->session()->flash('status', 'error');
                 $request->session()->flash('message', 'Periode pendaftaran belum dibuka, silahkan hubungi sekolah untuk informasi lebih lanjut');
                 return back();
             }
-            session(['periode'=> $data[0]->periode]);
+            session(['periode'=> $periode]);
             session(['user' => $data[0]->email]);
             session(['id_user'=>$data[0]->id_user]);
             session(['level' => $data[0]->level]);
@@ -55,6 +72,6 @@ class AuthController extends Controller
         session(['id_user'=>$data[0]->id_admin]);
         session(['level' => $data[0]->level]);
         session(['nama_lengkap' => $data[0]->nama_lengkap]);
-        return to_route('admin.periode');
+        return to_route('admin.dashboard');
     }
 }

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id('no_form');
             $table->string('periode',8);
             $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('verif_by')->nullable();
+            $table->date('verif_date')->nullable();
             $table->timestamps();
         });
     }

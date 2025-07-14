@@ -6,6 +6,7 @@ use App\Http\Middleware\AuthSession;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard;
+use App\Http\Controllers\NilaiController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\PendaftaranSiswa;
 use App\Http\Controllers\PeriodeController;
@@ -16,7 +17,7 @@ use App\Http\Controllers\PembayaranController;
 
 
 Route::middleware(AuthSession::class)->group(function () {
-    Route::get('/',[Dashboard::class,'index'])->name('dashboard');
+    Route::get('/dashboard',[Dashboard::class,'index'])->name('dashboard');
     Route::get('/pendaftaran',[PendaftaranSiswa::class,'index'])->name('pendaftaran');
     Route::post('/pendaftaran/siswa/store', [PendaftaranSiswa::class, 'store'])->name('pendaftaran.store');
     Route::post('/pendaftaran/siswa/update', [PendaftaranSiswa::class, 'update'])->name('pendaftaran.update');
@@ -27,6 +28,7 @@ Route::middleware(AuthSession::class)->group(function () {
     Route::get('/riwayat-pembayaran/detail', [TransaksiPembayaran::class, 'detail_riwayat_pembayaran'])->name('detail.riwayat.pembayaran');
 });
 Route::middleware(AdminMiddleware::class)->group(function () {
+    Route::get('/admin/dashboard', [Dashboard::class, 'admin_index'])->name('admin.dashboard');
     Route::get('/admin/periode', [PeriodeController::class,'index'])->name('admin.periode');
     Route::post('/admin/periode/store',[PeriodeController::class,'store'])->name('admin.periode.store');
     Route::post('/admin/periode/update',[PeriodeController::class,'update'])->name('admin.periode.update');
@@ -52,4 +54,9 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::post('/admin/ujian/detail/store', [ujian::class, 'store_detail_ujian'])->name('admin.ujian.detail.store');
     Route::post('/admin/ujian/detail/update', [ujian::class, 'update_detail_ujian'])->name('admin.ujian.detail.update');
     Route::post('/admin/ujian/detail/destroy', [ujian::class, 'destroy_detail_ujian'])->name('admin.ujian.detail.destroy');
+    Route::get('/admin/nilai',[NilaiController::class,'index'])->name('admin.nilai');
+    Route::get('/admin/nilai/detail',[NilaiController::class,'detail'])->name('admin.nilai.detail');
+    Route::post('/admin/nilai/store',[NilaiController::class,'store'])->name('admin.nilai.store');
+    Route::post('/admin/nilai/update',[NilaiController::class,'update'])->name('admin.nilai.update');
+    Route::post('/admin/nilai/delete',[NilaiController::class,'destroy'])->name('admin.nilai.delete');
 });
