@@ -354,6 +354,12 @@ class PendaftaranSiswa extends Controller
         $modul = new Pendaftaran;
         $modul->noForm = $request->no_form;
         $data = $modul->detailFormulir();
+        $modul1 = new Helper;
+        if(!empty($data) && isset($data->no_kk)){
+            $data->no_kk = $modul1->decrypt($data->no_kk);
+            $data->nik_ayah = $modul1->decrypt($data->nik_ayah);
+            $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
+        }
         // dd($data);
         return Inertia::render('admin/calon_siswa/DataCalonSiswa',[
             'datas'=>$data,
@@ -366,6 +372,12 @@ class PendaftaranSiswa extends Controller
         $modul = new Pendaftaran;
         $modul->noForm = $request->no_form;
         $data = $modul->detailFormulir();
+        $modul1 = new Helper;
+        if(!empty($data) && isset($data->no_kk)){
+            $data->no_kk = $modul1->decrypt($data->no_kk);
+            $data->nik_ayah = $modul1->decrypt($data->nik_ayah);
+            $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
+        }
         // dd($data);
         return Inertia::render('admin/pdf/StreamPdf',[
             'datas'=>$data,
