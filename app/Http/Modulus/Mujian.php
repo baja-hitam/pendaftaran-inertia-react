@@ -2,7 +2,7 @@
 namespace App\Http\Modulus;
 use Illuminate\Support\Facades\DB;
 
-class MUjian
+class Mujian
 {
     public $nama_ujian;
     public $id_ujian;
