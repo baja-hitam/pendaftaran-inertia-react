@@ -198,8 +198,12 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
             }).format(row.jumlah_hrsbayar),
         },
         {
-            name:"Entry Pembayaran",
-            selector: (row) => row.nama_entry_admin ?? '-',
+            name:"Verif Pembayaran",
+            selector: (row) => row.verif_by ?? '-',
+        },
+        {
+            name: "Tanggal Verifikasi",
+            selector: (row) => row.verif_date == null ? '-' : handleChangeParseDate(row.verif_date),
         },
         {
             name: "Tanggal Dibayarkan",

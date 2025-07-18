@@ -15,16 +15,10 @@ const SidebarAdmin = () => {
         <Menu text="Entri Master Pembayaran" link="/admin/pembayaran">
             <IconForm />
         </Menu>
-        <Menu text="Entri Ujian" link="/admin/ujian">
-            <IconForm />
-        </Menu>
         <Menu text="Entri Transaksi Pembayaran" link="/admin/transaksi-pembayaran">
             <IconForm />
         </Menu>
         <Menu text="Formulir Pendaftaran" link="/admin/calon-siswa">
-            <IconForm />
-        </Menu>
-        <Menu text="Entri Nilai" link="/admin/nilai">
             <IconForm />
         </Menu>
     </Sidebar>

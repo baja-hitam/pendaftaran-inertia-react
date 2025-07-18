@@ -11,7 +11,7 @@ const TemplateSidebar = () => {
         <Menu text='Formulir Pendaftaran' link='/pendaftaran'>
           <IconForm/>
         </Menu>
-        <Menu text='Riwayat Pembayaran' link='/riwayat-pembayaran'>
+        <Menu text='Kwitansi' link='/riwayat-pembayaran'>
           <IconForm/>
         </Menu>
       </Sidebar>

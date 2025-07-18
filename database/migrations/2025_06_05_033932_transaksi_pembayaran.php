@@ -15,11 +15,14 @@ return new class extends Migration
             $table->id('id_transaksi_pembayaran');
             $table->unsignedBigInteger('id_user')->nullable();
             $table->unsignedBigInteger('no_form')->nullable();
+            $table->unsignedBigInteger('verif_by')->nullable();
             $table->unsignedBigInteger('id_pembayaran');
-            $table->string('nama_entry_admin',100)->nullable();
             $table->string('periode',8);
             $table->date('tanggal_dibayar')->nullable();
+            $table->date('verif_date')->nullable();
             $table->string('jumlah_hrsbayar');
+            $table->string('path_bukti')->nullable();
+            $table->string('nama_bukti')->nullable();
             $table->timestamps();
 
         });

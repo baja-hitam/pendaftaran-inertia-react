@@ -25,6 +25,7 @@ Route::middleware(AuthSession::class)->group(function () {
     Route::post('/pendaftaran/ortu/update', [PendaftaranSiswa::class, 'update_ortu'])->name('pendaftaran.update.ortu');
     Route::post('/kartu-peserta/cetak', [PendaftaranSiswa::class, 'cetak_kartu_peserta'])->name('kartu.peserta.cetak');
     Route::get('/riwayat-pembayaran', [TransaksiPembayaran::class, 'riwayat_pembayaran'])->name('riwayat.pembayaran');
+    Route::post('/create-kwitansi', [TransaksiPembayaran::class, 'create_kwitansi'])->name('create.kwitansi');
     Route::get('/riwayat-pembayaran/detail', [TransaksiPembayaran::class, 'detail_riwayat_pembayaran'])->name('detail.riwayat.pembayaran');
 });
 Route::middleware(AdminMiddleware::class)->group(function () {

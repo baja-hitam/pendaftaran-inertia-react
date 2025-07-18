@@ -72,6 +72,7 @@ class Tpembayaran
         return $conn[0]->total_pembayaran;
     }
     public function checkCicilan(){
+        // dd($this->getIdUser());
         if($this->getIdUser() != null){
             $where = "WHERE id_pembayaran = :ridpembayaran and periode = :rperiode and id_user = :riduser and no_form is null";
             $params = [
@@ -111,8 +112,9 @@ class Tpembayaran
             a.jumlah_hrsbayar,
             a.tanggal_dibayar,
             b.nama_pembayaran,
-            a.nama_entry_admin,
-            e.nama_lengkap as nama_siswa
+            e.nama_lengkap as nama_siswa,
+            a.verif_by,
+            a.verif_date
             FROM transaksi_pembayaran a
             INNER JOIN mpembayaran b
             ON a.id_pembayaran = b.id_pembayaran
@@ -156,7 +158,8 @@ class Tpembayaran
             a.jumlah_hrsbayar,
             a.tanggal_dibayar,
             b.nama_pembayaran,
-            a.nama_entry_admin,
+            a.verif_by,
+            a.verif_date,
             e.nama_lengkap as nama_siswa
             FROM transaksi_pembayaran a
             INNER JOIN mpembayaran b
@@ -202,7 +205,8 @@ class Tpembayaran
             transaksi_pembayaran.tanggal_dibayar,
             transaksi_pembayaran.periode,
             transaksi_pembayaran.jumlah_hrsbayar,
-            transaksi_pembayaran.nama_entry_admin
+            transaksi_pembayaran.verif_by,
+            transaksi_pembayaran.verif_date
             from mpembayaran 
             RIGHT JOIN transaksi_pembayaran 
             on mpembayaran.id_pembayaran = transaksi_pembayaran.id_pembayaran 
@@ -260,7 +264,7 @@ class Tpembayaran
     }
     public function store()
     {
-        $query = "INSERT INTO transaksi_pembayaran (id_user,id_pembayaran,periode,tanggal_dibayar, no_form, jumlah_hrsbayar, nama_entry_admin, created_at, updated_at) VALUES (:riduser, :ridpembayaran, :rperiode, NULL, :rnoform, :rjumlah_hrsbayar, NULL, NOW(), NOW())";
+        $query = "INSERT INTO transaksi_pembayaran (id_user,id_pembayaran,periode,tanggal_dibayar, no_form, jumlah_hrsbayar, verif_by, verif_date, path_bukti, nama_bukti, created_at, updated_at) VALUES (:riduser, :ridpembayaran, :rperiode, NULL, :rnoform, :rjumlah_hrsbayar, NULL, NULL, NULL, NULL, NOW(), NOW())";
         $conn = DB::connection("mysql")->insert($query, [
             'riduser' => $this->getIdUser(),
             'ridpembayaran' => $this->getIdPembayaran(),
@@ -272,10 +276,9 @@ class Tpembayaran
     }
     public function konfirmasiPembayaran()
     {
-        $query = "UPDATE transaksi_pembayaran SET tanggal_dibayar = :rtanggal_dibayar, nama_entry_admin = :rnama_entry_admin, updated_at = NOW() WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
+        $query = "UPDATE transaksi_pembayaran SET tanggal_dibayar = :rtanggal_dibayar, updated_at = NOW() WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
         $conn = DB::connection("mysql")->update($query, [
             'rtanggal_dibayar' => $this->getTanggalDibayar(),
-            'rnama_entry_admin' => $this->getNamaEntryAdmin(),
             'ridtransaksipembayaran' => $this->getIdTransaksiPembayaran()
         ]);
         return $conn;

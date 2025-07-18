@@ -123,7 +123,35 @@ class TransaksiPembayaran extends Controller
     //     }
     //     return to_route('admin.transaksi-pembayaran');
     // }
-    
+    public function create_kwitansi(Request $request)
+    {
+        $modul = new Tpembayaran;
+        $modul->id_pembayaran = $request->id_pembayaran;
+        $total_pembayaran = $modul->getTotalPembayaran();
+        if($request->id_pembayaran == '1'){
+            $modul->id_user = session('id_user');
+            $modul->periode = session('periode');
+            $modul->jumlah_hrsbayar = $total_pembayaran;
+            $modul->no_form = null;
+        }else{
+            if($request->no_form == null){
+                session()->flash('error', 'Anda belum mengisi formulir pendaftaran');
+                return to_route('riwayat.pembayaran');
+            }
+            $modul->no_form = $request->no_form;
+            $modul->periode = session('periode');
+            $modul->jumlah_hrsbayar = $total_pembayaran;
+            $modul->id_user = session('id_user');
+        }
+        $data = $modul->store();
+
+        if ($data) {
+            session()->flash('success', 'Kwitansi berhasil dibuat');
+        } else {
+            session()->flash('error', 'Kwitansi gagal dibuat');
+        }
+        return to_route('riwayat.pembayaran');
+    }
     public function destroy(Request $request){
         $modul = new Tpembayaran;
         $data = $modul->destroy($request->id);
@@ -138,7 +166,42 @@ class TransaksiPembayaran extends Controller
     public function riwayat_pembayaran()
     {
         $modul = new Tpembayaran;
+        $modul1 = new Pendaftaran;
         $data = $modul->getAllPembayaran();
+        $modul1->periode = session('periode');
+        $no_form = empty($modul1->getNoFormulir()) ? null : $modul1->getNoFormulir();
+        // dd($no_form);
+        // dd(session('id_user'));
+        foreach ($data as $key => $row) {
+            // dd($row);
+            $modul->periode = session('periode');
+            if($row->id_pembayaran == '1'){
+                // dd('tets');
+                $modul->id_user = session('id_user');
+                $modul->id_pembayaran = $row->id_pembayaran;
+                $cicilan = $modul->checkCicilan();
+                // dd($cicilan);
+                if(empty($cicilan)){
+                    $data[$key]->status = 0;
+                }else{
+                    $data[$key]->status = 1;
+                }
+            }else{
+                // dd($no_form)
+                if($no_form != null){
+                    $modul->no_form = $no_form;
+                    $modul->id_pembayaran = $row->id_pembayaran;
+                    $cicilan = $modul->checkCicilan();
+                    if(empty($cicilan)){
+                        $data[$key]->status = 0;
+                    }else{
+                        $data[$key]->status = 1;
+                    }
+                }else{
+                    $data[$key]->status = 0;
+                }
+            }
+        }
         // dd($data);
         return inertia('calon_siswa/pembayaran/RiwayatPembayaran',[
             'datas' => $data,
@@ -159,7 +222,7 @@ class TransaksiPembayaran extends Controller
         $data = $modul->riwayatPembayaran();
         // dd($data);
         if(empty($data)){
-            session()->flash('error', 'Anda belum membuat cicilan yang harus dibayar');
+            session()->flash('error', 'Anda belum membuat kwitansi untuk pembayaran ini');
             return to_route('riwayat.pembayaran');
         }
         // dd($data);

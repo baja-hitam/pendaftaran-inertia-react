@@ -67,12 +67,24 @@ const RiwayatPembayaran = ({datas}) => {
         {
             name: "Aksi",
             cell: (row) => (
+                <>
+                {
+                    (row.status == 0) && (
+                        <button
+                        className="bg-[#226F54] py-1 px-3 mr-3 text-white rounded-md hover:bg-[#1a5b45]"
+                        onClick={() => router.post('/create-kwitansi',{id_pembayaran: row.id_pembayaran})}
+                        >
+                            Buat Kwitansi
+                        </button>
+                    )
+                }
                 <button
-                    className="bg-blue-600 w-20 h-7 text-white rounded-md hover:bg-blue-700"
+                    className="bg-blue-600 py-1 px-3 text-white rounded-md hover:bg-blue-700"
                     onClick={() => router.get('/riwayat-pembayaran/detail', {id: row.id_pembayaran})}
                 >
                     Detail
                 </button>
+                </>
             ),
         }
     ];
@@ -80,12 +92,12 @@ const RiwayatPembayaran = ({datas}) => {
     return (
         <div className="bg-[#226F54] relative min-h-screen flex flex-row justify-end pb-3">
             <Head>
-                <title>Riwayat Pembayaran</title>
+                <title>Kwitansi Pembayaran</title>
             </Head>
             <TemplateSidebar />
             <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
-                    Riwayat Pembayaran
+                    Kwitansi Pembayaran
                 </p>
                 <Card
                     className={

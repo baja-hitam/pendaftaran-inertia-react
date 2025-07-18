@@ -3,9 +3,15 @@ import { Card } from "../../UI/organisms/Card";
 import React, { useState,useEffect } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
 import TemplateSidebar from "../../template/TemplateSidebar";
+import FileUploader from "../../UI/molecules/FileUploader";
+import UploadBuktiPembayaran from "./UploadBuktiPembayaran";
 
 
 const DetailRiwayatPembayaran = ({datas}) => {
+    const [tambahMode, setTambahMode] = useState(false);
+    const handleOpenModalTambah = (o) => {
+        setTambahMode(o);
+    }
     const handleChangeParseDate = (date) => {
         // console.log(date);
         date = new Date(date);
@@ -71,6 +77,20 @@ const DetailRiwayatPembayaran = ({datas}) => {
             name: "Tanggal Dibayarkan",
             selector: (row) => row.tanggal_dibayar == null ? '-' : handleChangeParseDate(row.tanggal_dibayar),
         },
+        {
+            name: "Verif Pembayaran",
+            selector: (row) => row.verif_by == null ? '-' : row.verif_by,
+        },
+        {
+            name: "Tanggal Verifikasi",
+            selector: (row) => row.verif_date == null ? '-' : handleChangeParseDate(row.verif_date),
+        },
+        {
+            name : "Bukti Pembayaran",
+            cell : (row) => (
+                <button className="bg-blue-600 w-16 h-7 text-white rounded-md hover:bg-blue-700" onClick={()=>handleOpenModalTambah(true)}>Upload Bukti</button>
+            )
+        }
     ];
 
     return (
@@ -79,10 +99,10 @@ const DetailRiwayatPembayaran = ({datas}) => {
                 <title>Detail Riwayat Pembayaran</title>
             </Head>
             <TemplateSidebar />
-            <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
+            <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] mt-12">
                 <Card
                     className={
-                        "w-[95%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[70%] xl:w-[50%]"
+                        "w-[95%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[70%] xl:w-[70%]"
                     }
                 >
                     <p>Nama Pembayaran : {datas[0]?.nama_pembayaran}</p>
@@ -105,6 +125,12 @@ const DetailRiwayatPembayaran = ({datas}) => {
                         noDataComponent={<i>Tidak Ada Data Transaksi</i>}
                     />
                 </Card>
+                {tambahMode && (
+                    <UploadBuktiPembayaran
+                        open={tambahMode}
+                        handleChangeOpen={handleOpenModalTambah}
+                    />
+                )}
             </div>
         </div>
     );
