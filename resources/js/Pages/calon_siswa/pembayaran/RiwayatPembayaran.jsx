@@ -4,20 +4,14 @@ import React, { useState,useEffect } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
 import TemplateSidebar from "../../template/TemplateSidebar";
 import { toast,ToastContainer } from "react-toastify";
+import Angsuran from "./Angsuran";
 
 
 const RiwayatPembayaran = ({datas}) => {
     const { flash } = usePage().props;
-    const handleChangeParseDate = (date) => {
-        // console.log(date);
-        date = new Date(date);
-        const formatted = new Intl.DateTimeFormat("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        }).format(date);
-
-        return formatted;
+    const [angsuranModal, setAngsuranModal] = useState(false);
+    const handleChangeAngsuranModal = (o) => {
+        setAngsuranModal(o);
     }
     createTheme("custom", {
         background: {
@@ -104,6 +98,12 @@ const RiwayatPembayaran = ({datas}) => {
                         "w-[95%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[70%] xl:w-[50%]"
                     }
                 >
+                    <button
+                        className="bg-[#226F54] py-1 px-3 text-sm mr-3 text-white rounded-md hover:bg-[#1a5b45]"
+                        onClick={() => handleChangeAngsuranModal(true)}
+                        >
+                            Ajukan Angsuran
+                    </button>
                     <DataTable
                         columns={columns}
                         data={datas}
@@ -112,6 +112,13 @@ const RiwayatPembayaran = ({datas}) => {
                         noDataComponent={<i>Tidak Ada Riwayat Pembayaran</i>}
                     />
                 </Card>
+                {angsuranModal && (
+                    <Angsuran
+                        open={angsuranModal}
+                        handleChangeOpen={handleChangeAngsuranModal}
+                        datasJenPembayaranOption={datas}
+                    />
+                )}
             </div>
             <ToastContainer />
         </div>
