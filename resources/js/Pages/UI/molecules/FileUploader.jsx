@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { router } from '@inertiajs/react';
 
-const FileUploader = () => {
+const FileUploader = ({onSubmit,handleChangeOpen}) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   const [error, setError] = useState(''); // State baru untuk pesan error
@@ -41,7 +42,9 @@ const FileUploader = () => {
 
   const handleUpload = () => {
     if (selectedFile) {
-      
+      onSubmit(selectedFile);
+      setSelectedFile(null); // Reset setelah pengunggahan
+      handleChangeOpen(false); // Tutup modal setelah pengunggahan
     } else {
       setError('Pilih file terlebih dahulu!');
     }

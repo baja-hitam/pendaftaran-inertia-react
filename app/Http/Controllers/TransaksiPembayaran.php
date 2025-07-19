@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Modulus\Mperiode;
 use App\Http\Modulus\Pendaftaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
 use App\Http\Modulus\Tpembayaran;
 
 class TransaksiPembayaran extends Controller
@@ -17,9 +19,14 @@ class TransaksiPembayaran extends Controller
         $data = $modul->getAllUser();
         $data1 = $modul->getAllPembayaran();
         $data2 = $modul->getAllTransaksi();
+        foreach ($data2 as $key => $row) {
+            if($row->path_bukti != null){
+                $data2[$key]->path_bukti = Storage::url($row->path_bukti);
+            }
+        }
         $data3 = $modul1->getAllPeriode();
         $data4 = $modul2->getAllFormulir();
-        // dd($data1);
+        // dd($data2);
         return inertia('admin/transaksi_pembayaran/TransaksiPembayaran',[
             'datasUserOption' => $data,
             'datasFormulirOption' => $data4,
@@ -40,6 +47,11 @@ class TransaksiPembayaran extends Controller
         $data3 = $modul1->getAllPeriode();
         $data4 = $modul2->getAllFormulir();
         $data = $modul->search();
+        foreach ($data as $key => $row) {
+            if($row->path_bukti != null){
+                $data[$key]->path_bukti = Storage::url($row->path_bukti);
+            }
+        }
         return inertia('admin/transaksi_pembayaran/TransaksiPembayaran',[
             'datas' => $data,
             'search' => $request->user,
@@ -85,9 +97,9 @@ class TransaksiPembayaran extends Controller
     {
         $modul = new Tpembayaran;
         $modul->id_transaksi_pembayaran = $request->id;
-        $modul->tanggal_dibayar = date('Y-m-d');
-        $modul->nama_entry_admin = session('nama_lengkap');
+        $modul->verif_by = session('id_user');
         $data = $modul->konfirmasiPembayaran();
+        // dd($modul);
         if ($data) {
             session()->flash('success', 'Transaksi pembayaran berhasil dikonfirmasi');
         } else {
@@ -126,6 +138,9 @@ class TransaksiPembayaran extends Controller
     public function create_kwitansi(Request $request)
     {
         $modul = new Tpembayaran;
+        $modul1 = new Pendaftaran;
+        $modul1->periode = session('periode');
+        $no_form = empty($modul1->getNoFormulir()) ? null : $modul1->getNoFormulir();
         $modul->id_pembayaran = $request->id_pembayaran;
         $total_pembayaran = $modul->getTotalPembayaran();
         if($request->id_pembayaran == '1'){
@@ -134,14 +149,13 @@ class TransaksiPembayaran extends Controller
             $modul->jumlah_hrsbayar = $total_pembayaran;
             $modul->no_form = null;
         }else{
-            if($request->no_form == null){
+            if($no_form == null){
                 session()->flash('error', 'Anda belum mengisi formulir pendaftaran');
                 return to_route('riwayat.pembayaran');
             }
-            $modul->no_form = $request->no_form;
+            $modul->no_form = $no_form;
             $modul->periode = session('periode');
             $modul->jumlah_hrsbayar = $total_pembayaran;
-            $modul->id_user = session('id_user');
         }
         $data = $modul->store();
 
@@ -192,6 +206,7 @@ class TransaksiPembayaran extends Controller
                     $modul->no_form = $no_form;
                     $modul->id_pembayaran = $row->id_pembayaran;
                     $cicilan = $modul->checkCicilan();
+                    // dd($cicilan);
                     if(empty($cicilan)){
                         $data[$key]->status = 0;
                     }else{
@@ -220,6 +235,11 @@ class TransaksiPembayaran extends Controller
         // dd($no_form);
         $modul->no_form = $no_form;
         $data = $modul->riwayatPembayaran();
+        foreach ($data as $key => $row) {
+            if($row->path_bukti != null){
+                $data[$key]->path_bukti = Storage::url($row->path_bukti);
+            }
+        }
         // dd($data);
         if(empty($data)){
             session()->flash('error', 'Anda belum membuat kwitansi untuk pembayaran ini');
@@ -229,5 +249,25 @@ class TransaksiPembayaran extends Controller
         return inertia('calon_siswa/pembayaran/DetailRiwayatPembayaran',[
             'datas' => $data,
         ]);
+    }
+    public function upload_bukti(Request $request)
+    {
+        // dd($request->all());
+        // dd($request->file('file'));
+        $path = $request->file('file')->store('bukti_pembayaran', 'public');
+        // dd($path,basename($path));
+        $modul = new Tpembayaran;
+        $modul->id_transaksi_pembayaran = $request['idTransaksiPembayaran'];
+        $modul->path_bukti = $path;
+        $modul->nama_bukti = $request->file('file')->getClientOriginalName();
+        // dd($modul);
+        $data = $modul->uploadBukti();
+        // dd($data);
+        if ($data) {
+            session()->flash('success', 'Bukti pembayaran berhasil diupload');
+        } else {
+            session()->flash('error', 'Bukti pembayaran gagal diupload');
+        }
+        return to_route('riwayat.pembayaran');
     }
 }

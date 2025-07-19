@@ -9,7 +9,10 @@ import UploadBuktiPembayaran from "./UploadBuktiPembayaran";
 
 const DetailRiwayatPembayaran = ({datas}) => {
     const [tambahMode, setTambahMode] = useState(false);
-    const handleOpenModalTambah = (o) => {
+    const [idTransaksiPembayaran, setIdTransaksiPembayaran] = useState('');
+    const handleOpenModalTambah = (o,id) => {
+        // console.log(id);
+        setIdTransaksiPembayaran(id);
         setTambahMode(o);
     }
     const handleChangeParseDate = (date) => {
@@ -29,7 +32,7 @@ const DetailRiwayatPembayaran = ({datas}) => {
         },
     });
     const sisaPembayaran = Number(datas[0]?.total_pembayaran) - datas.reduce((acc, curr) => {
-        if (curr.tanggal_dibayar !== null) {
+        if (curr.verif_by !== null) {
             return acc + Number(curr.jumlah_hrsbayar);
         }
         return acc;
@@ -79,7 +82,7 @@ const DetailRiwayatPembayaran = ({datas}) => {
         },
         {
             name: "Verif Pembayaran",
-            selector: (row) => row.verif_by == null ? '-' : row.verif_by,
+            selector: (row) => row.verif_name == null ? '-' : row.verif_name,
         },
         {
             name: "Tanggal Verifikasi",
@@ -88,7 +91,13 @@ const DetailRiwayatPembayaran = ({datas}) => {
         {
             name : "Bukti Pembayaran",
             cell : (row) => (
-                <button className="bg-blue-600 w-16 h-7 text-white rounded-md hover:bg-blue-700" onClick={()=>handleOpenModalTambah(true)}>Upload Bukti</button>
+                row.path_bukti != null ? (
+                    <a href={row.path_bukti} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        {row.nama_bukti}
+                    </a>
+                ):(
+                    <button className="bg-blue-600 py-2 px-4 text-white rounded-md hover:bg-blue-700" onClick={()=>handleOpenModalTambah(true,row.id_transaksi_pembayaran)}>Upload Bukti</button>
+                )
             )
         }
     ];
@@ -129,6 +138,7 @@ const DetailRiwayatPembayaran = ({datas}) => {
                     <UploadBuktiPembayaran
                         open={tambahMode}
                         handleChangeOpen={handleOpenModalTambah}
+                        idTransaksiPembayaran={idTransaksiPembayaran}
                     />
                 )}
             </div>

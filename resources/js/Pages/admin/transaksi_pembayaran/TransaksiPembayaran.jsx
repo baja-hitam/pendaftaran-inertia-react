@@ -199,7 +199,7 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
         },
         {
             name:"Verif Pembayaran",
-            selector: (row) => row.verif_by ?? '-',
+            selector: (row) => row.verif_name ?? '-',
         },
         {
             name: "Tanggal Verifikasi",
@@ -210,9 +210,21 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
             selector: (row)=> row.tanggal_dibayar == null ? '-':handleChangeParseDate(row.tanggal_dibayar),
         },
         {
+            name: "Bukti Pembayaran",
+            cell: (row) => (
+                row.path_bukti != null ? (
+                    <a href={row.path_bukti} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        {row.nama_bukti}
+                    </a>
+                ) : (
+                    <span>Tidak ada bukti</span>
+                )
+            ),
+        },
+        {
             name: "Aksi",
-            cell: (row) => row.tanggal_dibayar == null ? (<div className="flex flex-row gap-x-2"> 
-                <button className="bg-blue-600 w-20 h-7 text-white rounded-md hover:bg-blue-700" onClick={() => handleKonfirmasiPembayaran(row.id_transaksi_pembayaran)}>Lunas</button>
+            cell: (row) => row.verif_by == null ? (<div className="flex flex-row gap-x-2"> 
+                <button className="bg-blue-600 w-20 h-7 text-white rounded-md hover:bg-blue-700" onClick={() => handleKonfirmasiPembayaran(row.id_transaksi_pembayaran)}>Konfirmasi</button>
                 {/* <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeleteTransaksi(row.id_transaksi_pembayaran)}>Hapus</button> */}
                 </div>) : (<div className="flex flex-row gap-x-2"> 
                 {/* <button className="bg-red-600 w-16 h-7 text-white rounded-md hover:bg-red-700" onClick={()=>handleDeleteTransaksi(row.id_transaksi_pembayaran)}>Hapus</button> */}

@@ -12,11 +12,26 @@ class Tpembayaran
     public $jumlah_hrsbayar;
     public $nama_entry_admin;
     public $no_form;
+    public $path_bukti;
+    public $nama_bukti;
+    public $verif_by;
 
 
     public function getPeriode()
     {
         return $this->periode;
+    }
+    public function getPathBukti()
+    {
+        return $this->path_bukti;
+    }
+    public function getVerifBy()
+    {
+        return $this->verif_by;
+    }
+    public function getNamaBukti()
+    {
+        return $this->nama_bukti;
     }
     public function getIdTransaksiPembayaran()
     {
@@ -114,7 +129,10 @@ class Tpembayaran
             b.nama_pembayaran,
             e.nama_lengkap as nama_siswa,
             a.verif_by,
-            a.verif_date
+            f.nama_lengkap as verif_name,
+            a.verif_date,
+            a.path_bukti,
+            a.nama_bukti
             FROM transaksi_pembayaran a
             INNER JOIN mpembayaran b
             ON a.id_pembayaran = b.id_pembayaran
@@ -124,6 +142,8 @@ class Tpembayaran
             ON a.no_form = d.no_form
             LEFT JOIN calon_siswa e
             ON a.no_form = e.no_form
+            LEFT JOIN admin f
+            ON a.verif_by = f.id_admin
         EOD;
         $conn = DB::connection("mysql")->select($query);
         if (empty($conn)) {
@@ -160,7 +180,10 @@ class Tpembayaran
             b.nama_pembayaran,
             a.verif_by,
             a.verif_date,
-            e.nama_lengkap as nama_siswa
+            e.nama_lengkap as nama_siswa,
+            a.path_bukti,
+            a.nama_bukti,
+            f.nama_lengkap as verif_name
             FROM transaksi_pembayaran a
             INNER JOIN mpembayaran b
             ON a.id_pembayaran = b.id_pembayaran
@@ -170,6 +193,8 @@ class Tpembayaran
             ON a.no_form = d.no_form
             LEFT JOIN calon_siswa e
             ON a.no_form = e.no_form
+            LEFT JOIN admin f
+            ON a.verif_by = f.id_admin
             $where
         EOD;
         $conn = DB::connection('mysql')->select($query, $params);
@@ -206,10 +231,15 @@ class Tpembayaran
             transaksi_pembayaran.periode,
             transaksi_pembayaran.jumlah_hrsbayar,
             transaksi_pembayaran.verif_by,
-            transaksi_pembayaran.verif_date
+            admin.nama_lengkap as verif_name,
+            transaksi_pembayaran.verif_date,
+            transaksi_pembayaran.path_bukti,
+            transaksi_pembayaran.nama_bukti
             from mpembayaran 
             RIGHT JOIN transaksi_pembayaran 
-            on mpembayaran.id_pembayaran = transaksi_pembayaran.id_pembayaran 
+            on mpembayaran.id_pembayaran = transaksi_pembayaran.id_pembayaran
+            LEFT JOIN admin 
+            on transaksi_pembayaran.verif_by = admin.id_admin 
             AND $where
             AND transaksi_pembayaran.periode = :rperiode
             WHERE mpembayaran.id_pembayaran = :ridpembayaran
@@ -274,11 +304,20 @@ class Tpembayaran
         ]);
         return $conn;
     }
+    public function uploadBukti(){
+        $query = "UPDATE transaksi_pembayaran SET path_bukti = :rpath, tanggal_dibayar = NOW(), nama_bukti = :rnama_bukti, updated_at = NOW() WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
+        $conn = DB::connection("mysql")->update($query, [
+            'rpath' => $this->getPathBukti(),
+            'rnama_bukti' => $this->getNamaBukti(),
+            'ridtransaksipembayaran' => $this->getIdTransaksiPembayaran()
+        ]);
+        return $conn;
+    }
     public function konfirmasiPembayaran()
     {
-        $query = "UPDATE transaksi_pembayaran SET tanggal_dibayar = :rtanggal_dibayar, updated_at = NOW() WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
+        $query = "UPDATE transaksi_pembayaran SET verif_by = :rverif_by, verif_date = NOW(), updated_at = NOW() WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
         $conn = DB::connection("mysql")->update($query, [
-            'rtanggal_dibayar' => $this->getTanggalDibayar(),
+            'rverif_by' => $this->getVerifBy(),
             'ridtransaksipembayaran' => $this->getIdTransaksiPembayaran()
         ]);
         return $conn;
