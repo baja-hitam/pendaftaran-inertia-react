@@ -4,6 +4,7 @@ import { useForm } from "@inertiajs/react";
 import { Label } from "../atoms/Label";
 import InputSelect from "../atoms/InputSelect";
 import { useEffect } from "react";
+import FileUploaderBerkas from "../molecules/FileUploaderBerkas";
 
 const FormPendaftaranSiswa = ({datas}) => {
     const {data, setData, post} = useForm({
@@ -557,6 +558,22 @@ const FormPendaftaranSiswa = ({datas}) => {
               value={data.citaCita}
               onChange={handleChangePendaftaran}
             />
+            <p className="text-xl text-[#226F54] font-extrabold mt-7">BERKAS</p>
+            <Label>Pas Foto</Label>
+            <FileUploaderBerkas
+              name="pasFoto"
+              onChange={(file) => setData('pasFoto', file)}
+              accept="image/*"/>
+            <Label>Foto Kartu Keluarga</Label>
+            <FileUploaderBerkas
+              name="kk"
+              onChange={(file) => setData('kk', file)}
+              accept="image/*"/>
+              <Label>Foto Akta Kelahiran</Label>
+            <FileUploaderBerkas
+              name="aktaKelahiran"
+              onChange={(file) => setData('aktaKelahiran', file)}
+              accept="image/*"/>
             <Button className={'w-full'} type="submit">Submit</Button>
           </form>
         </>
