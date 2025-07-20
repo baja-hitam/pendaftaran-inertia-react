@@ -553,7 +553,7 @@ class Pendaftaran
     }
     public function getDaftarFormulir(){
         $query = <<<EOD
-        SELECT * FROM formulir 
+        SELECT formulir.no_form as no_formulir, formulir.periode, calon_siswa.*, orang_tua_wali.* from formulir
         LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
         LEFT JOIN orang_tua_wali ON formulir.no_form = orang_tua_wali.no_form
         EOD;
@@ -949,6 +949,14 @@ class Pendaftaran
         ]);
         // dd($result);
         return $result;
+    }
+    public function getFormulirPeriode()
+    {
+        $query = "SELECT periode FROM formulir WHERE id_user = :riduser ORDER BY periode";
+        $conn = DB::connection('mysql')->select($query, [
+            'riduser' => session('id_user'),
+        ]);
+        return $conn;
     }
 }
 ?>

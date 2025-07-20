@@ -9,10 +9,11 @@ import Select from 'react-select';
 
 
 
-const Angsuran = ({open,handleChangeOpen,datasJenPembayaranOption}) => {
+const Angsuran = ({open,handleChangeOpen,datasJenPembayaranOption,periode}) => {
     const { data, setData, post } = useForm({
         selectedPembayaran: null,
-        cicilan: ''
+        cicilan: '',
+        periode: periode,
     });
     const optionsJenPembayaran = datasJenPembayaranOption.map(jen =>({
         value: jen.id_pembayaran,
@@ -20,7 +21,8 @@ const Angsuran = ({open,handleChangeOpen,datasJenPembayaranOption}) => {
             style: 'currency',
             currency: 'IDR',
         }).format(jen.total_pembayaran)
-    }))
+    }));
+
     // console.log(options);
     
     // console.log(data.selectedUser);
@@ -41,7 +43,7 @@ const Angsuran = ({open,handleChangeOpen,datasJenPembayaranOption}) => {
         e.preventDefault();
 
         handleChangeOpen(false);
-        post('/admin/transaksi-pembayaran/store');
+        post('/buat-angsuran');
     }
 
 return (

@@ -351,9 +351,11 @@ class PendaftaranSiswa extends Controller
     public function detail_calon_siswa(Request $request)
     {
         // dd($request->all());
+        // dd($request->no_form);
         $modul = new Pendaftaran;
         $modul->noForm = $request->no_form;
         $data = $modul->detailFormulir();
+        // dd($data);
         $modul1 = new Helper;
         if(!empty($data) && isset($data->no_kk)){
             $data->no_kk = $modul1->decrypt($data->no_kk);

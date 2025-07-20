@@ -86,6 +86,19 @@ class Tpembayaran
         }
         return $conn[0]->total_pembayaran;
     }
+    public function getTransaksiPembayaranById()
+    {
+        $query = "SELECT * FROM transaksi_pembayaran WHERE no_form = :rnoform AND periode = :rperiode AND id_pembayaran = :ridpembayaran ORDER BY path_bukti DESC";
+        $conn = DB::connection("mysql")->select($query, [
+            'rnoform' => $this->getNoForm(),
+            'rperiode' => $this->getPeriode(),
+            'ridpembayaran' => $this->getIdPembayaran()
+        ]);
+        if (empty($conn)) {
+            return [];
+        }
+        return $conn;
+    }
     public function checkCicilan(){
         // dd($this->getIdUser());
         if($this->getIdUser() != null){
@@ -276,7 +289,7 @@ class Tpembayaran
     }
 
     public function checkTransaksiFormulir(){
-        $query = "SELECT transaksi_pembayaran.id_user, transaksi_pembayaran.periode, transaksi_pembayaran.id_pembayaran, mpembayaran.nama_pembayaran, mpembayaran.total_pembayaran, CAST(SUM(jumlah_hrsbayar) as UNSIGNED) as total_jumlah_hrsbayar FROM transaksi_pembayaran LEFT JOIN mpembayaran ON transaksi_pembayaran.id_pembayaran = mpembayaran.id_pembayaran WHERE id_user = :riduser AND transaksi_pembayaran.periode = :rperiode AND mpembayaran.id_pembayaran = :ridpembayaran AND transaksi_pembayaran.tanggal_dibayar IS NOT NULL GROUP BY transaksi_pembayaran.id_user, transaksi_pembayaran.periode, transaksi_pembayaran.id_pembayaran, mpembayaran.nama_pembayaran, mpembayaran.total_pembayaran";
+        $query = "SELECT transaksi_pembayaran.id_user, transaksi_pembayaran.periode, transaksi_pembayaran.id_pembayaran, mpembayaran.nama_pembayaran, mpembayaran.total_pembayaran, CAST(SUM(jumlah_hrsbayar) as UNSIGNED) as total_jumlah_hrsbayar FROM transaksi_pembayaran LEFT JOIN mpembayaran ON transaksi_pembayaran.id_pembayaran = mpembayaran.id_pembayaran WHERE id_user = :riduser AND transaksi_pembayaran.periode = :rperiode AND mpembayaran.id_pembayaran = :ridpembayaran AND transaksi_pembayaran.tanggal_dibayar IS NOT NULL AND transaksi_pembayaran.verif_by IS NOT NULL GROUP BY transaksi_pembayaran.id_user, transaksi_pembayaran.periode, transaksi_pembayaran.id_pembayaran, mpembayaran.nama_pembayaran, mpembayaran.total_pembayaran";
         $conn = DB::connection("mysql")->select($query, [
             'riduser' => $this->getIdUser(),
             'rperiode' => $this->getPeriode(),
@@ -330,18 +343,6 @@ class Tpembayaran
         ]);
         return $conn;
     }
-    // public function update($id_transaksi_pembayaran)
-    // {
-    //     $query = "UPDATE transaksi_pembayaran SET id_user = :riduser, id_pembayaran = :ridpembayaran, periode = :rcperiode, jumlah_pembayaran = :rnjumlah, updated_at = NOW() WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";
-    //     $conn = DB::connection("mysql")->update($query, [
-    //         'riduser' => $this->getIdUser(),
-    //         'ridpembayaran' => $this->getIdPembayaran(),
-    //         'rcperiode' => $this->getCperiode(),
-    //         'rnjumlah' => $this->getNjumlah(),
-    //         'ridtransaksipembayaran' => $id_transaksi_pembayaran
-    //     ]);
-    //     return $conn;
-    // }
     public function destroy($id_transaksi_pembayaran)
     {
         $query = "DELETE FROM transaksi_pembayaran WHERE id_transaksi_pembayaran = :ridtransaksipembayaran";

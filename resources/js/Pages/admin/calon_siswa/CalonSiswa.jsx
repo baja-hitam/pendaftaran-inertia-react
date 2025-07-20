@@ -23,8 +23,8 @@ const CalonSiswa = ({datas}) => {
 
         return formatted;
     }
-        const handleDetailCalonSiswa = (no_form) => {
-            router.post('/admin/calon-siswa/detail',{no_form: no_form});
+        const handleDetailCalonSiswa = (no_formulir) => {
+            router.post('/admin/calon-siswa/detail',{no_form: no_formulir});
         }
 
     const customStyles = {
@@ -78,7 +78,7 @@ const CalonSiswa = ({datas}) => {
         {
             name: "Aksi",
             cell: (row) => (<div className="flex flex-row gap-x-2"> 
-                <button className="bg-blue-500 w-16 h-7 text-white rounded-md hover:bg-blue-700" onClick={()=>handleDetailCalonSiswa(row.no_form)}>Detail</button>
+                <button className="bg-blue-500 w-16 h-7 text-white rounded-md hover:bg-blue-700" onClick={()=>handleDetailCalonSiswa(row.no_formulir)}>Detail</button>
                 </div>)
         }
     ];
