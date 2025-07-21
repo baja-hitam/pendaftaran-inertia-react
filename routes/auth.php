@@ -48,8 +48,10 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::post('/admin/transaksi-pembayaran/update',[TransaksiPembayaran::class,'update'])->name('admin.transaksi-pembayaran.update');
     Route::post('/admin/transaksi-pembayaran/delete',[TransaksiPembayaran::class,'destroy'])->name('admin.transaksi-pembayaran.delete');
     Route::get('/admin/calon-siswa',[PendaftaranSiswa::class,'get_daftar_calon_siswa'])->name('admin.daftar.calon-siswa');
-    Route::post('/admin/calon-siswa/detail',[PendaftaranSiswa::class,'detail_calon_siswa'])->name('admin.detail.calon-siswa');
-    Route::post('/admin/calon-siswa/cetak',[PendaftaranSiswa::class,'cetak_calon_siswa'])->name('admin.cetak.calon-siswa');
+    Route::get('/admin/calon-siswa/detail',[PendaftaranSiswa::class,'detail_calon_siswa'])->name('admin.detail.calon-siswa');
+    Route::get('/admin/calon-siswa/cetak',[PendaftaranSiswa::class,'cetak_calon_siswa'])->name('admin.cetak.calon-siswa');
+    Route::post('/admin/calon-siswa/verif',[PendaftaranSiswa::class,'verif_calon_siswa'])->name('admin.verif.calon-siswa');
+    Route::post('/admin/calon-siswa/batal-verif',[PendaftaranSiswa::class,'batal_verif_calon_siswa'])->name('admin.batal-verif.calon-siswa');
     Route::get('/admin/ujian', [Ujian::class, 'index'])->name('admin.ujian');
     Route::post('/admin/ujian/store', [Ujian::class, 'store'])->name('admin.ujian.store');
     Route::post('/admin/ujian/update', [Ujian::class, 'update'])->name('admin.ujian.update');

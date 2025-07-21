@@ -95,6 +95,22 @@ class Pendaftaran
     public $penghasilanWali;
     public $alamatWali;
     public $telpWali;
+    public $pasFoto;
+    public $fotoKK;
+    public $fotoAktaKelahiran;
+
+    public function getPasFoto()
+    {
+        return $this->pasFoto;
+    }
+    public function getFotoKK()
+    {
+        return $this->fotoKK;
+    }
+    public function getFotoAktaKelahiran()
+    {
+        return $this->fotoAktaKelahiran;
+    }
 
     public function getIdCalonSiswa()
     {
@@ -512,6 +528,16 @@ class Pendaftaran
         }
         return $conn;
     }
+    public function getBerkas($id_berkas){
+        $query = "SELECT * FROM berkas where id_berkas = :ridberkas";
+        $conn = DB::connection('mysql')->select($query,[
+            'ridberkas' => $id_berkas,
+        ]);
+        if(empty($conn)){
+            return [];
+        }
+        return $conn[0];
+    }
     public function checkDataCalonSiswa(){
         $query = "SELECT id_calon_siswa FROM calon_siswa where id_user = :riduser AND periode = :rcperiode";
         $conn = DB::connection('mysql')->select($query,[
@@ -568,6 +594,7 @@ class Pendaftaran
         SELECT * FROM formulir 
         LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
         LEFT JOIN orang_tua_wali ON formulir.no_form = orang_tua_wali.no_form
+        LEFT JOIN berkas ON formulir.no_form = berkas.no_form
         WHERE formulir.no_form = :rnoform
         EOD;
         $conn = DB::connection('mysql')->select($query,[
@@ -578,11 +605,33 @@ class Pendaftaran
         }
         return $conn[0];
     }
+    public function verifikasiFormulir(){
+        $query = "UPDATE formulir SET verif_by = :riduser,verif_date = NOW(), updated_at = NOW() WHERE no_form = :rnoform";
+        $conn = DB::connection('mysql')->update($query,[
+            'riduser' => session('id_user'),
+            'rnoform' => $this->getNoForm(),
+        ]);
+        if(!$conn){
+            return [];
+        }
+        return true;
+    }
+    public function batalVerifikasiFormulir(){
+        $query = "UPDATE formulir SET verif_by = NULL, verif_date = NOW(), updated_at = NOW() WHERE no_form = :rnoform";
+        $conn = DB::connection('mysql')->update($query,[
+            'rnoform' => $this->getNoForm(),
+        ]);
+        if(!$conn){
+            return [];
+        }
+        return true;
+    }
     public function index(){
         $query = <<<EOD
-        SELECT formulir.no_form as no_formulir,calon_siswa.*,orang_tua_wali.* FROM formulir
+        SELECT formulir.no_form as no_formulir, formulir.verif_by, formulir.verif_date,calon_siswa.*,orang_tua_wali.*, berkas.* FROM formulir
         LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
         LEFT JOIN orang_tua_wali ON formulir.no_form = orang_tua_wali.no_form
+        LEFT JOIN berkas ON formulir.no_form = berkas.no_form
         where periode = :rcperiode AND id_user = :riduser
         EOD;
         $conn = DB::connection('mysql')->select($query,[
@@ -678,7 +727,25 @@ class Pendaftaran
             'rhobi'=>$this->getHobi(),
             'rcitaCita'=>$this->getCitaCita(),
             'rcreatedat' => now(),
-            'rupdatedat' => now(),
+            'rupdatedat' => now()
+        ]);
+        if(!$conn){
+            return $conn;
+        }
+        $status = $this->store_berkas();
+        return $status;
+    }
+    public function store_berkas(){
+        $query = <<<EOD
+        INSERT INTO berkas (no_form, pas_foto, kk, akte, created_at, updated_at) VALUES (:rnoform, :rpasfoto, :rkk, :rakte, :rcreatedat, :rupdatedat)
+        EOD;
+        $conn = DB::connection('mysql')->insert($query,[
+            'rnoform' => $this->getNoForm(),
+            'rpasfoto' => $this->getPasFoto(),
+            'rkk' => $this->getFotoKK(),
+            'rakte' => $this->getFotoAktaKelahiran(),
+            'rcreatedat' => now(),
+            'rupdatedat' => now()
         ]);
         return $conn;
     }
@@ -743,7 +810,7 @@ class Pendaftaran
         ]);
         return $conn;
     }
-    public function update($id_calon_siswa)
+    public function update($id_calon_siswa,$id_berkas)
     {
         // return $id_calon_siswa;
         $query = <<<EOD
@@ -851,8 +918,33 @@ class Pendaftaran
             'ridcalonsiswa' => $id_calon_siswa,
         ]);
         // dd($resultOrtu);
+        if(!$result) {
+            return false;
+        }
+        $resultBerkas = $this->updateBerkas($id_berkas);
+        return $resultBerkas;
+    }
+    public function updateBerkas($id_berkas)
+    {
+        $query = <<<EOD
+        UPDATE berkas SET
+            pas_foto = :rpasfoto,
+            kk = :rkk,
+            akte = :rakte,
+            updated_at = :rupdatedat
+        WHERE id_berkas = :ridberkas
+    EOD;
+
+        $result = DB::connection('mysql')->update($query, [
+            'rpasfoto' => $this->getPasFoto(),
+            'rkk' => $this->getFotoKK(),
+            'rakte' => $this->getFotoAktaKelahiran(),
+            'rupdatedat' => now(),
+            'ridberkas' => $id_berkas,
+        ]);
         return $result;
     }
+
     public function updateOrangTuaWali($id_orangtua_wali)
     {
         $query = <<<EOD

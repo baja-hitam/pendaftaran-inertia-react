@@ -96,15 +96,19 @@ class TransaksiPembayaran extends Controller
     //calon siswa buat angsuran
     public function storeAngsuran(Request $request)
     {
-        $startYear = date( 'Y');
-        $endYear = $startYear + 1;
+        if($request->input('periode') != session('periode')){
+            session()->flash('error', 'Periode '.$request->input('periode').' sudah tidak berlaku '); 
+            return to_route('riwayat.pembayaran',[
+                'periode' => $request->input('periode') ?? session('periode'),
+            ]);
+        }
         $modul = new Tpembayaran;
         $modul1 = new Pendaftaran;
         $modul1->periode = session('periode');
         $no_form = empty($modul1->getNoFormulir()) ? null : $modul1->getNoFormulir();
         // dd($no_form);
         $modul->id_pembayaran = $request->selectedPembayaran['value'];
-        $modul->periode = $request->periode ?? $startYear.$endYear;
+        $modul->periode = $request->periode ?? session('periode');
         $total_pembayaran = $modul->getTotalPembayaran();
         $transaksiPembayaran = [];
         if($request->selectedPembayaran['value'] == '1'){
@@ -191,13 +195,19 @@ class TransaksiPembayaran extends Controller
     // }
     public function create_kwitansi(Request $request)
     {
+        if($request->input('periode') != session('periode')){
+            session()->flash('error', 'Periode '.$request->input('periode').' sudah tidak berlaku '); 
+            return to_route('riwayat.pembayaran',[
+                'periode' => $request->input('periode') ?? session('periode'),
+            ]);
+        }
         $modul = new Tpembayaran;
         $modul1 = new Pendaftaran;
         $modul1->periode = session('periode');
         $no_form = empty($modul1->getNoFormulir()) ? null : $modul1->getNoFormulir();
-        $modul->id_pembayaran = $request->id_pembayaran;
+        $modul->id_pembayaran = $request->input('id_pembayaran');
         $total_pembayaran = $modul->getTotalPembayaran();
-        if($request->id_pembayaran == '1'){
+        if($request->input('id_pembayaran') == '1'){
             $modul->id_user = session('id_user');
             $modul->periode = session('periode');
             $modul->jumlah_hrsbayar = $total_pembayaran;
@@ -222,7 +232,7 @@ class TransaksiPembayaran extends Controller
     }
     public function destroy(Request $request){
         $modul = new Tpembayaran;
-        $data = $modul->destroy($request->id);
+        $data = $modul->destroy($request->input('id'));
         if ($data) {
             session()->flash('success', 'Transaksi pembayaran berhasil dihapus');
         } else {
@@ -233,6 +243,7 @@ class TransaksiPembayaran extends Controller
     // Calon Siswa
     public function riwayat_pembayaran(Request $request)
     {
+        // dd($request->all());
         $modul = new Tpembayaran;
         $modul1 = new Pendaftaran;
         $data = $modul->getAllPembayaran();
@@ -277,7 +288,7 @@ class TransaksiPembayaran extends Controller
         return inertia('calon_siswa/pembayaran/RiwayatPembayaran',[
             'datas' => $data,
             'periode' => $periode,
-            'periodeSession' => session('periode')
+            'periodeSession' => $request->periode ?? session('periode')
         ]);
     }
     public function detail_riwayat_pembayaran(Request $request)
@@ -301,7 +312,9 @@ class TransaksiPembayaran extends Controller
         // dd($data);
         if(empty($data)){
             session()->flash('error', 'Anda belum membuat kwitansi untuk pembayaran ini');
-            return to_route('riwayat.pembayaran');
+            return to_route('riwayat.pembayaran',[
+                'periode' => $request->periode ?? session('periode'),
+            ]);
         }
         // dd($data);
         return inertia('calon_siswa/pembayaran/DetailRiwayatPembayaran',[

@@ -5,6 +5,7 @@ use App\Http\Helper\Helper;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Modulus\Pendaftaran;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Modulus\Tpembayaran;
 use App\Http\Modulus\KartuPeserta;
 
@@ -16,10 +17,20 @@ class PendaftaranSiswa extends Controller
         $modul1 = new Helper;
         $modul->periode = session('periode');
         $data = $modul->index();
+        // dd($data);
         if(!empty($data) && isset($data->no_kk)){
             $data->no_kk = $modul1->decrypt($data->no_kk);
             $data->nik_ayah = $modul1->decrypt($data->nik_ayah);
             $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
+        }
+        if(!empty($data) && isset($data->pas_foto)){
+            $data->pas_foto = Storage::url($data->pas_foto);
+        }
+        if(!empty($data) && isset($data->kk)){
+            $data->kk = Storage::url($data->kk);
+        }
+        if(!empty($data) && isset($data->akte)){
+            $data->akte = Storage::url($data->akte);
         }
         // $data->noKK = $modul1->decrypt();
         // dd($data);
@@ -93,6 +104,12 @@ class PendaftaranSiswa extends Controller
         $modul->prestasiLainnya = $request->input('prestasiLainnya');
         $modul->hobi = $request->input('hobi');
         $modul->citaCita = $request->input('citaCita');
+        $path_pasFoto = $request->file('pasFoto')->store('berkas', 'public');
+        $path_fotoKK = $request->file('fotoKK')->store('berkas', 'public');
+        $path_fotoAktaKelahiran = $request->file('fotoAktaKelahiran')->store('berkas', 'public');
+        $modul->pasFoto = $path_pasFoto;
+        $modul->fotoKK = $path_fotoKK;
+        $modul->fotoAktaKelahiran = $path_fotoAktaKelahiran;
         $no_form = $modul->store_formulir();
         if(empty($no_form)){
             session()->flash('error', 'Formulir Pendaftaran Gagal Disimpan');
@@ -167,8 +184,50 @@ class PendaftaranSiswa extends Controller
     }
     public function update(Request $request)
     {
+        // dd($request->all());
         $modul = new Pendaftaran;
         $rsa = new Helper;
+        $data_berkas = $modul->getBerkas($request->input('idBerkas'));
+        if ($request->hasFile('pasFoto')) {
+            if($data_berkas->pas_foto != null){
+                Storage::disk('public')->delete($data_berkas->pas_foto);
+            }
+            $path_pasFoto = $request->file('pasFoto')->store('berkas', 'public');
+            $modul->pasFoto = $path_pasFoto;
+        } else {
+            if($request->input('pasFoto') == null){
+                $modul->pasFoto = null;
+            } else {
+                $modul->pasFoto = $data_berkas->pas_foto;
+            }
+        }
+        if ($request->hasFile('fotoKK')) {
+            if($data_berkas->kk != null){
+                Storage::disk('public')->delete($data_berkas->kk);
+            }
+            $path_fotoKK = $request->file('fotoKK')->store('berkas', 'public');
+            $modul->fotoKK = $path_fotoKK;
+        } else {
+            if($request->input('fotoKK') == null){
+                $modul->fotoKK = null;
+            } else {
+                $modul->fotoKK = $data_berkas->kk;
+            }
+        }
+        if ($request->hasFile('fotoAktaKelahiran')) {
+            if($data_berkas->akte != null){
+                Storage::disk('public')->delete($data_berkas->akte);
+            }
+            $path_fotoAktaKelahiran = $request->file('fotoAktaKelahiran')->store('berkas', 'public');
+            $modul->fotoAktaKelahiran = $path_fotoAktaKelahiran;
+        } else {
+            if($request->input('fotoAktaKelahiran') == null){
+
+                $modul->fotoAktaKelahiran = null;
+            } else {
+                $modul->fotoAktaKelahiran = $data_berkas->akte;
+            }
+        }
         $modul->namaSiswa = $request->input('namaSiswa');
         $modul->namaPanggilan = $request->input('namaPanggilan');
         $modul->jenisKelamin = $request->input('jenisKelamin');
@@ -255,7 +314,7 @@ class PendaftaranSiswa extends Controller
         $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
         $modul->alamatWali = $request->input('alamatWali');
         $modul->telpWali = $request->input('telpWali');
-        $data = $modul->update($request->input('idCalonSiswa'));
+        $data = $modul->update($request->input('idCalonSiswa'), $request->input('idBerkas'));
         // dd($data);
         if ($data) {
             session()->flash('success', 'Formulir Pendaftaran Siswa Berhasil Diupdate');
@@ -353,8 +412,17 @@ class PendaftaranSiswa extends Controller
         // dd($request->all());
         // dd($request->no_form);
         $modul = new Pendaftaran;
-        $modul->noForm = $request->no_form;
+        $modul->noForm = base64_decode($request->input('no_form'));
         $data = $modul->detailFormulir();
+        if(!empty($data) && isset($data->pas_foto)){
+            $data->pas_foto = Storage::url($data->pas_foto);
+        }
+        if(!empty($data) && isset($data->kk)){
+            $data->kk = Storage::url($data->kk);
+        }
+        if(!empty($data) && isset($data->akte)){
+            $data->akte = Storage::url($data->akte);
+        }
         // dd($data);
         $modul1 = new Helper;
         if(!empty($data) && isset($data->no_kk)){
@@ -367,12 +435,42 @@ class PendaftaranSiswa extends Controller
             'datas'=>$data,
         ]);
     }
+    public function verif_calon_siswa(Request $request)
+    {
+        // dd($request->all());
+        $modul = new Pendaftaran;
+        $modul->noForm = $request->input('no_form');
+        $data = $modul->verifikasiFormulir();
+        if ($data) {
+            session()->flash('success', 'Data Calon Siswa Berhasil Diverifikasi');
+        } else {
+            session()->flash('error', 'Data Calon Siswa Gagal Diverifikasi');
+        }
+        return to_route('admin.detail.calon-siswa',[
+            'no_form' => base64_encode($request->input('no_form'))
+        ]);
+    }
+    public function batal_verif_calon_siswa(Request $request)
+    {
+        // dd($request->all());
+        $modul = new Pendaftaran;
+        $modul->noForm = $request->input('no_form');
+        $data = $modul->batalVerifikasiFormulir();
+        if ($data) {
+            session()->flash('success', 'Data Calon Siswa Berhasil Dibatalkan Verifikasi');
+        } else {
+            session()->flash('error', 'Data Calon Siswa Gagal Dibatalkan Verifikasi');
+        }
+        return to_route('admin.detail.calon-siswa',[
+            'no_form' => base64_encode($request->input('no_form'))
+        ]);
+    }
 
     public function cetak_calon_siswa(Request $request)
     {
         // dd($request->all());
         $modul = new Pendaftaran;
-        $modul->noForm = $request->no_form;
+        $modul->noForm = base64_decode($request->input('no_form'));
         $data = $modul->detailFormulir();
         $modul1 = new Helper;
         if(!empty($data) && isset($data->no_kk)){
@@ -381,7 +479,7 @@ class PendaftaranSiswa extends Controller
             $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
         }
         // dd($data);
-        return Inertia::render('admin/pdf/StreamPdf',[
+        return Inertia::render('admin/pdf/StreamPdfPage',[
             'datas'=>$data,
         ]);
     }

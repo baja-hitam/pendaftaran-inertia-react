@@ -1,15 +1,45 @@
-import React from "react";
+import React,{useState,useEffect} from "react";
 import { Label } from "../../UI/atoms/Label";
 import { Card } from "../../UI/organisms/Card";
-import { Head,router } from "@inertiajs/react";
+import { Head,router,usePage } from "@inertiajs/react";
 import SidebarAdmin from "../SidebarAdmin";
+import { toast,ToastContainer } from "react-toastify";
 import { FaPrint } from "react-icons/fa";
 
 
 const DataCalonSiswa = ({ datas }) => {
+        const { flash } = usePage().props;
+        // State untuk mengontrol apakah modal preview terbuka atau tidak
+        const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+        // State untuk menyimpan URL gambar yang sedang di-preview (opsional, jika Anda ingin preview gambar yang berbeda)
+        const [imageToPreview, setImageToPreview] = useState(null);
     if (!datas) {
         return <div>Data siswa tidak ditemukan.</div>;
     }
+    
+        useEffect(() => {
+            if(flash.success != null){
+                toast.success(flash.success, {
+                    autoClose: 500,
+                    position: 'top-center'
+                });
+            }else if(flash.error != null){
+                toast.error(flash.error, {
+                    autoClose: 500,
+                    position: 'top-center'
+                });
+            }
+          },[flash])
+
+    const openImagePreview = (imageUrl) => {
+        setImageToPreview(imageUrl);
+        setIsImagePreviewOpen(true);
+    };
+  
+    const closeImagePreview = () => {
+        setIsImagePreviewOpen(false);
+        setImageToPreview(null);
+    };
     // Function to format date
     const formatDate = (date) => {
         if (!date) return "-";
@@ -25,7 +55,13 @@ const DataCalonSiswa = ({ datas }) => {
         }).format(value);
     };
     const handleCetakFormulir = (no_form) => {
-        router.post('/admin/calon-siswa/cetak',{no_form:no_form})
+        router.get('/admin/calon-siswa/cetak',{no_form:btoa(no_form)});
+    }
+    const handleVerifikasiFormulir = (no_form) => {
+        router.post('/admin/calon-siswa/verif',{no_form: no_form});
+    }
+    const handleBatalVerifikasiFormulir = (no_form) => {
+        router.post('/admin/calon-siswa/batal-verif',{no_form: no_form});
     }
     
 
@@ -39,16 +75,37 @@ const DataCalonSiswa = ({ datas }) => {
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
                     Detail Formulir
                 </p>
-                <button 
-                className="bg-blue-500 hover:bg-blue-700 cursor-pointer text-white mb-2 flex items-center gap-3 font-poppins py-2 px-4 rounded-[7px]"
-                onClick={()=>handleCetakFormulir(datas.no_form)}>
-                    <FaPrint /> Cetak Formulir
-                </button>
+                    <button 
+                    className="bg-blue-500 hover:bg-blue-700 cursor-pointer text-white mb-2 flex items-center gap-3 font-poppins py-2 px-4 rounded-[7px]"
+                    onClick={()=>handleCetakFormulir(datas.no_form)}>
+                        <FaPrint /> Cetak Formulir
+                    </button>
                 <Card
                     className={
                         "w-[95%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[70%] xl:w-[50%]"
                     }
                 >
+                    {
+                        !datas.id_calon_siswa || !datas.id_orangtua_wali == true ? (
+                            <div className="bg-red-100 text-red-800 p-4 rounded-lg mb-4">
+                                <p className="font-bold">Data calon siswa atau orang tua pada formulir belum lengkap.</p>
+                            </div>
+                        ) : (
+                                datas.verif_by != null ? (
+                                <button 
+                                    className="bg-[#226F54] hover:bg-[#265944] active:bg-[#226F54] cursor-pointer text-white mb-2 flex items-center gap-3 font-poppins py-2 px-4 rounded-[7px]"
+                                    onClick={()=>handleBatalVerifikasiFormulir(datas.no_form)}>
+                                        Batal Verifikasi Formulir
+                                </button>
+                                ):(
+                                <button 
+                                    className="bg-[#226F54] hover:bg-[#265944] active:bg-[#226F54] cursor-pointer text-white mb-2 flex items-center gap-3 font-poppins py-2 px-4 rounded-[7px]"
+                                    onClick={()=>handleVerifikasiFormulir(datas.no_form)}>
+                                        Verifikasi Formulir
+                                </button>
+                                )
+                        )
+                    }
             {/* Keterangan Pribadi */}
             <div className="mb-6">
                 <h3 className="text-lg font-semibold text-[#226F54] mb-2">Keterangan Pribadi</h3>
@@ -326,8 +383,65 @@ const DataCalonSiswa = ({ datas }) => {
                     </div>
                 </div>
             </div>
-                </Card>
+            <div>
+                <h3 className="text-lg font-semibold text-[#226F54] mb-2">Berkas Pendukung</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <Label>Pas Foto</Label>
+                        {datas.pas_foto && (
+                            <div className="mb-4">
+                                <p className="block text-gray-700 text-sm font-bold mb-2">Gambar Saat Ini:</p>
+                                <img onClick={() => openImagePreview(datas.pas_foto)} src={datas.pas_foto}  alt="Preview" className="max-w-full h-auto max-h-48 rounded-lg shadow-md cursor-pointer" />
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        <Label>Kartu Keluarga</Label>
+                        {datas.kk && (
+                            <div className="mb-4">
+                                <p className="block text-gray-700 text-sm font-bold mb-2">Gambar Saat Ini:</p>
+                                <img onClick={() => openImagePreview(datas.kk)} src={datas.kk}  alt="Preview" className="max-w-full h-auto max-h-48 rounded-lg shadow-md cursor-pointer" />
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        <Label>Akte Kelahiran</Label>
+                        {datas.akte && (
+                            <div className="mb-4">
+                                <p className="block text-gray-700 text-sm font-bold mb-2">Gambar Saat Ini:</p>
+                                <img onClick={() => openImagePreview(datas.akte)} src={datas.akte}  alt="Preview" className="max-w-full h-auto max-h-48 rounded-lg shadow-md cursor-pointer" />
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
+                </Card>
+                {/* Modal Preview Gambar */}
+                {isImagePreviewOpen && imageToPreview && (
+                        <div
+                            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+                            onClick={closeImagePreview} // Menutup modal saat mengklik di luar gambar
+                        >
+                            <div
+                                className="relative bg-white p-4 rounded-lg max-w-3xl max-h-full overflow-auto"
+                                onClick={(e) => e.stopPropagation()} // Mencegah klik pada modal menutupnya
+                            >
+                                <button
+                                    onClick={closeImagePreview}
+                                    className="absolute top-2 right-2 text-white bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold"
+                                >
+                                    &times;
+                                </button>
+                                <img
+                                    src={imageToPreview}
+                                    alt="Full Preview"
+                                    className="max-w-full max-h-[80vh] h-auto object-contain mx-auto" // Menyesuaikan ukuran gambar agar sesuai dengan modal
+                                />
+                            </div>
+                        </div>
+                    )}
+            </div>
+            <ToastContainer />
         </div>
     );
 };

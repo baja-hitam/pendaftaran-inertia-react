@@ -24,7 +24,7 @@ const CalonSiswa = ({datas}) => {
         return formatted;
     }
         const handleDetailCalonSiswa = (no_formulir) => {
-            router.post('/admin/calon-siswa/detail',{no_form: no_formulir});
+            router.get('/admin/calon-siswa/detail',{no_form: btoa(no_formulir)});
         }
 
     const customStyles = {

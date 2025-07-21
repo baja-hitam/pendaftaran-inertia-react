@@ -7,7 +7,6 @@ Text,
 View,
 Document,
 StyleSheet,
-Font,
 Image,
 } from "@react-pdf/renderer";
 

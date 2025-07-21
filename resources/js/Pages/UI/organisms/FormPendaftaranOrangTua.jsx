@@ -120,6 +120,13 @@ const FormPendaftaranOrangTua = ({datas}) => {
     return (
     <>
           <form onSubmit={submitFormPendaftaran}>
+          {
+              datas.verif_by !== null && (
+                <div className="bg-green-100 text-green-800 p-4 rounded-lg mb-4 mt-4">
+                  <p className="font-bold">Formulir telah diverifikasi</p>
+                </div>
+              )
+            }
             <p className="text-xl text-[#226F54] font-extrabold mt-7">KETERANGAN TENTANG ORANG TUA </p>
             <p className="text-[#226F54] font-semibold font-poppins text-lg">Ayah</p>
             <Label>Nama</Label>
@@ -510,7 +517,11 @@ const FormPendaftaranOrangTua = ({datas}) => {
               maxLength='13'
               onChange={handleChangeNumber}
             />
-            <Button className={'w-full'} type="submit">Submit</Button>
+            {
+              datas.verif_by == null && (
+                <Button className={'w-full'} type="submit">Submit</Button>
+              )
+            }
           </form>
         </>
     );

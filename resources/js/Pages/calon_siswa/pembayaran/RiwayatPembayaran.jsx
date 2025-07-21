@@ -18,7 +18,7 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
             ...data,
             periode: e.target.value
         });
-        router.get('/riwayat-pembayaran', {periode: data.periode});
+        router.get('/riwayat-pembayaran', {periode: e.target.value});
     }
     useEffect(() => {
         setData({
@@ -30,11 +30,12 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
         value: user.periode,
         label: user.periode.slice(0, 4) + "/" + user.periode.slice(4)
     }));
+    const optionPeriodeTest = [...optionsPeriode, { value: '20262027', label: '2026/2027' }];
     const handleChangeAngsuranModal = (o) => {
         setAngsuranModal(o);
     }
     const handleChangeDetailRiwayatPembayaran = (id) => {
-        console.log(data.periode);
+        // console.log(data.periode);
         
         if(data.periode === ''){
             toast.error('Periode tidak boleh kosong', {

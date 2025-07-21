@@ -3,12 +3,26 @@ import { Button } from "../atoms/Button";
 import { useForm } from "@inertiajs/react";
 import { Label } from "../atoms/Label";
 import InputSelect from "../atoms/InputSelect";
-import { useEffect } from "react";
+import { useEffect,useState } from "react";
 import FileUploaderBerkas from "../molecules/FileUploaderBerkas";
 
 const FormPendaftaranSiswa = ({datas}) => {
+    const [currentFilePasFoto, setCurrentFilePasFoto] = useState(null);
+    const [currentFileKK, setCurrentFileKK] = useState(null);
+    const [currentFileAkte, setCurrentFileAkte] = useState(null);
+    const [error, setError] = useState({
+      pasFoto: '',
+      fotoKK: '',
+      fotoAkte: '',
+    });
+    // State untuk mengontrol apakah modal preview terbuka atau tidak
+    const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+    // State untuk menyimpan URL gambar yang sedang di-preview (opsional, jika Anda ingin preview gambar yang berbeda)
+    const [imageToPreview, setImageToPreview] = useState(null);
+
     const {data, setData, post} = useForm({
       idCalonSiswa: datas?.id_calon_siswa || '',
+      idBerkas: datas?.id_berkas || '',
       namaSiswa: datas?.nama_lengkap || '',
       namaPanggilan: datas?.nama_panggilan || '',
       jenisKelamin: datas?.jenis_kelamin || '',
@@ -55,7 +69,32 @@ const FormPendaftaranSiswa = ({datas}) => {
       prestasiLainnya: datas?.prestasi_lainnya || '',
       hobi: datas?.hobi || '',
       citaCita: datas?.cita_cita || '',
+      pasFoto: datas?.pas_foto || null,
+      fotoKK: datas?.kk || null,
+      fotoAktaKelahiran: datas?.akte || null,
     });
+    useEffect(() => {
+      if (datas?.pas_foto) {
+        setCurrentFilePasFoto(datas.pas_foto);
+      }
+      if (datas?.kk) {
+        setCurrentFileKK(datas.kk);
+      }
+      if (datas?.akte) {
+        setCurrentFileAkte(datas.akte);
+      }
+    },[datas]);
+
+    const openImagePreview = (imageUrl) => {
+      setImageToPreview(imageUrl);
+      setIsImagePreviewOpen(true);
+  };
+
+  const closeImagePreview = () => {
+      setIsImagePreviewOpen(false);
+      setImageToPreview(null);
+  };
+
 
     function handleChangePendaftaran (e){
         setData({
@@ -68,10 +107,49 @@ const FormPendaftaranSiswa = ({datas}) => {
         ...data,[e.target.name]:cleanedValue,
       })
     }
+    function handleChangeFile(name,file){
+      setData({
+        ...data, [name]: file,
+      });
+    }
+    function handleRemoveCurrentFilePasFoto(){
+      setCurrentFilePasFoto(null);
+      setData({
+        ...data, pasFoto: null,
+      });
+    }
+    function handleRemoveCurrentFileKK(){
+      setCurrentFileKK(null);
+      setData({
+        ...data, fotoKK: null,
+      });
+    }
+    
+    function handleRemoveCurrentFileAkte(){
+      setCurrentFileAkte(null);
+      setData({
+        ...data, fotoAktaKelahiran: null,
+      });
+    }
+
     function submitFormPendaftaran(e) {
       e.preventDefault();
-      // console.log(data.idCalonSiswa);
+      console.log(data);
       
+      if(!data.pasFoto) {
+        setError({...error, pasFoto: 'Foto Pas Siswa harus diisi.'});
+        return;
+      }
+      if(!data.fotoKK) {
+        setError({...error, fotoKK: 'Foto Kartu Keluarga harus diisi.'});
+        return;
+      }
+      if(!data.fotoAktaKelahiran) {
+        setError({...error, fotoAkte: 'Foto Akta Kelahiran harus diisi.'});
+        return;
+      }
+      setError('');
+
       if (data.idCalonSiswa && data.idCalonSiswa !== '') {
         // Jika ada idCalonSiswa, lakukan update
         post('/pendaftaran/siswa/update');
@@ -84,6 +162,13 @@ const FormPendaftaranSiswa = ({datas}) => {
     return (
     <>
           <form onSubmit={submitFormPendaftaran}>
+            {
+              datas.verif_by !== null && (
+                <div className="bg-green-100 text-green-800 p-4 rounded-lg mb-4 mt-4">
+                  <p className="font-bold">Formulir telah diverifikasi</p>
+                </div>
+              )
+            }
             <p className="text-xl text-[#226F54] font-extrabold mt-7">KETERANGAN PRIBADI</p>
             <Label>Nama Lengkap Siswa *</Label>
             <InputForm
@@ -560,22 +645,105 @@ const FormPendaftaranSiswa = ({datas}) => {
             />
             <p className="text-xl text-[#226F54] font-extrabold mt-7">BERKAS</p>
             <Label>Pas Foto</Label>
+            {currentFilePasFoto && (
+                <div className="mb-4">
+                    <p className="block text-gray-700 text-sm font-bold mb-2">Gambar Saat Ini:</p>
+                    <img onClick={() => openImagePreview(currentFilePasFoto)} src={currentFilePasFoto}  alt="Preview" className="max-w-full h-auto max-h-48 rounded-lg shadow-md cursor-pointer" />
+                    {currentFilePasFoto && (
+                        <button
+                            onClick={() => handleRemoveCurrentFilePasFoto()}
+                            className="mt-2 px-4 py-2 text-sm rounded-lg font-semibold text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400"
+                        >
+                            Hapus Gambar Saat Ini
+                        </button>
+                    )}
+                </div>
+            )}
             <FileUploaderBerkas
               name="pasFoto"
-              onChange={(file) => setData('pasFoto', file)}
-              accept="image/*"/>
+              handleChangeFile={handleChangeFile}
+              selectedFile={data.pasFoto}
+              accept="image/*"
+              />
+              {error.pasFoto && (
+                <p className="text-red-500 text-sm mt-2">{error.pasFoto}</p>
+              )}
             <Label>Foto Kartu Keluarga</Label>
+            {currentFileKK && (
+                <div className="mb-4">
+                    <p className="block text-gray-700 text-sm font-bold mb-2">Gambar Saat Ini:</p>
+                    <img onClick={() => openImagePreview(currentFileKK)} src={currentFileKK} alt="Preview" className="max-w-full h-auto max-h-48 rounded-lg shadow-md cursor-pointer" />
+                    {currentFileKK && (
+                        <button
+                            onClick={() => handleRemoveCurrentFileKK()}
+                            className="mt-2 px-4 py-2 text-sm rounded-lg font-semibold text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400"
+                        >
+                            Hapus Gambar Saat Ini
+                        </button>
+                    )}
+                </div>
+            )}
             <FileUploaderBerkas
-              name="kk"
-              onChange={(file) => setData('kk', file)}
+              name="fotoKK"
+              handleChangeFile={handleChangeFile}
+              selectedFile={data.fotoKK}
               accept="image/*"/>
-              <Label>Foto Akta Kelahiran</Label>
+              {error.fotoKK && (
+                <p className="text-red-500 text-sm mt-2">{error.fotoKK}</p>
+              )}
+            <Label>Foto Akta Kelahiran</Label>
+            {currentFileAkte && (
+                <div className="mb-4">
+                    <p className="block text-gray-700 text-sm font-bold mb-2">Gambar Saat Ini:</p>
+                    <img onClick={() => openImagePreview(currentFileAkte)} src={currentFileAkte} alt="Preview" className="max-w-full h-auto max-h-48 rounded-lg shadow-md cursor-pointer" />
+                    {currentFileAkte && (
+                        <button
+                            onClick={() => handleRemoveCurrentFileAkte()}
+                            className="mt-2 px-4 py-2 text-sm rounded-lg font-semibold text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400"
+                        >
+                            Hapus Gambar Saat Ini
+                        </button>
+                    )}
+                </div>
+            )}
             <FileUploaderBerkas
-              name="aktaKelahiran"
-              onChange={(file) => setData('aktaKelahiran', file)}
+              name="fotoAktaKelahiran"
+              selectedFile={data.fotoAktaKelahiran}
+              handleChangeFile={handleChangeFile}
               accept="image/*"/>
-            <Button className={'w-full'} type="submit">Submit</Button>
+              {error.fotoAkte && (
+                <p className="text-red-500 text-sm mt-2">{error.fotoAkte}</p>
+              )}
+              {
+                datas.verif_by == null && (
+                  <Button className={'w-full'} type="submit">Submit</Button>
+                )
+              }
           </form>
+           {/* Modal Preview Gambar */}
+          {isImagePreviewOpen && imageToPreview && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+                    onClick={closeImagePreview} // Menutup modal saat mengklik di luar gambar
+                >
+                    <div
+                        className="relative bg-white p-4 rounded-lg max-w-3xl max-h-full overflow-auto"
+                        onClick={(e) => e.stopPropagation()} // Mencegah klik pada modal menutupnya
+                    >
+                        <button
+                            onClick={closeImagePreview}
+                            className="absolute top-2 right-2 text-white bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold"
+                        >
+                            &times;
+                        </button>
+                        <img
+                            src={imageToPreview}
+                            alt="Full Preview"
+                            className="max-w-full max-h-[80vh] h-auto object-contain mx-auto" // Menyesuaikan ukuran gambar agar sesuai dengan modal
+                        />
+                    </div>
+                </div>
+            )}
         </>
     );
 }

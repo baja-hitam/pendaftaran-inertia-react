@@ -1,15 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { router } from '@inertiajs/react';
 
-const FileUploaderBerkas = ({handleChangeOpen,name}) => {
-  const [selectedFile, setSelectedFile] = useState(null);
+const FileUploaderBerkas = ({name,handleChangeFile,selectedFile}) => {
   const fileInputRef = useRef(null);
   const [error, setError] = useState(''); // State baru untuk pesan error
 
   const handleFileChange = (event) => {
     // Reset error message setiap kali file baru dipilih
     setError('');
-    setSelectedFile(null); // Bersihkan file sebelumnya untuk validasi baru
+    handleChangeFile(event.target.name,null); // Bersihkan file sebelumnya untuk validasi baru
 
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
@@ -34,24 +33,14 @@ const FileUploaderBerkas = ({handleChangeOpen,name}) => {
         return;
       }
 
-      setSelectedFile(file);
+      handleChangeFile(event.target.name, file);
     } else {
-      setSelectedFile(null);
-    }
-  };
-
-  const handleUpload = () => {
-    if (selectedFile) {
-      onSubmit(selectedFile);
-      setSelectedFile(null); // Reset setelah pengunggahan
-      handleChangeOpen(false); // Tutup modal setelah pengunggahan
-    } else {
-      setError('Pilih file terlebih dahulu!');
+      handleChangeFile(event.target.name, null);
     }
   };
 
   const handleClearSelection = () => {
-    setSelectedFile(null);
+    handleChangeFile(name, null);
     setError(''); // Bersihkan error saat menghapus pilihan
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
