@@ -6,6 +6,7 @@ use App\Http\Middleware\AuthSession;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard;
+use App\Http\Controllers\KelasController;
 use App\Http\Controllers\NilaiController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\PendaftaranSiswa;
@@ -64,4 +65,8 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::post('/admin/nilai/store',[NilaiController::class,'store'])->name('admin.nilai.store');
     Route::post('/admin/nilai/update',[NilaiController::class,'update'])->name('admin.nilai.update');
     Route::post('/admin/nilai/delete',[NilaiController::class,'destroy'])->name('admin.nilai.delete');
+    Route::get('/admin/kelas', [KelasController::class, 'index'])->name('admin.kelas');
+    Route::post('/admin/kelas/store', [KelasController::class, 'store'])->name('admin.kelas.store');
+    Route::post('/admin/kelas/update', [KelasController::class, 'update'])->name('admin.kelas.update');
+    Route::post('/admin/kelas/delete', [KelasController::class, 'destroy'])->name('admin.kelas.delete');
 });

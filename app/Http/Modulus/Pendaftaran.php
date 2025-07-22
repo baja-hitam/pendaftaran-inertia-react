@@ -582,8 +582,11 @@ class Pendaftaran
         SELECT formulir.no_form as no_formulir, formulir.periode, calon_siswa.*, orang_tua_wali.* from formulir
         LEFT JOIN calon_siswa ON formulir.no_form = calon_siswa.no_form
         LEFT JOIN orang_tua_wali ON formulir.no_form = orang_tua_wali.no_form
+        where formulir.periode = :rperiode
         EOD;
-        $conn = DB::connection('mysql')->select($query);
+        $conn = DB::connection('mysql')->select($query,[
+            'rperiode' => $this->getPeriode(),
+        ]);
         if(empty($conn)){
             return [];
         }

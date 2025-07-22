@@ -163,7 +163,7 @@ const FormPendaftaranSiswa = ({datas}) => {
     <>
           <form onSubmit={submitFormPendaftaran}>
             {
-              datas.verif_by !== null && (
+              datas.verif_by != null && (
                 <div className="bg-green-100 text-green-800 p-4 rounded-lg mb-4 mt-4">
                   <p className="font-bold">Formulir telah diverifikasi</p>
                 </div>

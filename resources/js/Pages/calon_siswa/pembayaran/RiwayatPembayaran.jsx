@@ -151,7 +151,7 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
                         data={datas}
                         theme="custom"
                         customStyles={customStyles}
-                        noDataComponent={<i>Tidak Ada Riwayat Pembayaran</i>}
+                        noDataComponent={<i>Tidak Ada Pembayaran</i>}
                     />
                 </Card>
                 {angsuranModal && (

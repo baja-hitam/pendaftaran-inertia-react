@@ -401,6 +401,7 @@ class PendaftaranSiswa extends Controller
     public function get_daftar_calon_siswa()
     {
         $modul = new Pendaftaran;
+        // $modul->periode = session('periode');
         $data = $modul->getDaftarFormulir();
         // dd($data);
         return Inertia::render('admin/calon_siswa/CalonSiswa',[

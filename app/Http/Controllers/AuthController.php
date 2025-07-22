@@ -59,6 +59,9 @@ class AuthController extends Controller
             return to_route('dashboard');
     }
     public function loginAdmin(Request $request){
+        $startYear = date('Y');
+        $endYear = $startYear + 1;
+        $periode = $startYear . $endYear;
         $modul = new Authentication;
         $modul->email = $request->email;
         $modul->password = $request->password;
@@ -68,6 +71,7 @@ class AuthController extends Controller
             $request->session()->flash('message', 'Email atau Password Salah');
             return back();
         }
+        session(['periode'=> $periode]);
         session(['user' => $data[0]->email]);
         session(['id_user'=>$data[0]->id_admin]);
         session(['level' => $data[0]->level]);

@@ -21,7 +21,10 @@ const SidebarAdmin = () => {
         <Menu text="Formulir Pendaftaran" link="/admin/calon-siswa">
             <IconForm />
         </Menu>
-    </Sidebar>
+        <Menu text="Kelas" link="/admin/kelas">
+            <IconForm />
+        </Menu>
+        </Sidebar>
     )
 }
 export default SidebarAdmin;
