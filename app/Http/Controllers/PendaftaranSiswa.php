@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Http\Helper\Helper;
 use Inertia\Inertia;
+use App\Http\Helper\Helper;
 use Illuminate\Http\Request;
+use App\Http\Modulus\Mperiode;
 use App\Http\Modulus\Pendaftaran;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Modulus\Tpembayaran;
 use App\Http\Modulus\KartuPeserta;
+use Illuminate\Support\Facades\Storage;
 
 class PendaftaranSiswa extends Controller
 {
@@ -398,14 +399,19 @@ class PendaftaranSiswa extends Controller
     }
 
     // Admin
-    public function get_daftar_calon_siswa()
+    public function get_daftar_calon_siswa(Request $request)
     {
         $modul = new Pendaftaran;
+        $modul1 = new Mperiode;
         // $modul->periode = session('periode');
+        $modul->periode = $request->input('periode') ?? session('periode');
         $data = $modul->getDaftarFormulir();
+        $dataPeriode = $modul1->getAllPeriode();
         // dd($data);
         return Inertia::render('admin/calon_siswa/CalonSiswa',[
             'datas'=>$data,
+            'dataPeriode' => $dataPeriode,
+            'periodeSession'=>$request->input('periode') ?? session('periode'),
         ]);
     }
     public function detail_calon_siswa(Request $request)

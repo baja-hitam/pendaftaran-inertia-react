@@ -128,7 +128,7 @@ const Periode = ({datas}) => {
                 <title>Periode</title>
             </Head>
             <SidebarAdmin/>
-            <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
+            <div className="w-[80%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
                     Master Periode
                 </p>

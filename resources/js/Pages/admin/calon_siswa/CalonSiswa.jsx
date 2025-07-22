@@ -2,11 +2,30 @@ import { Head, usePage, router } from "@inertiajs/react";
 import SidebarAdmin from "../SidebarAdmin";
 import { Card } from "../../UI/organisms/Card";
 import React, { useState,useEffect } from "react";
+import InputSelect from "../../UI/atoms/InputSelect";
 import DataTable, { createTheme } from "react-data-table-component";
 
 
-const CalonSiswa = ({datas}) => {
-
+const CalonSiswa = ({datas,dataPeriode,periodeSession}) => {
+    const [data, setData] = useState({
+            periode: ''
+        });
+        const handleSearchChangePeriode = (e) => {
+            setData({
+                ...data,
+                periode: e.target.value
+            });
+            router.get('/admin/calon-siswa', {periode: e.target.value});
+        }
+        useEffect(() => {
+            setData({
+                periode: periodeSession
+            });
+        }, []);
+        const optionsPeriode = dataPeriode.map(user => ({
+            value: user.periode,
+            label: user.periode.slice(0, 4) + "/" + user.periode.slice(4)
+        }));
     createTheme("custom", {
         background: {
             default: "transparent",
@@ -89,7 +108,7 @@ const CalonSiswa = ({datas}) => {
                 <title>Formulir Pendaftaran</title>
             </Head>
             <SidebarAdmin/>
-            <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
+            <div className="w-[80%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
                     Formulir Pendaftaran Siswa/i Baru
                 </p>
@@ -98,6 +117,15 @@ const CalonSiswa = ({datas}) => {
                         "w-[98%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[90%] lg:w-[90%] xl:w-[60%]"
                     }
                 >
+                                                        Periode:
+                                    <InputSelect
+                                        options={optionsPeriode}
+                                        className='w-full mb-7 lg:w-[150px]'
+                                        name='periode'
+                                        disabled
+                                        onChange={handleSearchChangePeriode}
+                                        value={data.periode}
+                                    />
                     <DataTable
                         columns={columns}
                         data={datas}

@@ -67,6 +67,12 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
     },[flash])
 
     const customStyles = {
+        table: {
+            style: {
+                width: '100%',
+                minWidth: '450px',
+            },
+        },
         rows: {
             style: {
                 fontSize: "14px",
@@ -93,6 +99,7 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
         },
         {
             name: "Aksi",
+            wrap: true,
             cell: (row) => (
                 <>
                 {
@@ -122,13 +129,13 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
                 <title>Kwitansi Pembayaran</title>
             </Head>
             <TemplateSidebar />
-            <div className="w-[70%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
+            <div className="w-[80%] h-max sm:w-[80%] xl:w-[90%] xl:mt-12">
                 <p className="text-xl font-poppins mb-3 text-white sm:text-2xl xl:text-3xl">
                     Kwitansi Pembayaran
                 </p>
                 <Card
                     className={
-                        "w-[95%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[70%] xl:w-[50%]"
+                        "w-[98%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[80%] lg:w-[70%] xl:w-[50%]"
                     }
                 >
                     Periode:
