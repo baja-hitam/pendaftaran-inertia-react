@@ -68,7 +68,7 @@ class Tpembayaran
 
     public function getAllPembayaran()
     {
-        $query = "SELECT * FROM mpembayaran where aktif = 'T' ORDER BY nama_pembayaran DESC";
+        $query = "SELECT * FROM mpembayaran ORDER BY nama_pembayaran DESC";
         $conn = DB::connection("mysql")->select($query);
         if (empty($conn)) {
             return [];
@@ -289,19 +289,15 @@ class Tpembayaran
     }
 
     public function checkTransaksiFormulir(){
-        $query = "SELECT transaksi_pembayaran.id_user, transaksi_pembayaran.periode, transaksi_pembayaran.id_pembayaran, mpembayaran.nama_pembayaran, mpembayaran.total_pembayaran, CAST(SUM(jumlah_hrsbayar) as UNSIGNED) as total_jumlah_hrsbayar FROM transaksi_pembayaran LEFT JOIN mpembayaran ON transaksi_pembayaran.id_pembayaran = mpembayaran.id_pembayaran WHERE id_user = :riduser AND transaksi_pembayaran.periode = :rperiode AND mpembayaran.id_pembayaran = :ridpembayaran AND transaksi_pembayaran.tanggal_dibayar IS NOT NULL AND transaksi_pembayaran.verif_by IS NOT NULL GROUP BY transaksi_pembayaran.id_user, transaksi_pembayaran.periode, transaksi_pembayaran.id_pembayaran, mpembayaran.nama_pembayaran, mpembayaran.total_pembayaran";
+        $query = "SELECT transaksi_pembayaran.id_user, transaksi_pembayaran.periode, transaksi_pembayaran.id_pembayaran, mpembayaran.nama_pembayaran, mpembayaran.total_pembayaran, jumlah_hrsbayar FROM transaksi_pembayaran LEFT JOIN mpembayaran ON transaksi_pembayaran.id_pembayaran = mpembayaran.id_pembayaran WHERE id_user = :riduser AND transaksi_pembayaran.periode = :rperiode AND mpembayaran.id_pembayaran = :ridpembayaran AND transaksi_pembayaran.tanggal_dibayar IS NOT NULL AND transaksi_pembayaran.verif_by IS NOT NULL";
         $conn = DB::connection("mysql")->select($query, [
             'riduser' => $this->getIdUser(),
             'rperiode' => $this->getPeriode(),
             'ridpembayaran' => $this->getIdPembayaran()
         ]);
+        // dd($conn);
         if (empty($conn)) {
             return [];
-        }
-        if($conn[0]->total_jumlah_hrsbayar == (int)$conn[0]->total_pembayaran){
-            $conn[0]->lunas = 'T';
-        }else{
-            $conn[0]->lunas = 'F';
         }
         return $conn;
     }

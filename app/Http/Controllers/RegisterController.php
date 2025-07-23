@@ -16,7 +16,7 @@ class RegisterController extends Controller
     {
         return Inertia::render('Daftar');
     }
-    public function otp(Request $request)
+    public function registerSession(Request $request)
     {
         $startYear = date('Y');
         $endYear = $startYear + 1;
@@ -46,19 +46,22 @@ class RegisterController extends Controller
         // Send OTP via WhatsApp
         $whatsapp = new Whatsapp($request['notelp'], $message);
         $response = $whatsapp->send();
-        return Inertia::render('calon_siswa/otp/daftar/Otp',[
-            'otp' => $otp,
-            'responWhatsapp' => $response,
-        ]);
+        return to_route('otp');
+    }
+    public function otp()
+    {
+        if(!session('user')){
+            return to_route('register');
+        }
+        return Inertia::render('calon_siswa/otp/daftar/Otp');
     }
     public function store(Request $request)
     {
         $user = session('user');
-        $otp = (new Otp)->validate($user['email'], $request->otp);
-        if (!$otp) {
-            $request->session()->flash('status', 'error');
-            $request->session()->flash('message', 'Kode OTP tidak valid');
-            return back();
+        $otp = (new Otp)->validate($user['email'], $request->input('otp'));
+        if (!$otp->status) {
+            session()->flash('error', 'Kode OTP tidak valid');
+            return to_route('otp');
         }
         $modul = new Registration;
         $modul->email = $user['email'];

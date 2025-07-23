@@ -2,6 +2,7 @@ import { Menu } from "../UI/molecules/Menu";
 import { IconDashboard } from "../UI/atoms/IconDashboard";
 import { IconForm } from "../UI/atoms/IconForm";
 import Sidebar from "../UI/organisms/Sidebar";
+import { IconLogout } from "../UI/atoms/IconLogout";
 const TemplateSidebar = () => {
     return(
         <Sidebar>
@@ -14,8 +15,8 @@ const TemplateSidebar = () => {
         <Menu text='Kwitansi Pembayaran' link='/riwayat-pembayaran'>
           <IconForm/>
         </Menu>
-        <Menu text='Keluar' link='#'>
-          <IconForm/>
+        <Menu text='Keluar' link='/logout'>
+          <IconLogout/>
         </Menu>
       </Sidebar>
     )

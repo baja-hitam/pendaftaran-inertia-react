@@ -13,7 +13,7 @@ const FormOtp = () => {
     return (
         <form className="flex flex-col gap-4">
             <div className="flex flex-col">
-                <Label htmlFor="otp" className="text-sm font-semibold mb-2">Masukkan Kode OTP yang telah dikirimkan ke email Anda</Label>
+                <Label htmlFor="otp" className="text-sm font-semibold mb-2">Masukkan Kode OTP yang telah dikirimkan ke whatsapp Anda</Label>
                 <InputForm
                     className="w-full"
                     placeholder="Masukkan Kode OTP"

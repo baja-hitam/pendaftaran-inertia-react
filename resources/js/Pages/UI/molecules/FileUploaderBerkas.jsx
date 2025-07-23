@@ -4,7 +4,7 @@ import { router } from '@inertiajs/react';
 const FileUploaderBerkas = ({name,handleChangeFile,selectedFile}) => {
   const fileInputRef = useRef(null);
   const [error, setError] = useState(''); // State baru untuk pesan error
-
+  // console.log('selectedFile', selectedFile);
   const handleFileChange = (event) => {
     // Reset error message setiap kali file baru dipilih
     setError('');

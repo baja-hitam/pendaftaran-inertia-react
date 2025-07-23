@@ -93,7 +93,7 @@ const DataCalonSiswa = ({ datas }) => {
                         ) : (
                                 datas.verif_by != null ? (
                                 <button 
-                                    className="bg-[#226F54] hover:bg-[#265944] active:bg-[#226F54] cursor-pointer text-white mb-2 flex items-center gap-3 font-poppins py-2 px-4 rounded-[7px]"
+                                    className="bg-red-500 hover:bg-red-700 active:bg-red-600 cursor-pointer text-white mb-2 flex items-center gap-3 font-poppins py-2 px-4 rounded-[7px]"
                                     onClick={()=>handleBatalVerifikasiFormulir(datas.no_form)}>
                                         Batal Verifikasi Formulir
                                 </button>

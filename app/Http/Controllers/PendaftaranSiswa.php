@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use Inertia\Inertia;
-use App\Http\Helper\Helper;
+use App\Http\Helper\RSA;
 use Illuminate\Http\Request;
 use App\Http\Modulus\Mperiode;
 use App\Http\Modulus\Pendaftaran;
@@ -15,25 +15,42 @@ class PendaftaranSiswa extends Controller
     public function index()
     {
         $modul = new Pendaftaran;
-        $modul1 = new Helper;
+        $rsa = new RSA;
         $modul->periode = session('periode');
         $data = $modul->index();
         // dd($data);
-        if(!empty($data) && isset($data->no_kk)){
-            $data->no_kk = $modul1->decrypt($data->no_kk);
-            $data->nik_ayah = $modul1->decrypt($data->nik_ayah);
-            $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
-        }
-        if(!empty($data) && isset($data->pas_foto)){
+        if(!empty($data)){
+            // Decrypt fields that are encrypted and not null
+            $encryptedFields = [
+                'nama_lengkap', 'nama_panggilan', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+                'agama', 'kewarganegaraan', 'anak_ke', 'jumlah_saudara_kandung', 'jumlah_saudara_tiri',
+                'jumlah_saudara_angkat', 'status_anak', 'bahasa_sehari_hari', 'alamat', 'no_kk', 'kelurahan',
+                'kecamatan', 'kota', 'kode_pos', 'nomor_telepon', 'tempat_alamat', 'nama_pemilik_tempat_alamat',
+                'jarak_ke_sekolah', 'metode_transportasi', 'golongan_darah', 'riwayat_rawat', 'riwayat_penyakit',
+                'kelainan_jasmani', 'tinggi_badan', 'berat_badan', 'nama_sekolah_asal', 'tanggal_ijazah',
+                'nomor_ijazah', 'tanggal_skhun', 'nomor_skhun', 'lama_belajar', 'nisn', 'tipe_riwayat_sekolah',
+                'nama_riwayat_sekolah', 'tanggal_pindah', 'alasan_pindah', 'kesenian', 'olahraga',
+                'organisasi', 'prestasi_lainnya', 'hobi', 'cita_cita', 'pas_foto', 'kk', 'akte',
+                'nama_ayah', 'tempat_lahir_ayah', 'tanggal_lahir_ayah', 'nik_ayah', 'agama_ayah',
+                'kewarganegaraan_ayah', 'pendidikan_terakhir_ayah', 'ijazah_tertinggi_ayah', 'pekerjaan_ayah',
+                'alamat_pekerjaan_ayah', 'penghasilan_ayah', 'alamat_rumah_ayah', 'telp_ayah', 'status_ayah',
+                'nama_ibu', 'tempat_lahir_ibu', 'tanggal_lahir_ibu', 'nik_ibu', 'agama_ibu',
+                'kewarganegaraan_ibu', 'pendidikan_terakhir_ibu', 'ijazah_tertinggi_ibu', 'pekerjaan_ibu',
+                'alamat_pekerjaan_ibu', 'penghasilan_ibu', 'alamat_rumah_ibu', 'telp_ibu', 'status_ibu',
+                'nama_wali', 'tempat_lahir_wali', 'tanggal_lahir_wali', 'nik_wali', 'agama_wali',
+                'kewarganegaraan_wali', 'hubungan_keluarga_wali', 'ijazah_tertinggi_wali', 'pekerjaan_wali',
+                'penghasilan_wali', 'alamat_wali', 'telp_wali'
+            ];
+            
+            foreach($encryptedFields as $field){
+                if(isset($data->$field) && !is_null($data->$field)){
+                    $data->$field = $rsa->decrypt($data->$field);
+                }
+            }
             $data->pas_foto = Storage::url($data->pas_foto);
-        }
-        if(!empty($data) && isset($data->kk)){
             $data->kk = Storage::url($data->kk);
-        }
-        if(!empty($data) && isset($data->akte)){
             $data->akte = Storage::url($data->akte);
         }
-        // $data->noKK = $modul1->decrypt();
         // dd($data);
         $modul1 = new Tpembayaran;
         $modul1->periode = session('periode');
@@ -41,12 +58,20 @@ class PendaftaranSiswa extends Controller
         $modul1->id_pembayaran = 1; // Asumsi id_pembayaran untuk formulir adalah 1
         // dd($modul1);
         $data1 = $modul1->checkTransaksiFormulir();
-        // dd($data1);
-        if (!empty($data1) && $data1[0]->lunas == 'T') {
-            $statusPembayaran = true;
-        } else {
-            $statusPembayaran = false;
+        // dd($data1);  
+        $total_jumlah_hrsbayar = 0;
+        $statusPembayaran = false;
+        if(!empty($data1)){
+            foreach ($data1 as $key => $row) {
+                $total_jumlah_hrsbayar += (int)$rsa->decrypt($row->jumlah_hrsbayar);
+            }
+            if($total_jumlah_hrsbayar == (int)$data1[0]->total_pembayaran){
+                $statusPembayaran = true;
+            } else {
+                $statusPembayaran = false;
+            }
         }
+        // dd($total_jumlah_hrsbayar);
         return Inertia::render('Pendaftaran',[
             'datas'=>$data,
             'statusPembayaran' => $statusPembayaran,
@@ -55,62 +80,33 @@ class PendaftaranSiswa extends Controller
     
     public function store(Request $request)
     {
-        $rsa = new Helper;
+        $rsa = new RSA;
         // dd($encrypt);
         $modul = new Pendaftaran;
         $modul->periode = session('periode');
-        $modul->namaSiswa = $request->input('namaSiswa');
-        $modul->namaPanggilan = $request->input('namaPanggilan');
-        $modul->jenisKelamin = $request->input('jenisKelamin');
-        $modul->tempatLahir = $request->input('tempatLahir');
-        $modul->tanggalLahir = $request->input('tanggalLahir');
-        $modul->agama = $request->input('agama');
-        $modul->kewarganegaraan = $request->input('kewarganegaraan');
-        $modul->anakKeBerapa = $request->input('anakKeBerapa');
-        $modul->jmlKandung = $request->input('jmlKandung');
-        $modul->jmlTiri = $request->input('jmlTiri');
-        $modul->jmlAngkat = $request->input('jmlAngkat');
-        $modul->statusAnak = $request->input('statusAnak');
-        $modul->bahasa = $request->input('bahasa');
-        $modul->alamat = $request->input('alamat');
-        $modul->noKK = $rsa->encrypt($request->input('noKK'));
-        $modul->kelurahan = $request->input('kelurahan');
-        $modul->kecamatan = $request->input('kecamatan');
-        $modul->kotaKabupaten = $request->input('kotaKabupaten');
-        $modul->kodePos = $request->input('kodePos');
-        $modul->telp = $request->input('telp');
-        $modul->alamatTersebut = $request->input('alamatTersebut');
-        $modul->namaPemilikAlamat = $request->input('namaPemilikAlamat');
-        $modul->modeTransportasi = $request->input('modeTransportasi');
-        $modul->golonganDarah = $request->input('golonganDarah');
-        $modul->penyakit = $request->input('penyakit');
-        $modul->tempatDirawat = $request->input('tempatDirawat');
-        $modul->kelainanJasmani = $request->input('kelainanJasmani');
-        $modul->tinggiBadan = $request->input('tinggiBadan');
-        $modul->beratBadan = $request->input('beratBadan');
-        $modul->sdAsal = $request->input('sdAsal');
-        $modul->tanggalIjazah = $request->input('tanggalIjazah');
-        $modul->nomorIjazah = $request->input('nomorIjazah');
-        $modul->tanggalSkhun = $request->input('tanggalSkhun');
-        $modul->nomorSkhun = $request->input('nomorSkhun');
-        $modul->lamaBelajar = $request->input('lamaBelajar');
-        $modul->nisn = $request->input('nisn');
-        $modul->tipeSekolah = $request->input('tipeSekolah');
-        $modul->namaSekolah = $request->input('namaSekolah');
-        $modul->tanggalPindah = $request->input('tanggalPindah');
-        $modul->alasanPindah = $request->input('alasanPindah');
-        $modul->kesenian = $request->input('kesenian');
-        $modul->olahraga = $request->input('olahraga');
-        $modul->organisasi = $request->input('organisasi');
-        $modul->prestasiLainnya = $request->input('prestasiLainnya');
-        $modul->hobi = $request->input('hobi');
-        $modul->citaCita = $request->input('citaCita');
+        $fields = [
+            'namaSiswa', 'namaPanggilan', 'jenisKelamin', 'tempatLahir', 'tanggalLahir',
+            'agama', 'kewarganegaraan', 'anakKeBerapa', 'jmlKandung', 'jmlTiri',
+            'jmlAngkat', 'statusAnak', 'bahasa', 'alamat', 'noKK', 'kelurahan',
+            'kecamatan', 'kotaKabupaten', 'kodePos', 'telp', 'alamatTersebut',
+            'namaPemilikAlamat', 'modeTransportasi', 'golonganDarah', 'penyakit',
+            'tempatDirawat', 'kelainanJasmani', 'tinggiBadan', 'beratBadan',
+            'sdAsal', 'tanggalIjazah', 'nomorIjazah', 'tanggalSkhun', 'nomorSkhun',
+            'lamaBelajar', 'nisn', 'tipeSekolah', 'namaSekolah', 'tanggalPindah',
+            'alasanPindah', 'kesenian', 'olahraga', 'organisasi', 'prestasiLainnya',
+            'hobi', 'citaCita'
+        ];
+
+        foreach ($fields as $field) {
+            $value = $request->input($field);
+            $modul->$field = empty($value) ? $value : $rsa->encrypt($value);
+        }
         $path_pasFoto = $request->file('pasFoto')->store('berkas', 'public');
         $path_fotoKK = $request->file('fotoKK')->store('berkas', 'public');
         $path_fotoAktaKelahiran = $request->file('fotoAktaKelahiran')->store('berkas', 'public');
-        $modul->pasFoto = $path_pasFoto;
-        $modul->fotoKK = $path_fotoKK;
-        $modul->fotoAktaKelahiran = $path_fotoAktaKelahiran;
+        $modul->pasFoto = $rsa->encrypt($path_pasFoto);
+        $modul->fotoKK = $rsa->encrypt($path_fotoKK);
+        $modul->fotoAktaKelahiran = $rsa->encrypt($path_fotoAktaKelahiran);
         $no_form = $modul->store_formulir();
         if(empty($no_form)){
             session()->flash('error', 'Formulir Pendaftaran Gagal Disimpan');
@@ -127,48 +123,41 @@ class PendaftaranSiswa extends Controller
     }
     public function store_ortu(Request $request){
         $modul = new Pendaftaran;
-        $rsa = new Helper;
+        $rsa = new RSA;
         $modul->periode = session('periode');
-        $modul->namaAyah = $request->input('namaAyah');
-        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
-        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
-        $modul->nikAyah = $rsa->encrypt($request->input('nikAyah'));
-        $modul->agamaAyah = $request->input('agamaAyah');
-        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
-        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
-        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
-        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
-        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
-        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
-        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
-        $modul->telpAyah = $request->input('telpAyah');
-        $modul->statusAyah = $request->input('statusAyah');
-        $modul->namaIbu = $request->input('namaIbu');
-        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
-        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
-        $modul->nikIbu = $rsa->encrypt($request->input('nikIbu'));
-        $modul->agamaIbu = $request->input('agamaIbu');
-        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
-        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
-        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
-        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
-        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
-        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
-        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
-        $modul->telpIbu = $request->input('telpIbu');
-        $modul->statusIbu = $request->input('statusIbu');
-        $modul->namaWali = $request->input('namaWali');
-        $modul->tempatLahirWali = $request->input('tempatLahirWali');
-        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
-        $modul->nikWali = $rsa->encrypt($request->input('nikWali'));
-        $modul->agamaWali = $request->input('agamaWali');
-        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
-        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
-        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
-        $modul->pekerjaanWali = $request->input('pekerjaanWali');
-        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
-        $modul->alamatWali = $request->input('alamatWali');
-        $modul->telpWali = $request->input('telpWali');
+        $parentFields = [
+            'namaAyah', 'tempatLahirAyah', 'tanggalLahirAyah', 'agamaAyah', 'kewarganegaraanAyah',
+            'pendidikanTerakhirAyah', 'ijazahTertinggiAyah', 'pekerjaanAyah', 'alamatPekerjaanAyah',
+            'alamatRumahAyah', 'telpAyah', 'statusAyah', 'namaIbu', 'tempatLahirIbu', 'tanggalLahirIbu',
+            'agamaIbu', 'kewarganegaraanIbu', 'pendidikanTerakhirIbu', 'ijazahTertinggiIbu', 'pekerjaanIbu',
+            'alamatPekerjaanIbu', 'alamatRumahIbu', 'telpIbu', 'statusIbu', 'namaWali', 'tempatLahirWali',
+            'tanggalLahirWali', 'agamaWali', 'kewarganegaraanWali', 'hubunganKeluargaWali', 'ijazahTertinggiWali',
+            'pekerjaanWali', 'alamatWali', 'telpWali'
+        ];
+
+        foreach ($parentFields as $field) {
+            $value = $request->input($field);
+            $modul->$field = empty($value) ? $value : $rsa->encrypt($value);
+        }
+
+        // Handle NIK fields separately with encryption
+        $nikFields = ['nikAyah', 'nikIbu', 'nikWali'];
+        foreach ($nikFields as $field) {
+            $value = $request->input($field);
+            $modul->$field = empty($value) ? $value : $rsa->encrypt($value);
+        }
+
+        // Handle penghasilan fields with dot removal and encryption
+        $penghasilanFields = ['penghasilanAyah', 'penghasilanIbu', 'penghasilanWali'];
+        foreach ($penghasilanFields as $field) {
+            $value = $request->input($field);
+            if (!empty($value)) {
+            $cleanValue = preg_replace('/\./', '', $value);
+            $modul->$field = $rsa->encrypt($cleanValue);
+            } else {
+            $modul->$field = $value;
+            }
+        }
         $no_form = $modul->store_formulir();
         if(empty($no_form)){
             session()->flash('error', 'Formulir Pendaftaran Gagal Disimpan');
@@ -187,14 +176,14 @@ class PendaftaranSiswa extends Controller
     {
         // dd($request->all());
         $modul = new Pendaftaran;
-        $rsa = new Helper;
+        $rsa = new RSA;
         $data_berkas = $modul->getBerkas($request->input('idBerkas'));
         if ($request->hasFile('pasFoto')) {
             if($data_berkas->pas_foto != null){
-                Storage::disk('public')->delete($data_berkas->pas_foto);
+                Storage::disk('public')->delete($rsa->decrypt($data_berkas->pas_foto));
             }
             $path_pasFoto = $request->file('pasFoto')->store('berkas', 'public');
-            $modul->pasFoto = $path_pasFoto;
+            $modul->pasFoto = $rsa->encrypt($path_pasFoto);
         } else {
             if($request->input('pasFoto') == null){
                 $modul->pasFoto = null;
@@ -204,10 +193,10 @@ class PendaftaranSiswa extends Controller
         }
         if ($request->hasFile('fotoKK')) {
             if($data_berkas->kk != null){
-                Storage::disk('public')->delete($data_berkas->kk);
+                Storage::disk('public')->delete($rsa->decrypt($data_berkas->kk));
             }
             $path_fotoKK = $request->file('fotoKK')->store('berkas', 'public');
-            $modul->fotoKK = $path_fotoKK;
+            $modul->fotoKK = $rsa->encrypt($path_fotoKK);
         } else {
             if($request->input('fotoKK') == null){
                 $modul->fotoKK = null;
@@ -217,10 +206,10 @@ class PendaftaranSiswa extends Controller
         }
         if ($request->hasFile('fotoAktaKelahiran')) {
             if($data_berkas->akte != null){
-                Storage::disk('public')->delete($data_berkas->akte);
+                Storage::disk('public')->delete($rsa->decrypt($data_berkas->akte));
             }
             $path_fotoAktaKelahiran = $request->file('fotoAktaKelahiran')->store('berkas', 'public');
-            $modul->fotoAktaKelahiran = $path_fotoAktaKelahiran;
+            $modul->fotoAktaKelahiran = $rsa->encrypt($path_fotoAktaKelahiran);
         } else {
             if($request->input('fotoAktaKelahiran') == null){
 
@@ -229,92 +218,23 @@ class PendaftaranSiswa extends Controller
                 $modul->fotoAktaKelahiran = $data_berkas->akte;
             }
         }
-        $modul->namaSiswa = $request->input('namaSiswa');
-        $modul->namaPanggilan = $request->input('namaPanggilan');
-        $modul->jenisKelamin = $request->input('jenisKelamin');
-        $modul->tempatLahir = $request->input('tempatLahir');
-        $modul->tanggalLahir = $request->input('tanggalLahir');
-        $modul->agama = $request->input('agama');
-        $modul->kewarganegaraan = $request->input('kewarganegaraan');
-        $modul->anakKeBerapa = $request->input('anakKeBerapa');
-        $modul->jmlKandung = $request->input('jmlKandung');
-        $modul->jmlTiri = $request->input('jmlTiri');
-        $modul->jmlAngkat = $request->input('jmlAngkat');
-        $modul->statusAnak = $request->input('statusAnak');
-        $modul->bahasa = $request->input('bahasa');
-        $modul->alamat = $request->input('alamat');
-        $modul->noKK = $rsa->encrypt($request->input('noKK'));
-        $modul->kelurahan = $request->input('kelurahan');
-        $modul->kecamatan = $request->input('kecamatan');
-        $modul->kotaKabupaten = $request->input('kotaKabupaten');
-        $modul->kodePos = $request->input('kodePos');
-        $modul->telp = $request->input('telp');
-        $modul->alamatTersebut = $request->input('alamatTersebut');
-        $modul->namaPemilikAlamat = $request->input('namaPemilikAlamat');
-        $modul->modeTransportasi = $request->input('modeTransportasi');
-        $modul->golonganDarah = $request->input('golonganDarah');
-        $modul->penyakit = $request->input('penyakit');
-        $modul->tempatDirawat = $request->input('tempatDirawat');
-        $modul->kelainanJasmani = $request->input('kelainanJasmani');
-        $modul->tinggiBadan = $request->input('tinggiBadan');
-        $modul->beratBadan = $request->input('beratBadan');
-        $modul->sdAsal = $request->input('sdAsal');
-        $modul->tanggalIjazah = $request->input('tanggalIjazah');
-        $modul->nomorIjazah = $request->input('nomorIjazah');
-        $modul->tanggalSkhun = $request->input('tanggalSkhun');
-        $modul->nomorSkhun = $request->input('nomorSkhun');
-        $modul->lamaBelajar = $request->input('lamaBelajar');
-        $modul->nisn = $request->input('nisn');
-        $modul->tipeSekolah = $request->input('tipeSekolah');
-        $modul->namaSekolah = $request->input('namaSekolah');
-        $modul->tanggalPindah = $request->input('tanggalPindah');
-        $modul->alasanPindah = $request->input('alasanPindah');
-        $modul->kesenian = $request->input('kesenian');
-        $modul->olahraga = $request->input('olahraga');
-        $modul->organisasi = $request->input('organisasi');
-        $modul->prestasiLainnya = $request->input('prestasiLainnya');
-        $modul->hobi = $request->input('hobi');
-        $modul->citaCita = $request->input('citaCita');
-        $modul->namaAyah = $request->input('namaAyah');
-        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
-        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
-        $modul->nikAyah = $request->input('nikAyah');
-        $modul->agamaAyah = $request->input('agamaAyah');
-        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
-        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
-        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
-        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
-        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
-        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
-        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
-        $modul->telpAyah = $request->input('telpAyah');
-        $modul->statusAyah = $request->input('statusAyah');
-        $modul->namaIbu = $request->input('namaIbu');
-        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
-        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
-        $modul->nikIbu = $request->input('nikIbu');
-        $modul->agamaIbu = $request->input('agamaIbu');
-        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
-        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
-        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
-        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
-        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
-        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
-        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
-        $modul->telpIbu = $request->input('telpIbu');
-        $modul->statusIbu = $request->input('statusIbu');
-        $modul->namaWali = $request->input('namaWali');
-        $modul->tempatLahirWali = $request->input('tempatLahirWali');
-        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
-        $modul->nikWali = $request->input('nikWali');
-        $modul->agamaWali = $request->input('agamaWali');
-        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
-        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
-        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
-        $modul->pekerjaanWali = $request->input('pekerjaanWali');
-        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
-        $modul->alamatWali = $request->input('alamatWali');
-        $modul->telpWali = $request->input('telpWali');
+        $fields = [
+            'namaSiswa', 'namaPanggilan', 'jenisKelamin', 'tempatLahir', 'tanggalLahir',
+            'agama', 'kewarganegaraan', 'anakKeBerapa', 'jmlKandung', 'jmlTiri',
+            'jmlAngkat', 'statusAnak', 'bahasa', 'alamat', 'noKK', 'kelurahan',
+            'kecamatan', 'kotaKabupaten', 'kodePos', 'telp', 'alamatTersebut',
+            'namaPemilikAlamat', 'modeTransportasi', 'golonganDarah', 'penyakit',
+            'tempatDirawat', 'kelainanJasmani', 'tinggiBadan', 'beratBadan',
+            'sdAsal', 'tanggalIjazah', 'nomorIjazah', 'tanggalSkhun', 'nomorSkhun',
+            'lamaBelajar', 'nisn', 'tipeSekolah', 'namaSekolah', 'tanggalPindah',
+            'alasanPindah', 'kesenian', 'olahraga', 'organisasi', 'prestasiLainnya',
+            'hobi', 'citaCita'
+        ];
+
+        foreach ($fields as $field) {
+            $value = $request->input($field);
+            $modul->$field = empty($value) ? $value : $rsa->encrypt($value);
+        }
         $data = $modul->update($request->input('idCalonSiswa'), $request->input('idBerkas'));
         // dd($data);
         if ($data) {
@@ -327,47 +247,40 @@ class PendaftaranSiswa extends Controller
     public function update_ortu(Request $request)
     {
         $modul = new Pendaftaran;
-        $rsa = new Helper;
-        $modul->namaAyah = $request->input('namaAyah');
-        $modul->tempatLahirAyah = $request->input('tempatLahirAyah');
-        $modul->tanggalLahirAyah = $request->input('tanggalLahirAyah');
-        $modul->nikAyah = $rsa->encrypt($request->input('nikAyah'));
-        $modul->agamaAyah = $request->input('agamaAyah');
-        $modul->kewarganegaraanAyah = $request->input('kewarganegaraanAyah');
-        $modul->pendidikanTerakhirAyah = $request->input('pendidikanTerakhirAyah');
-        $modul->ijazahTertinggiAyah = $request->input('ijazahTertinggiAyah');
-        $modul->pekerjaanAyah = $request->input('pekerjaanAyah');
-        $modul->alamatPekerjaanAyah = $request->input('alamatPekerjaanAyah');
-        $modul->penghasilanAyah = preg_replace('/\./', '', $request->input('penghasilanAyah'));
-        $modul->alamatRumahAyah = $request->input('alamatRumahAyah');
-        $modul->telpAyah = $request->input('telpAyah');
-        $modul->statusAyah = $request->input('statusAyah');
-        $modul->namaIbu = $request->input('namaIbu');
-        $modul->tempatLahirIbu = $request->input('tempatLahirIbu');
-        $modul->tanggalLahirIbu = $request->input('tanggalLahirIbu');
-        $modul->nikIbu = $rsa->encrypt($request->input('nikIbu'));
-        $modul->agamaIbu = $request->input('agamaIbu');
-        $modul->kewarganegaraanIbu = $request->input('kewarganegaraanIbu');
-        $modul->pendidikanTerakhirIbu = $request->input('pendidikanTerakhirIbu');
-        $modul->ijazahTertinggiIbu = $request->input('ijazahTertinggiIbu');
-        $modul->pekerjaanIbu = $request->input('pekerjaanIbu');
-        $modul->alamatPekerjaanIbu = $request->input('alamatPekerjaanIbu');
-        $modul->penghasilanIbu = preg_replace('/\./', '', $request->input('penghasilanIbu'));
-        $modul->alamatRumahIbu = $request->input('alamatRumahIbu');
-        $modul->telpIbu = $request->input('telpIbu');
-        $modul->statusIbu = $request->input('statusIbu');
-        $modul->namaWali = $request->input('namaWali');
-        $modul->tempatLahirWali = $request->input('tempatLahirWali');
-        $modul->tanggalLahirWali = $request->input('tanggalLahirWali');
-        $modul->nikWali = $rsa->encrypt($request->input('nikWali'));
-        $modul->agamaWali = $request->input('agamaWali');
-        $modul->kewarganegaraanWali = $request->input('kewarganegaraanWali');
-        $modul->hubunganKeluargaWali = $request->input('hubunganKeluargaWali');
-        $modul->ijazahTertinggiWali = $request->input('ijazahTertinggiWali');
-        $modul->pekerjaanWali = $request->input('pekerjaanWali');
-        $modul->penghasilanWali = preg_replace('/\./', '', $request->input('penghasilanWali'));
-        $modul->alamatWali = $request->input('alamatWali');
-        $modul->telpWali = $request->input('telpWali');
+        $rsa = new RSA;
+        $parentFields = [
+            'namaAyah', 'tempatLahirAyah', 'tanggalLahirAyah', 'agamaAyah', 'kewarganegaraanAyah',
+            'pendidikanTerakhirAyah', 'ijazahTertinggiAyah', 'pekerjaanAyah', 'alamatPekerjaanAyah',
+            'alamatRumahAyah', 'telpAyah', 'statusAyah', 'namaIbu', 'tempatLahirIbu', 'tanggalLahirIbu',
+            'agamaIbu', 'kewarganegaraanIbu', 'pendidikanTerakhirIbu', 'ijazahTertinggiIbu', 'pekerjaanIbu',
+            'alamatPekerjaanIbu', 'alamatRumahIbu', 'telpIbu', 'statusIbu', 'namaWali', 'tempatLahirWali',
+            'tanggalLahirWali', 'agamaWali', 'kewarganegaraanWali', 'hubunganKeluargaWali', 'ijazahTertinggiWali',
+            'pekerjaanWali', 'alamatWali', 'telpWali'
+        ];
+
+        foreach ($parentFields as $field) {
+            $value = $request->input($field);
+            $modul->$field = empty($value) ? $value : $rsa->encrypt($value);
+        }
+
+        // Handle NIK fields separately with encryption
+        $nikFields = ['nikAyah', 'nikIbu', 'nikWali'];
+        foreach ($nikFields as $field) {
+            $value = $request->input($field);
+            $modul->$field = empty($value) ? $value : $rsa->encrypt($value);
+        }
+
+        // Handle penghasilan fields with dot removal and encryption
+        $penghasilanFields = ['penghasilanAyah', 'penghasilanIbu', 'penghasilanWali'];
+        foreach ($penghasilanFields as $field) {
+            $value = $request->input($field);
+            if (!empty($value)) {
+            $cleanValue = preg_replace('/\./', '', $value);
+            $modul->$field = $rsa->encrypt($cleanValue);
+            } else {
+            $modul->$field = $value;
+            }
+        }
         $data = $modul->updateOrangTuaWali($request->input('idOrangTuaWali'));
         // dd($data);
         if ($data) {
@@ -381,9 +294,10 @@ class PendaftaranSiswa extends Controller
     {
         // dd($request->all());
         $modul = new KartuPeserta;
-        $modul->no_form = $request->no_form;
+        $modul->no_form = $request->input('no_form');
         $no_peserta = $modul->getRandomNoPeserta(session('periode'));
         // dd($no_peserta);
+        
         $result = $modul->checkCalonSiswa();
         // dd($result);
         if(empty($result)){
@@ -403,10 +317,22 @@ class PendaftaranSiswa extends Controller
     {
         $modul = new Pendaftaran;
         $modul1 = new Mperiode;
+        $rsa = new RSA;
         // $modul->periode = session('periode');
         $modul->periode = $request->input('periode') ?? session('periode');
         $data = $modul->getDaftarFormulir();
         $dataPeriode = $modul1->getAllPeriode();
+        // dd($data);
+        $fields = [
+            'nama_lengkap', 'tanggal_lahir', 'jenis_kelamin', 'alamat', 'kelurahan', 'kecamatan', 'kota'
+        ];
+        foreach ($data as $item) {
+            foreach ($fields as $field) {
+                if (isset($item->$field) && !is_null($item->$field)) {
+                    $item->$field = $rsa->decrypt($item->$field);
+                }
+            }
+        }
         // dd($data);
         return Inertia::render('admin/calon_siswa/CalonSiswa',[
             'datas'=>$data,
@@ -420,22 +346,40 @@ class PendaftaranSiswa extends Controller
         // dd($request->no_form);
         $modul = new Pendaftaran;
         $modul->noForm = base64_decode($request->input('no_form'));
+        $rsa = new RSA;
         $data = $modul->detailFormulir();
-        if(!empty($data) && isset($data->pas_foto)){
-            $data->pas_foto = Storage::url($data->pas_foto);
-        }
-        if(!empty($data) && isset($data->kk)){
-            $data->kk = Storage::url($data->kk);
-        }
-        if(!empty($data) && isset($data->akte)){
-            $data->akte = Storage::url($data->akte);
-        }
         // dd($data);
-        $modul1 = new Helper;
-        if(!empty($data) && isset($data->no_kk)){
-            $data->no_kk = $modul1->decrypt($data->no_kk);
-            $data->nik_ayah = $modul1->decrypt($data->nik_ayah);
-            $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
+        if(!empty($data)){
+            // Decrypt fields that are encrypted and not null
+            $encryptedFields = [
+                'nama_lengkap', 'nama_panggilan', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+                'agama', 'kewarganegaraan', 'anak_ke', 'jumlah_saudara_kandung', 'jumlah_saudara_tiri',
+                'jumlah_saudara_angkat', 'status_anak', 'bahasa_sehari_hari', 'alamat', 'no_kk', 'kelurahan',
+                'kecamatan', 'kota', 'kode_pos', 'nomor_telepon', 'tempat_alamat', 'nama_pemilik_tempat_alamat',
+                'jarak_ke_sekolah', 'metode_transportasi', 'golongan_darah', 'riwayat_rawat', 'riwayat_penyakit',
+                'kelainan_jasmani', 'tinggi_badan', 'berat_badan', 'nama_sekolah_asal', 'tanggal_ijazah',
+                'nomor_ijazah', 'tanggal_skhun', 'nomor_skhun', 'lama_belajar', 'nisn', 'tipe_riwayat_sekolah',
+                'nama_riwayat_sekolah', 'tanggal_pindah', 'alasan_pindah', 'kesenian', 'olahraga',
+                'organisasi', 'prestasi_lainnya', 'hobi', 'cita_cita', 'pas_foto', 'kk', 'akte',
+                'nama_ayah', 'tempat_lahir_ayah', 'tanggal_lahir_ayah', 'nik_ayah', 'agama_ayah',
+                'kewarganegaraan_ayah', 'pendidikan_terakhir_ayah', 'ijazah_tertinggi_ayah', 'pekerjaan_ayah',
+                'alamat_pekerjaan_ayah', 'penghasilan_ayah', 'alamat_rumah_ayah', 'telp_ayah', 'status_ayah',
+                'nama_ibu', 'tempat_lahir_ibu', 'tanggal_lahir_ibu', 'nik_ibu', 'agama_ibu',
+                'kewarganegaraan_ibu', 'pendidikan_terakhir_ibu', 'ijazah_tertinggi_ibu', 'pekerjaan_ibu',
+                'alamat_pekerjaan_ibu', 'penghasilan_ibu', 'alamat_rumah_ibu', 'telp_ibu', 'status_ibu',
+                'nama_wali', 'tempat_lahir_wali', 'tanggal_lahir_wali', 'nik_wali', 'agama_wali',
+                'kewarganegaraan_wali', 'hubungan_keluarga_wali', 'ijazah_tertinggi_wali', 'pekerjaan_wali',
+                'penghasilan_wali', 'alamat_wali', 'telp_wali'
+            ];
+            
+            foreach($encryptedFields as $field){
+                if(isset($data->$field) && !is_null($data->$field)){
+                    $data->$field = $rsa->decrypt($data->$field);
+                }
+            }
+            $data->pas_foto = Storage::url($data->pas_foto);
+            $data->kk = Storage::url($data->kk);
+            $data->akte = Storage::url($data->akte);
         }
         // dd($data);
         return Inertia::render('admin/calon_siswa/DataCalonSiswa',[
@@ -479,11 +423,35 @@ class PendaftaranSiswa extends Controller
         $modul = new Pendaftaran;
         $modul->noForm = base64_decode($request->input('no_form'));
         $data = $modul->detailFormulir();
-        $modul1 = new Helper;
-        if(!empty($data) && isset($data->no_kk)){
-            $data->no_kk = $modul1->decrypt($data->no_kk);
-            $data->nik_ayah = $modul1->decrypt($data->nik_ayah);
-            $data->nik_ibu = $modul1->decrypt($data->nik_ibu);
+        $rsa = new RSA;
+        if(!empty($data)){
+            // Decrypt fields that are encrypted and not null
+            $encryptedFields = [
+                'nama_lengkap', 'nama_panggilan', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+                'agama', 'kewarganegaraan', 'anak_ke', 'jumlah_saudara_kandung', 'jumlah_saudara_tiri',
+                'jumlah_saudara_angkat', 'status_anak', 'bahasa_sehari_hari', 'alamat', 'no_kk', 'kelurahan',
+                'kecamatan', 'kota', 'kode_pos', 'nomor_telepon', 'tempat_alamat', 'nama_pemilik_tempat_alamat',
+                'jarak_ke_sekolah', 'metode_transportasi', 'golongan_darah', 'riwayat_rawat', 'riwayat_penyakit',
+                'kelainan_jasmani', 'tinggi_badan', 'berat_badan', 'nama_sekolah_asal', 'tanggal_ijazah',
+                'nomor_ijazah', 'tanggal_skhun', 'nomor_skhun', 'lama_belajar', 'nisn', 'tipe_riwayat_sekolah',
+                'nama_riwayat_sekolah', 'tanggal_pindah', 'alasan_pindah', 'kesenian', 'olahraga',
+                'organisasi', 'prestasi_lainnya', 'hobi', 'cita_cita', 'pas_foto', 'kk', 'akte',
+                'nama_ayah', 'tempat_lahir_ayah', 'tanggal_lahir_ayah', 'nik_ayah', 'agama_ayah',
+                'kewarganegaraan_ayah', 'pendidikan_terakhir_ayah', 'ijazah_tertinggi_ayah', 'pekerjaan_ayah',
+                'alamat_pekerjaan_ayah', 'penghasilan_ayah', 'alamat_rumah_ayah', 'telp_ayah', 'status_ayah',
+                'nama_ibu', 'tempat_lahir_ibu', 'tanggal_lahir_ibu', 'nik_ibu', 'agama_ibu',
+                'kewarganegaraan_ibu', 'pendidikan_terakhir_ibu', 'ijazah_tertinggi_ibu', 'pekerjaan_ibu',
+                'alamat_pekerjaan_ibu', 'penghasilan_ibu', 'alamat_rumah_ibu', 'telp_ibu', 'status_ibu',
+                'nama_wali', 'tempat_lahir_wali', 'tanggal_lahir_wali', 'nik_wali', 'agama_wali',
+                'kewarganegaraan_wali', 'hubungan_keluarga_wali', 'ijazah_tertinggi_wali', 'pekerjaan_wali',
+                'penghasilan_wali', 'alamat_wali', 'telp_wali'
+            ];
+            
+            foreach($encryptedFields as $field){
+                if(isset($data->$field) && !is_null($data->$field)){
+                    $data->$field = $rsa->decrypt($data->$field);
+                }
+            }
         }
         // dd($data);
         return Inertia::render('admin/pdf/StreamPdfPage',[

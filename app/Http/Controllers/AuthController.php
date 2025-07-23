@@ -37,8 +37,8 @@ class AuthController extends Controller
         $periode = $startYear . $endYear;
         $modul = new Authentication;
         $modul1 = new Mperiode;
-        $modul->email = $request->email;
-        $modul->password = $request->password;
+        $modul->email = $request->input('email');
+        $modul->password = $request->input('password');
         $data = $modul->login();
         if(empty($data)){
             $request->session()->flash('status', 'error');
@@ -65,8 +65,8 @@ class AuthController extends Controller
         $endYear = $startYear + 1;
         $periode = $startYear . $endYear;
         $modul = new Authentication;
-        $modul->email = $request->email;
-        $modul->password = $request->password;
+        $modul->email = $request->input('email');
+        $modul->password = $request->input('password');
         $data = $modul->login_admin();
         if(empty($data)){
             $request->session()->flash('status', 'error');
@@ -79,5 +79,9 @@ class AuthController extends Controller
         session(['level' => $data[0]->level]);
         session(['nama_lengkap' => $data[0]->nama_lengkap]);
         return to_route('admin.dashboard');
+    }
+    public function logout(Request $request){
+        $request->session()->flush();
+        return to_route('login');
     }
 }

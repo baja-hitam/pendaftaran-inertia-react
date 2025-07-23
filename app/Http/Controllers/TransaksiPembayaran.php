@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helper\RSA;
+use Illuminate\Http\Request;
 use App\Http\Helper\Whatsapp;
 use App\Http\Modulus\Mperiode;
 use App\Http\Modulus\Pendaftaran;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 use App\Http\Modulus\Tpembayaran;
+use Illuminate\Support\Facades\Storage;
 
 class TransaksiPembayaran extends Controller
 {
@@ -17,17 +18,34 @@ class TransaksiPembayaran extends Controller
         $modul = new Tpembayaran;
         $modul1 = new Mperiode;
         $modul2 = new Pendaftaran;
+        $rsa = new RSA;
         $data = $modul->getAllUser();
+        // dd($data);
         $data1 = $modul->getAllPembayaran();
         $data2 = $modul->getAllTransaksi();
-        foreach ($data2 as $key => $row) {
-            if($row->path_bukti != null){
-                $data2[$key]->path_bukti = Storage::url($row->path_bukti);
-            }
-        }
         $data3 = $modul1->getAllPeriode();
         $data4 = $modul2->getAllFormulir();
         // dd($data2);
+        $fieldsFormulir = [
+            'nama_lengkap','nama_ayah','nama_ibu','nama_wali'
+        ];
+        if(!empty($data2)) {
+            foreach ($data2 as $key => $row) {
+                $row->jumlah_hrsbayar = !empty($row->jumlah_hrsbayar) ? $rsa->decrypt($row->jumlah_hrsbayar) : null;
+                $row->path_bukti = !empty($row->path_bukti) ? Storage::url($rsa->decrypt($row->path_bukti)) : null;
+                $row->nama_siswa = !empty($row->nama_siswa) ? $rsa->decrypt($row->nama_siswa) : null;
+            }
+        }
+        if(!empty($data4)) {
+            foreach ($data4 as $key => $row) {
+                foreach ($fieldsFormulir as $field) {
+                    if (isset($row->$field) && !is_null($row->$field)) {
+                        $row->$field = $rsa->decrypt($row->$field);
+                    }
+                }
+            }
+        }
+        // dd($data4);
         return inertia('admin/transaksi_pembayaran/TransaksiPembayaran',[
             'datasUserOption' => $data,
             'datasFormulirOption' => $data4,
@@ -42,22 +60,37 @@ class TransaksiPembayaran extends Controller
         // dd($request->all());
         $modul1 = new Mperiode;
         $modul2 = new Pendaftaran;
-        $modul->periode = $request->periode ?? ''; 
-        $modul->search = $request->user ?? '';
-        $modul->id_pembayaran = $request->jenPembayaran ?? '';
+        $rsa = new RSA;
+        $modul->periode = $request->input('periode') ?? ''; 
+        $modul->search = $request->input('user') ?? '';
+        $modul->id_pembayaran = $request->input('jenPembayaran') ?? '';
         $data3 = $modul1->getAllPeriode();
         $data4 = $modul2->getAllFormulir();
         $data = $modul->search();
-        foreach ($data as $key => $row) {
-            if($row->path_bukti != null){
-                $data[$key]->path_bukti = Storage::url($row->path_bukti);
+        $fieldsFormulir = [
+            'nama_lengkap','nama_ayah','nama_ibu','nama_wali'
+        ];
+        if(!empty($data4)) {
+            foreach ($data4 as $key => $row) {
+                foreach ($fieldsFormulir as $field) {
+                    if (isset($row->$field) && !is_null($row->$field)) {
+                        $row->$field = $rsa->decrypt($row->$field);
+                    }
+                }
+            }
+        }
+        if(!empty($data)) {
+            foreach ($data as $key => $row) {
+                $row->jumlah_hrsbayar = !empty($row->jumlah_hrsbayar) ? $rsa->decrypt($row->jumlah_hrsbayar) : null;
+                $row->path_bukti = !empty($row->path_bukti) ? Storage::url($rsa->decrypt($row->path_bukti)) : null;
+                $row->nama_siswa = !empty($row->nama_siswa) ? $rsa->decrypt($row->nama_siswa) : null;
             }
         }
         return inertia('admin/transaksi_pembayaran/TransaksiPembayaran',[
             'datas' => $data,
-            'search' => $request->user,
-            'jenPembayaran' => $request->jenPembayaran,
-            'tahun' => $request->periode,
+            'search' => $request->input('user'),
+            'jenPembayaran' => $request->input('jenPembayaran'),
+            'tahun' => $request->input('periode'),
             'datasPeriodeOption' => $data3,
             'datasUserOption' => $modul->getAllUser(),
             'datasFormulirOption' => $data4,
@@ -70,6 +103,7 @@ class TransaksiPembayaran extends Controller
         $startYear = date( 'Y');
         $endYear = $startYear + 1;
         $modul = new Tpembayaran;
+        $rsa = new RSA;
         $modul->id_pembayaran = $request->selectedPembayaran['value'];
         $modul->periode = $startYear.$endYear;
         $total_pembayaran = $modul->getTotalPembayaran();
@@ -83,7 +117,7 @@ class TransaksiPembayaran extends Controller
         }
         $cicilan = $request->cicilan ?? 1;
         $jumlah_hrsbayar = (int)$total_pembayaran / (int)$cicilan;
-        $modul->jumlah_hrsbayar = (int)$jumlah_hrsbayar;
+        $modul->jumlah_hrsbayar = $rsa->encrypt((int)$jumlah_hrsbayar);
         for ($i = 1; $i <= $cicilan; $i++) {
             $data = $modul->store();
         }
@@ -95,8 +129,62 @@ class TransaksiPembayaran extends Controller
         return to_route('admin.transaksi-pembayaran');
     }
     //calon siswa buat angsuran
+    public function konfirmasi_pembayaran(Request $request)
+    {
+        $modul = new Tpembayaran;
+        $modul->id_transaksi_pembayaran = $request->input('id');
+        $modul->verif_by = session('id_user');
+        $data = $modul->konfirmasiPembayaran();
+        // dd($modul);
+        if ($data) {
+            session()->flash('success', 'Transaksi pembayaran berhasil dikonfirmasi');
+        } else {
+            session()->flash('error', 'Transaksi pembayaran gagal dikonfirmasi');
+        }
+        return to_route('admin.transaksi-pembayaran');
+    }
+    public function konfirmasi_batal_pembayaran(Request $request)
+    {
+        $modul = new Tpembayaran;
+        $modul->id_transaksi_pembayaran = $request->input('id');
+        $data = $modul->konfirmasiBatalPembayaran();
+        if ($data) {
+            session()->flash('success', 'Transaksi pembayaran berhasil dibatalkan');
+        } else {
+            session()->flash('error', 'Transaksi pembayaran gagal dibatalkan');
+        }
+        return to_route('admin.transaksi-pembayaran');
+    }
+    // public function update(Request $request){
+    //     $startYear = date('Y');
+    //     $endYear = $startYear + 1;
+    //     $modul = new Tpembayaran;
+    //     $modul->id_user = $request->selectedUser['value'];
+    //     $modul->id_pembayaran = $request->selectedPembayaran['value'];
+    //     $modul->cperiode = $startYear.$endYear;
+    //     $modul->njumlah = preg_replace('/\./', '', $request->dibayarkan);
+    //     $data = $modul->update($request->id);
+    //     if ($data) {
+    //         session()->flash('success', 'Transaksi pembayaran berhasil diupdate');
+    //     } else {
+    //         session()->flash('error', 'Transaksi pembayaran gagal diupdate');
+    //     }
+    //     return to_route('admin.transaksi-pembayaran');
+    // }
+    public function destroy(Request $request){
+        $modul = new Tpembayaran;
+        $data = $modul->destroy($request->input('id'));
+        if ($data) {
+            session()->flash('success', 'Transaksi pembayaran berhasil dihapus');
+        } else {
+            session()->flash('error', 'Transaksi pembayaran gagal dihapus');
+        }
+        return to_route('admin.transaksi-pembayaran');
+    }
+    // Calon Siswa
     public function storeAngsuran(Request $request)
     {
+        $rsa = new RSA;
         if($request->input('periode') != session('periode')){
             session()->flash('error', 'Periode '.$request->input('periode').' sudah tidak berlaku '); 
             return to_route('riwayat.pembayaran',[
@@ -141,7 +229,7 @@ class TransaksiPembayaran extends Controller
         }
         $cicilan = $request->cicilan ?? 1;
         $jumlah_hrsbayar = (int)$total_pembayaran / (int)$cicilan;
-        $modul->jumlah_hrsbayar = (int)$jumlah_hrsbayar;
+        $modul->jumlah_hrsbayar = $rsa->encrypt((int)$jumlah_hrsbayar);
         for ($i = 1; $i <= $cicilan; $i++) {
             $data = $modul->store();
         }
@@ -152,50 +240,9 @@ class TransaksiPembayaran extends Controller
         }
         return to_route('riwayat.pembayaran');
     }
-    public function konfirmasi_pembayaran(Request $request)
-    {
-        $modul = new Tpembayaran;
-        $modul->id_transaksi_pembayaran = $request->id;
-        $modul->verif_by = session('id_user');
-        $data = $modul->konfirmasiPembayaran();
-        // dd($modul);
-        if ($data) {
-            session()->flash('success', 'Transaksi pembayaran berhasil dikonfirmasi');
-        } else {
-            session()->flash('error', 'Transaksi pembayaran gagal dikonfirmasi');
-        }
-        return  to_route('admin.transaksi-pembayaran');
-    }
-    public function konfirmasi_batal_pembayaran(Request $request)
-    {
-        $modul = new Tpembayaran;
-        $modul->id_transaksi_pembayaran = $request->id;
-        $data = $modul->konfirmasiBatalPembayaran();
-        if ($data) {
-            session()->flash('success', 'Transaksi pembayaran berhasil dibatalkan');
-        } else {
-            session()->flash('error', 'Transaksi pembayaran gagal dibatalkan');
-        }
-        return to_route('admin.transaksi-pembayaran');
-    }
-    // public function update(Request $request){
-    //     $startYear = date('Y');
-    //     $endYear = $startYear + 1;
-    //     $modul = new Tpembayaran;
-    //     $modul->id_user = $request->selectedUser['value'];
-    //     $modul->id_pembayaran = $request->selectedPembayaran['value'];
-    //     $modul->cperiode = $startYear.$endYear;
-    //     $modul->njumlah = preg_replace('/\./', '', $request->dibayarkan);
-    //     $data = $modul->update($request->id);
-    //     if ($data) {
-    //         session()->flash('success', 'Transaksi pembayaran berhasil diupdate');
-    //     } else {
-    //         session()->flash('error', 'Transaksi pembayaran gagal diupdate');
-    //     }
-    //     return to_route('admin.transaksi-pembayaran');
-    // }
     public function create_kwitansi(Request $request)
     {
+        $rsa = new RSA;
         if($request->input('periode') != session('periode')){
             session()->flash('error', 'Periode '.$request->input('periode').' sudah tidak berlaku '); 
             return to_route('riwayat.pembayaran',[
@@ -211,7 +258,7 @@ class TransaksiPembayaran extends Controller
         if($request->input('id_pembayaran') == '1'){
             $modul->id_user = session('id_user');
             $modul->periode = session('periode');
-            $modul->jumlah_hrsbayar = $total_pembayaran;
+            $modul->jumlah_hrsbayar = $rsa->encrypt($total_pembayaran);
             $modul->no_form = null;
         }else{
             if($no_form == null){
@@ -220,7 +267,7 @@ class TransaksiPembayaran extends Controller
             }
             $modul->no_form = $no_form;
             $modul->periode = session('periode');
-            $modul->jumlah_hrsbayar = $total_pembayaran;
+            $modul->jumlah_hrsbayar = $rsa->encrypt($total_pembayaran);
         }
         $data = $modul->store();
 
@@ -231,17 +278,6 @@ class TransaksiPembayaran extends Controller
         }
         return to_route('riwayat.pembayaran');
     }
-    public function destroy(Request $request){
-        $modul = new Tpembayaran;
-        $data = $modul->destroy($request->input('id'));
-        if ($data) {
-            session()->flash('success', 'Transaksi pembayaran berhasil dihapus');
-        } else {
-            session()->flash('error', 'Transaksi pembayaran gagal dihapus');
-        }
-        return to_route('admin.transaksi-pembayaran');
-    }
-    // Calon Siswa
     public function riwayat_pembayaran(Request $request)
     {
         // dd($request->all());
@@ -297,10 +333,11 @@ class TransaksiPembayaran extends Controller
         // dd($request->all());
         $modul = new Tpembayaran;
         $modul1 = new Pendaftaran;
+        $rsa = new RSA;
         $modul->id_user = session('id_user');
-        $modul->id_pembayaran = $request->id;
-        $modul->periode = $request->periode;
-        $modul1->periode = $request->periode;
+        $modul->id_pembayaran = $request->input('id');
+        $modul->periode = $request->input('periode');
+        $modul1->periode = $request->input('periode');
         $no_form = $modul1->getNoFormulir();
         // dd($no_form);
         $modul->no_form = $no_form;
@@ -308,7 +345,10 @@ class TransaksiPembayaran extends Controller
         // dd($data);
         foreach ($data as $key => $row) {
             if($row->path_bukti != null){
-                $data[$key]->path_bukti = Storage::url($row->path_bukti);
+                $data[$key]->path_bukti = Storage::url($rsa->decrypt($row->path_bukti));
+            }
+            if($row->jumlah_hrsbayar != null){
+                $data[$key]->jumlah_hrsbayar = $rsa->decrypt($row->jumlah_hrsbayar);
             }
         }
         // dd($data);
@@ -327,11 +367,12 @@ class TransaksiPembayaran extends Controller
     {
         // dd($request->all());
         // dd($request->file('file'));
+        $rsa = new RSA;
         $path = $request->file('file')->store('bukti_pembayaran', 'public');
         // dd($path,basename($path));
         $modul = new Tpembayaran;
         $modul->id_transaksi_pembayaran = $request['idTransaksiPembayaran'];
-        $modul->path_bukti = $path;
+        $modul->path_bukti = $rsa->encrypt($path);
         $modul->nama_bukti = $request->file('file')->getClientOriginalName();
         // dd($modul);
         $data = $modul->uploadBukti();

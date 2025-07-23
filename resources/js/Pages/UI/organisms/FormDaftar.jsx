@@ -26,7 +26,7 @@ const handleChangeFormDaftar = (e) => {
   }
 const submitDaftar = (e) => {
     e.preventDefault();
-    post("/otp");
+    post("/register-session");
   };
   return (
     <>

@@ -70,3 +70,4 @@ Route::middleware(AdminMiddleware::class)->group(function () {
     Route::post('/admin/kelas/update', [KelasController::class, 'update'])->name('admin.kelas.update');
     Route::post('/admin/kelas/delete', [KelasController::class, 'destroy'])->name('admin.kelas.delete');
 });
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helper\RSA;
 use App\Http\Modulus\Mkelas;
 use App\Http\Modulus\Mperiode;
 use App\Http\Modulus\Pendaftaran;
@@ -14,11 +15,23 @@ class KelasController extends Controller
     {
         // dd(session('periode'));
         $modul = new Mkelas;
+        $rsa = new RSA;
         $data = $modul->getAllKelas();
         $modul1 = new Pendaftaran;
         $modul2 = new Mperiode;
         $modul1->periode = $request->input('periode') ?? session('periode');
         $dataSiswa = $modul1->getDaftarFormulir();
+        $fields = [
+            'nama_lengkap', 'tanggal_lahir', 'jenis_kelamin', 'alamat', 'kelurahan', 'kecamatan', 'kota'
+        ];
+        // Decrypt sensitive data
+        foreach ($dataSiswa as $item) {
+            foreach ($fields as $field) {
+                if (isset($item->$field) && !is_null($item->$field)) {
+                    $item->$field = $rsa->decrypt($item->$field);
+                }
+            }
+        }
         // dd($dataSiswa);
         $dataPeriode = $modul2->getAllPeriode();
         return Inertia::render('admin/kelas/Kelas', [

@@ -17,7 +17,7 @@ return new class extends Migration
             // Ayah
             $table->string('nama_ayah')->nullable();
             $table->string('tempat_lahir_ayah')->nullable();
-            $table->date('tanggal_lahir_ayah')->nullable();
+            $table->string('tanggal_lahir_ayah')->nullable();
             $table->string('nik_ayah', 255)->nullable();
             $table->string('agama_ayah')->nullable();
             $table->string('kewarganegaraan_ayah')->nullable();
@@ -32,7 +32,7 @@ return new class extends Migration
             // Ibu
             $table->string('nama_ibu')->nullable();
             $table->string('tempat_lahir_ibu')->nullable();
-            $table->date('tanggal_lahir_ibu')->nullable();
+            $table->string('tanggal_lahir_ibu')->nullable();
             $table->string('nik_ibu', 255)->nullable();
             $table->string('agama_ibu')->nullable();
             $table->string('kewarganegaraan_ibu')->nullable();
@@ -47,7 +47,7 @@ return new class extends Migration
             // Wali
             $table->string('nama_wali')->nullable();
             $table->string('tempat_lahir_wali')->nullable();
-            $table->date('tanggal_lahir_wali')->nullable();
+            $table->string('tanggal_lahir_wali')->nullable();
             $table->string('nik_wali', 255)->nullable();
             $table->string('agama_wali')->nullable();
             $table->string('kewarganegaraan_wali')->nullable();

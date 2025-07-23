@@ -2,6 +2,7 @@ import Sidebar from "../UI/organisms/Sidebar";
 import { Menu } from "../UI/molecules/Menu";
 import { IconDashboard } from "../UI/atoms/IconDashboard";
 import { IconForm } from "../UI/atoms/IconForm";
+import { IconLogout } from "../UI/atoms/IconLogout";
 
 const SidebarAdmin = () => {
     return (
@@ -24,8 +25,8 @@ const SidebarAdmin = () => {
         <Menu text="Kelas" link="/admin/kelas">
             <IconForm />
         </Menu>
-        <Menu text="Keluar" link="#">
-            <IconForm />
+        <Menu text="Keluar" link="/logout">
+            <IconLogout />
         </Menu>
         </Sidebar>
     )

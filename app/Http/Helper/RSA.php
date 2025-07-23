@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Helper;
 
-class Helper{
+class RSA{
     // Kunci publik dan privat
     public $p = 61;
     public $q = 53;

@@ -18,10 +18,10 @@ return new class extends Migration
             $table->unsignedBigInteger('verif_by')->nullable();
             $table->unsignedBigInteger('id_pembayaran');
             $table->string('periode',8);
-            $table->date('tanggal_dibayar')->nullable();
-            $table->date('verif_date')->nullable();
+            $table->string('tanggal_dibayar')->nullable();
+            $table->string('verif_date')->nullable();
             $table->string('jumlah_hrsbayar');
-            $table->string('path_bukti')->nullable();
+            $table->text('path_bukti')->nullable();
             $table->string('nama_bukti')->nullable();
             $table->timestamps();
 

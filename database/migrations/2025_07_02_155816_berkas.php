@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('berkas', function (Blueprint $table) {
             $table->id('id_berkas');
             $table->unsignedBigInteger('no_form');
-            $table->string('pas_foto', 255)->nullable();
-            $table->string('kk', 255)->nullable();
-            $table->string('akte', 255)->nullable();
+            $table->text('pas_foto')->nullable();
+            $table->text('kk')->nullable();
+            $table->text('akte')->nullable();
             $table->timestamps();
         });
     }

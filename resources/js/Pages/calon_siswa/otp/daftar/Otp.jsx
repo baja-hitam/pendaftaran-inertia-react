@@ -1,7 +1,24 @@
 import FormOtp from "./FormOtp";
-import {Head,Link} from "@inertiajs/react";
+import { useEffect } from "react";
+import {Head,Link,usePage} from "@inertiajs/react";
 import {TemplateAuth} from "../../../template/TemplateAuth";
+import { toast,ToastContainer } from "react-toastify";
 const Otp = ({otp}) => {
+    const { flash } = usePage().props;
+    useEffect(() => {
+        if(flash.success != null){
+            toast.success(flash.success, {
+                autoClose: 500,
+                position: 'top-center'
+            });
+        }else if(flash.error != null){
+            toast.error(flash.error, {
+                autoClose: 500,
+                position: 'top-center'
+            });
+        }
+    },[flash])
+
     return (
         <div className="flex justify-center items-center bg-[#226F54] min-h-screen">
         <Head>
@@ -16,6 +33,7 @@ const Otp = ({otp}) => {
             </Link>
             </p>
         </TemplateAuth>
+        <ToastContainer />
         </div>
     );
 }
