@@ -14,6 +14,9 @@ const TemplateSidebar = () => {
         <Menu text='Kwitansi Pembayaran' link='/riwayat-pembayaran'>
           <IconForm/>
         </Menu>
+        <Menu text='Keluar' link='#'>
+          <IconForm/>
+        </Menu>
       </Sidebar>
     )
 }

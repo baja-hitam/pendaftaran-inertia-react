@@ -55,7 +55,9 @@ class AuthController extends Controller
             session(['periode'=> $periode]);
             session(['user' => $data[0]->email]);
             session(['id_user'=>$data[0]->id_user]);
+            session(['nama_lengkap' => $data[0]->nama_lengkap]);
             session(['level' => $data[0]->level]);
+            session(['no_telp' => $data[0]->no_telp]);
             return to_route('dashboard');
     }
     public function loginAdmin(Request $request){

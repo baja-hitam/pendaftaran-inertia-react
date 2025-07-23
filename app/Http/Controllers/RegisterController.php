@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helper\Whatsapp;
 use Inertia\Inertia;
 use Ichtrojan\Otp\Otp;
 use Illuminate\Http\Request;
@@ -40,9 +41,14 @@ class RegisterController extends Controller
         }
         session()->put('user', $request->all());
         // dd(session('user'));
-        $otp = (new Otp)->generate($request->email, 'numeric', 4,10);
+        $otp = (new Otp)->generate($request['email'], 'numeric', 4,10);
+        $message = "Kode OTP anda adalah: ".$otp->token;
+        // Send OTP via WhatsApp
+        $whatsapp = new Whatsapp($request['notelp'], $message);
+        $response = $whatsapp->send();
         return Inertia::render('calon_siswa/otp/daftar/Otp',[
             'otp' => $otp,
+            'responWhatsapp' => $response,
         ]);
     }
     public function store(Request $request)

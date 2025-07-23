@@ -47,6 +47,11 @@ const CalonSiswa = ({datas,dataPeriode,periodeSession}) => {
         }
 
     const customStyles = {
+        table: {
+            style: {
+                minWidth: "450px",
+            },
+        },
         rows: {
             style: {
                 fontSize: "14px",
@@ -96,8 +101,10 @@ const CalonSiswa = ({datas,dataPeriode,periodeSession}) => {
         },
         {
             name: "Aksi",
+            wrap: true,
             cell: (row) => (<div className="flex flex-row gap-x-2"> 
                 <button className="bg-blue-500 w-16 h-7 text-white rounded-md hover:bg-blue-700" onClick={()=>handleDetailCalonSiswa(row.no_formulir)}>Detail</button>
+                <button className="bg-blue-500 w-[120px] h-7 text-white rounded-md hover:bg-blue-700" onClick=''>Cetak Kwitansi</button>
                 </div>)
         }
     ];

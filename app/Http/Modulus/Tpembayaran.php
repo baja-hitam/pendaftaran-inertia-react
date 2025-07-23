@@ -217,6 +217,7 @@ class Tpembayaran
     {
         // dd($this->getPeriode());
         if($this->getIdPembayaran() == 1){
+            // dd('test');
             $where = "transaksi_pembayaran.id_user = :riduser";
             $params = [
                 'rperiode' => $this->getPeriode(),
@@ -254,8 +255,7 @@ class Tpembayaran
             on mpembayaran.id_pembayaran = transaksi_pembayaran.id_pembayaran
             LEFT JOIN admin 
             on transaksi_pembayaran.verif_by = admin.id_admin 
-            AND $where
-            WHERE mpembayaran.id_pembayaran = :ridpembayaran and transaksi_pembayaran.periode = :rperiode
+            WHERE mpembayaran.id_pembayaran = :ridpembayaran and transaksi_pembayaran.periode = :rperiode AND $where
         EOD;
         $conn = DB::connection("mysql")->select($query, $params);
         return $conn;

@@ -24,6 +24,9 @@ const SidebarAdmin = () => {
         <Menu text="Kelas" link="/admin/kelas">
             <IconForm />
         </Menu>
+        <Menu text="Keluar" link="#">
+            <IconForm />
+        </Menu>
         </Sidebar>
     )
 }

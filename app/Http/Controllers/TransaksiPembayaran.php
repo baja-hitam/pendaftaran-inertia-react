@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helper\Whatsapp;
 use App\Http\Modulus\Mperiode;
 use App\Http\Modulus\Pendaftaran;
 use Illuminate\Http\Request;
@@ -304,6 +305,7 @@ class TransaksiPembayaran extends Controller
         // dd($no_form);
         $modul->no_form = $no_form;
         $data = $modul->riwayatPembayaran();
+        // dd($data);
         foreach ($data as $key => $row) {
             if($row->path_bukti != null){
                 $data[$key]->path_bukti = Storage::url($row->path_bukti);
@@ -335,6 +337,9 @@ class TransaksiPembayaran extends Controller
         $data = $modul->uploadBukti();
         // dd($data);
         if ($data) {
+            // Send WhatsApp notification
+            $whatsappp = new Whatsapp(session('no_telp'), session('nama_lengkap') . ' dengan nomor ' . session('no_telp') . ' sudah mengupload bukti pembayaran. Segera konfirmasi pembayaran.');
+            $response = $whatsappp->send();
             session()->flash('success', 'Bukti pembayaran berhasil diupload');
         } else {
             session()->flash('error', 'Bukti pembayaran gagal diupload');

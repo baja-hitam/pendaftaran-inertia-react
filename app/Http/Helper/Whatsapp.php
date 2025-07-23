@@ -3,10 +3,12 @@ namespace App\Http\Helper;
 class Whatsapp {
     private $phoneNumber;
     private $message;
+    private $token;
 
     public function __construct($phoneNumber, $message) {
         $this->phoneNumber = $phoneNumber;
-        $this->message = urlencode($message);
+        $this->message = $message;
+        $this->token = 'sExkj7N4BfEedMbYDoaV';
     }
 
     public function send() {
@@ -27,14 +29,14 @@ class Whatsapp {
         'countryCode' => '62', //optional
         ),
         CURLOPT_HTTPHEADER => array(
-            'Authorization: TOKEN' //change TOKEN to your actual token
+            'Authorization: ' . $this->token //change TOKEN to your actual token
         ),
         ));
 
         $response = curl_exec($curl);
 
         curl_close($curl);
-        echo $response;
+        return $response;
     }
 }
 ?>
