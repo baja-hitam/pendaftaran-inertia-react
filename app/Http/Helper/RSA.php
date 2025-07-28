@@ -20,10 +20,6 @@ class RSA{
     public function setd($modInverse) {
         $this->d = $modInverse;
     }
-    public function gcd($a,$b){
-        return ($b == 0) ? $a : $this->gcd($b, $a % $b);
-    }
-
     // Fungsi untuk menghitung invers modulo
     public function modInverse($a, $m) {
     $m0 = $m;
