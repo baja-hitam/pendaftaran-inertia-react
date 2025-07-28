@@ -134,7 +134,7 @@ const FormPendaftaranSiswa = ({datas}) => {
 
     function submitFormPendaftaran(e) {
       e.preventDefault();
-      console.log(data);
+      // console.log(data);
       
       if(!data.pasFoto) {
         setError({...error, pasFoto: 'Foto Pas Siswa harus diisi.'});
