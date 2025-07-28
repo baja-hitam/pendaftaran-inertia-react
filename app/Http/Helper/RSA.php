@@ -6,9 +6,11 @@ class RSA{
     public $p = 61;
     public $q = 53;
     public $n; // Modulus
-    public $phi;
+    public $phi; //nilai totien
     public $e = 17; // Harus coprime dengan phi
     public $d; // Invers dari e modulo phi
+
+    //kunci publi (e, n) dan kunci privat (d, n)
 
     public function __construct() {
         $this->n = $this->p * $this->q;
