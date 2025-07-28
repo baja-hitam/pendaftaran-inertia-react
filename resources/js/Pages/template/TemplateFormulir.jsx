@@ -4,6 +4,8 @@ import FormPendaftaranOrangTua from "../UI/organisms/FormPendaftaranOrangTua";
 import TemplateSidebar from "./TemplateSidebar";
 import { useState } from "react";
 import { FaPrint } from "react-icons/fa";
+import ViewPendaftaranSiswa from "../UI/organisms/ViewPendaftaranSiswa";
+import ViewPendaftaranOrangTua from "../UI/organisms/ViewPendaftaranOrangTua";
 
 export const TemplateFormulir = ({ datas }) => {
         const [siswa, setSiswa] = useState(true);
@@ -33,8 +35,12 @@ export const TemplateFormulir = ({ datas }) => {
                         <div className={"w-full text-center md:text-lg hover:cursor-pointer hover:text-[#226F54] "+(siswa == true ? "border-b-4 border-[#226F54]":"")} onClick={handleSiswaClick}>Siswa</div>
                         <div className={"w-full text-center md:text-lg hover:cursor-pointer hover:text-[#226F54] "+(orangTua == true ? "border-b-4 border-[#226F54]":"")} onClick={handleOrangTuaClick}>Orang Tua</div>
                     </div>
-                    {siswa && <FormPendaftaranSiswa datas={datas} />}
-                    {orangTua && <FormPendaftaranOrangTua datas={datas} />}
+                    {siswa && (
+                        datas.verif_by == null ? <FormPendaftaranSiswa datas={datas} /> : <ViewPendaftaranSiswa datas={datas}/>
+                    )}
+                    {orangTua && (
+                        datas.verif_by == null ? <FormPendaftaranOrangTua datas={datas} /> : <ViewPendaftaranOrangTua datas={datas} />   
+                    )}
                 </Card>
             </div>
         </>
