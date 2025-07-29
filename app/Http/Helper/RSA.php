@@ -4,6 +4,7 @@ class RSA {
     // Mendefinisikan nilai awal p dan q sebagai bilangan prima
     public $p = 61;
     public $q = 53;
+<<<<<<< HEAD
     // Nilai n (modulus), phi (totien), e (eksponen publik), dan d (eksponen privat)
     public $n;
     public $phi;
@@ -13,6 +14,15 @@ class RSA {
 
 
     // Konstruktor akan langsung menghitung n, phi, dan d
+=======
+    public $n; // Modulus
+    public $phi; //nilai totien
+    public $e = 17; // Harus coprime dengan phi
+    public $d; // Invers dari e modulo phi
+
+    //kunci publi (e, n) dan kunci privat (d, n)
+
+>>>>>>> af13cf6f8e2cf9686cf2d0c77ed4b08837cbe705
     public function __construct() {
         $this->n = $this->p * $this->q; // n = 61 * 53 = 3233
         $this->phi = ($this->p - 1) * ($this->q - 1); // phi = (61-1)*(53-1) = 3120

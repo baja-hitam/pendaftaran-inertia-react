@@ -31,8 +31,6 @@ const handleChangeParseTime = (time) => {
         <div className="w-[70%] h-max m-2 sm:w-[80%] xl:w-[90%] xl:mt-12">
             <p className="text-xl font-poppins text-white sm:text-2xl xl:text-3xl">Dashboard</p>
             <Card className="w-[98%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[90%] lg:w-[90%] xl:w-[90%]">
-                <p className="text-lg font-poppins text-gray-800 font-bold">Informasi Pelaksanaan Ujian</p>
-                <p><i>Cetak kartu peserta pada menu formulir untuk mengikuti pelaksanaan ujian di SMP ISLAM PLUS AL MADINAH</i></p>
                 {
                   datasDetailUjian.map((ujian, index) => (
                     <div key={index} className="mt-4">

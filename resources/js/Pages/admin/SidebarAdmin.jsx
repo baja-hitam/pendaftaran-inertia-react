@@ -22,9 +22,6 @@ const SidebarAdmin = () => {
         <Menu text="Formulir Pendaftaran" link="/admin/calon-siswa">
             <IconForm />
         </Menu>
-        <Menu text="Kelas" link="/admin/kelas">
-            <IconForm />
-        </Menu>
         <Menu text="Keluar" link="/logout">
             <IconLogout />
         </Menu>
