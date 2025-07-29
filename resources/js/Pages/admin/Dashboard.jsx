@@ -125,17 +125,6 @@ const Dashboard = ({datasRangking,datasLabel,datasJumlah}) => {
                 <div className="w-full h-[300px] lg:h-[500px]">
                     <Bar data={data} options={options} height={'240'} />
                 </div>
-                <div>
-                    <p className="text-lg font-poppins mt-16">Rangking Calon Siswa/i</p>
-                    <DataTable
-                        columns={columns}
-                        data={datasRangking}
-                        theme="custom"
-                        customStyles={customStyles}
-                        pagination
-                        noDataComponent={<i>Tidak Ada Peserta Ujian</i>}
-                    />
-                </div>
             </Card>
         </div>
     </div>
