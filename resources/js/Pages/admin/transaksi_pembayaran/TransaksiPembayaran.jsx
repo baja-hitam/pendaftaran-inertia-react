@@ -21,11 +21,12 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
     // const [dataEdit, setDataEdit] = useState(null);
     const MySwal = withReactContent(Swal);
     // State untuk search query dan debounced query
-    const {data,setData,get} = useForm({
+    const {data,setData} = useForm({
         user: search ?? '',
         periode: tahun ?? '',
         jenPembayaran : jenPembayaran ?? '', // Default ke Jenis Pembayaran 1
     });
+    const [filteredData, setFilteredData] = useState(datas);
     // State untuk debounced search
     const [debounceTimeout, setDebounceTimeout] = useState(null);
     const { flash } = usePage().props;
@@ -62,23 +63,41 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
 
     const handleSearchChange = (e) => {
         const searchValue = e.target.value;
-        setData({ ...data, user: searchValue });
-    };
+
+        handleFilterChange('user', searchValue);
+    }
     const handleSearchChangePeriode = (e) => {
         const searchValue = e.target.value;
-        setData({ ...data, periode: searchValue });
-    };
+        handleFilterChange('periode', searchValue);
+    }
     const handleChangeJenPembayaran = (e) => {
         const searchValue = e.target.value;
-        setData({ ...data, jenPembayaran: searchValue });
+        handleFilterChange('jenPembayaran', searchValue);
     }
-    const handleSearch = (e) => {
-        e.preventDefault();
-        
-        // console.log(data);
-        
-        get('/admin/transaksi-pembayaran/search');
-    }
+    
+    const handleFilterChange = (name, value) => {
+        // Create a new state object with the updated field
+        const newData = { ...data, [name]: value };
+        setData(newData);
+
+        // Apply all filters based on the new state
+        setFilteredData(datas.filter(item => {
+            const userFilter = newData.user ? newData.user.toLowerCase() : '';
+            const periodeFilter = newData.periode;
+            const jenPembayaranFilter = newData.jenPembayaran;
+
+            const textMatches = userFilter === '' ||
+                                (item.email && item.email.toLowerCase().includes(userFilter)) ||
+                                (item.nama_lengkap && item.nama_lengkap.toLowerCase().includes(userFilter)) ||
+                                (item.nama_siswa && item.nama_siswa.toLowerCase().includes(userFilter));
+
+            const periodeMatches = !periodeFilter || (item.periode && item.periode == periodeFilter);
+
+            const jenPembayaranMatches = !jenPembayaranFilter || (item.id_pembayaran && item.id_pembayaran == jenPembayaranFilter);
+
+            return textMatches && periodeMatches && jenPembayaranMatches;
+        }));
+    };
 
     const handleChangeParseDate = (date) => {
         // console.log(date);
@@ -171,7 +190,7 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
             wrap: true,
         },
         {
-            name: "Nama User",
+            name: "Nama Akun",
             selector: (row) => row.nama_lengkap ?? '-',
             wrap: true,
         },
@@ -247,18 +266,20 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
                         "w-[98%] p-5 bg-[#D8D8D8] rounded-xl relative shadow-2xl sm:w-[90%] lg:w-[90%] xl:w-[70%]"
                     }
                 >
-                    <ButtonLink
+                    {/* <ButtonLink
                         handleOpen={handleOpenModalTambah}
                         className="text-sm py-2"
                     >
                         Tambah Transaksi Pembayaran
-                    </ButtonLink>
-                        <form onSubmit={handleSearch} className="flex flex-col pt-4 lg:flex-row lg:items-center lg:gap-x-2">
+                    </ButtonLink> */}
+                        <div className="flex flex-col pt-4 lg:flex-row lg:items-center lg:gap-x-2">
                             <InputSelect
                                 options={optionsJenPembayaran}
                                 className='w-full mb-2 lg:w-[250px]'
                                 name='jenPembayaran'
                                 required
+                                disabled
+                                placeholder="-- Pilih Jenis Pembayaran --"
                                 onChange={handleChangeJenPembayaran}
                                 value={data.jenPembayaran}
                             />
@@ -266,6 +287,8 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
                                 options={optionsPeriode}
                                 className='w-full mb-2 lg:w-[150px]'
                                 name='periode'
+                                disabled
+                                placeholder="-- Pilih Periode --"
                                 onChange={handleSearchChangePeriode}
                                 value={data.periode}
                                 />
@@ -277,13 +300,10 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
                                 onChange={handleSearchChange}
                                 placeholder='Cari Email / Nama Siswa ....'
                             />
-                            <button type="submit" className="mb-2 bg-[#226F54] hover:bg-[#265944] active:bg-[#226F54] cursor-pointer text-[#e4e7eb] font-poppins mt-4 py-1 px-4 rounded-[7px] lg:mt-0 lg:ml-2">
-                                Search
-                            </button>
-                        </form>
+                        </div>
                     <DataTable
                         columns={columns}
-                        data={datas}
+                        data={filteredData}
                         theme="custom"
                         customStyles={customStyles}
                         pagination

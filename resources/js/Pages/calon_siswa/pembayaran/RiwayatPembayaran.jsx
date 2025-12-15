@@ -8,7 +8,7 @@ import Angsuran from "./Angsuran";
 import  InputSelect  from "../../UI/atoms/InputSelect";
 
 
-const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
+const RiwayatPembayaran = ({datas,utilsPeriode,periodeSession, utilsPembayaran}) => {
     const { flash } = usePage().props;
     const [data, setData] = useState({
         periode: ''
@@ -26,11 +26,11 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
         });
     }, []);
     const [angsuranModal, setAngsuranModal] = useState(false);
-    const optionsPeriode = periode.map(user => ({
+    const optionsPeriode = utilsPeriode.map(user => ({
         value: user.periode,
         label: user.periode.slice(0, 4) + "/" + user.periode.slice(4)
     }));
-    const optionPeriodeTest = [...optionsPeriode, { value: '20262027', label: '2026/2027' }];
+    
     const handleChangeAngsuranModal = (o) => {
         setAngsuranModal(o);
     }
@@ -98,20 +98,19 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
             wrap: true,
         },
         {
+            name:"Total Bayar",
+            selector: (row) => row.total_hrsbayar,
+            format: (row) => new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+            }).format(row.total_hrsbayar),
+            wrap: true,
+        },
+        {
             name: "Aksi",
             wrap: true,
             cell: (row) => (
                 <>
-                {
-                    (row.status == 0) && (
-                        <button
-                        className="bg-[#226F54] py-1 px-3 mr-3 text-white rounded-md hover:bg-[#1a5b45]"
-                        onClick={() => router.post('/create-kwitansi',{id_pembayaran: row.id_pembayaran, periode: data.periode})}
-                        >
-                            Buat Kwitansi
-                        </button>
-                    )
-                }
                 <button
                     className="bg-blue-600 py-1 px-3 text-white rounded-md hover:bg-blue-700"
                     onClick={() => handleChangeDetailRiwayatPembayaran(row.id_pembayaran)}
@@ -165,7 +164,7 @@ const RiwayatPembayaran = ({datas,periode,periodeSession}) => {
                     <Angsuran
                         open={angsuranModal}
                         handleChangeOpen={handleChangeAngsuranModal}
-                        datasJenPembayaranOption={datas}
+                        datasJenPembayaranOption={utilsPembayaran}
                         periode={data.periode}
                     />
                 )}

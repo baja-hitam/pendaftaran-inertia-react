@@ -99,6 +99,37 @@ class Tpembayaran
         }
         return $conn;
     }
+
+    public function getTransaksiPembayaranByIdGroup(){
+        $conditions = [];
+        $params = [];
+
+        $conditions[] = "a.periode = :rperiode";
+        $params['rperiode'] = $this->getPeriode();
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $query = "SELECT
+        a.id_user,
+        a.no_form,
+        a.id_pembayaran,
+        b.nama_pembayaran,
+        a.periode,
+        a.jumlah_hrsbayar
+        FROM
+        transaksi_pembayaran a
+        JOIN
+        mpembayaran b
+        ON
+        a.id_pembayaran = b.id_pembayaran
+        WHERE
+        $whereClause";
+        $conn = DB::connection("mysql")->select($query, $params);
+        if (empty($conn)) {
+            return [];
+        }
+        return $conn;
+    }
     public function checkCicilan(){
         // dd($this->getIdUser());
         if($this->getIdUser() != null){

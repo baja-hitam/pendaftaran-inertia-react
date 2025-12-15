@@ -21,9 +21,11 @@ const TambahTransaksi = ({open,handleChangeOpen,datasUserOption,datasJenPembayar
         value: user.id_user,
         label: user.email
     }));
+    // console.log(datasFormulirOption);
+    
     const optionsFormulir = datasFormulirOption.map(form =>({
         value: form.no_form,
-        label: form.nama_lengkap+' - '+ form.nama_ayah+' - '+ form.nama_ibu+' - '+ form.nama_wali
+        label: form.nama_lengkap
     }));
     const optionsJenPembayaran = datasJenPembayaranOption.map(jen =>({
         value: jen.id_pembayaran,

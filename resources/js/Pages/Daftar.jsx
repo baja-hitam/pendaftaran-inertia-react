@@ -29,7 +29,7 @@ const Daftar = () => {
           <FormDaftar />
           <p className="text-sm mt-2">
             Sudah punya akun?{" "}
-            <Link className="text-[#226F54]" href="/login">
+            <Link className="text-[#226F54]" href={route('login')}>
               Login Disini !
             </Link>
           </p>

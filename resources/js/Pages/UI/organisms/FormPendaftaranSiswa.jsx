@@ -230,11 +230,6 @@ const FormPendaftaranSiswa = ({datas}) => {
             onChange={handleChangePendaftaran}
             options={[
               { value: 'Islam', label: 'Islam' },
-              { value: 'Kristen', label: 'Kristen' },
-              { value: 'Katolik', label: 'Katolik' },
-              { value: 'Hindu', label: 'Hindu' },
-              { value: 'Buddha', label: 'Buddha' },
-              { value: 'Konghucu', label: 'Konghucu' },
             ]}
             />
             <Label>Kewarganegaraan *</Label>

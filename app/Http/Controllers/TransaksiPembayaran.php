@@ -25,7 +25,7 @@ class TransaksiPembayaran extends Controller
         $data2 = $modul->getAllTransaksi();
         $data3 = $modul1->getAllPeriode();
         $data4 = $modul2->getAllFormulir();
-        // dd($data2);
+        // dd($data4);
         $fieldsFormulir = [
             'nama_lengkap','nama_ayah','nama_ibu','nama_wali'
         ];
@@ -155,22 +155,6 @@ class TransaksiPembayaran extends Controller
         }
         return to_route('admin.transaksi-pembayaran');
     }
-    // public function update(Request $request){
-    //     $startYear = date('Y');
-    //     $endYear = $startYear + 1;
-    //     $modul = new Tpembayaran;
-    //     $modul->id_user = $request->selectedUser['value'];
-    //     $modul->id_pembayaran = $request->selectedPembayaran['value'];
-    //     $modul->cperiode = $startYear.$endYear;
-    //     $modul->njumlah = preg_replace('/\./', '', $request->dibayarkan);
-    //     $data = $modul->update($request->id);
-    //     if ($data) {
-    //         session()->flash('success', 'Transaksi pembayaran berhasil diupdate');
-    //     } else {
-    //         session()->flash('error', 'Transaksi pembayaran gagal diupdate');
-    //     }
-    //     return to_route('admin.transaksi-pembayaran');
-    // }
     public function destroy(Request $request){
         $modul = new Tpembayaran;
         $data = $modul->destroy($request->input('id'));
@@ -212,6 +196,7 @@ class TransaksiPembayaran extends Controller
                 session()->flash('error', 'Anda belum mengisi formulir pendaftaran');
                 return to_route('riwayat.pembayaran');
             }
+            $modul->id_user = session('id_user');
             $modul->no_form = $no_form;
             $data = $modul->checkCicilan();
             if(count($data) > 1){
@@ -280,52 +265,37 @@ class TransaksiPembayaran extends Controller
     }
     public function riwayat_pembayaran(Request $request)
     {
-        // dd($request->all());
         $modul = new Tpembayaran;
         $modul1 = new Pendaftaran;
-        $data = $modul->getAllPembayaran();
-        $periode = empty($modul1->getFormulirPeriode()) ? [['periode'=> session('periode')]] : $modul1->getFormulirPeriode();
-        // dd($periode);
+        $modul2 = new Mperiode;
+        $rsa = new RSA;
+        $data = [];
         $modul1->periode = $request->periode ?? session('periode');
-        $no_form = empty($modul1->getNoFormulir()) ? null : $modul1->getNoFormulir();
-        // dd($no_form);
-        // dd(session('id_user'));
-        foreach ($data as $key => $row) {
-            // dd($row);
-            $modul->periode = $request->periode ?? session('periode');
-            if($row->id_pembayaran == '1'){
-                // dd('tets');
-                $modul->id_user = session('id_user');
-                $modul->id_pembayaran = $row->id_pembayaran;
-                $cicilan = $modul->checkCicilan();
-                // dd($cicilan);
-                if(empty($cicilan)){
-                    $data[$key]->status = 0;
-                }else{
-                    $data[$key]->status = 1;
-                }
-            }else{
-                // dd($no_form)
-                if($no_form != null){
-                    $modul->no_form = $no_form;
-                    $modul->id_pembayaran = $row->id_pembayaran;
-                    $cicilan = $modul->checkCicilan();
-                    // dd($cicilan);
-                    if(empty($cicilan)){
-                        $data[$key]->status = 0;
-                    }else{
-                        $data[$key]->status = 1;
-                    }
-                }else{
-                    $data[$key]->status = 0;
-                }
+        $no_form = $modul1->getNoFormulir();
+        $modul->periode = $request->periode ?? session('periode');
+        $periode = $modul2->getAllPeriode();
+        // dd($periode);   
+        $data = $modul->getTransaksiPembayaranByIdGroup();
+        $groupedData = [];
+        foreach ($data as $row) {
+            $decryptedAmount = $rsa->decrypt($row->jumlah_hrsbayar);
+            $groupKey = $row->id_user . '-' . ($row->no_form ?? 'null') . '-' . $row->id_pembayaran;
+
+            if (!isset($groupedData[$groupKey])) {
+                $row->decrypted_jumlah_hrsbayar = $decryptedAmount;
+                $row->total_hrsbayar = (int) $decryptedAmount; // Cast to integer for summation
+                $groupedData[$groupKey] = $row;
+            } else {
+                $groupedData[$groupKey]->total_hrsbayar += (int) $decryptedAmount;
             }
         }
-        // dd($data);
+        $data = array_values($groupedData);
+
         return inertia('calon_siswa/pembayaran/RiwayatPembayaran',[
             'datas' => $data,
-            'periode' => $periode,
-            'periodeSession' => $request->periode ?? session('periode')
+            'utilsPeriode' => $periode,
+            'periodeSession' => $request->periode ?? session('periode'),
+            'utilsPembayaran' => $modul->getAllPembayaran()
         ]);
     }
     public function detail_riwayat_pembayaran(Request $request)

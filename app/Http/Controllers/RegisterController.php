@@ -40,12 +40,15 @@ class RegisterController extends Controller
             return back();
         }
         session()->put('user', $request->all());
-        // dd(session('user'));
-        $otp = (new Otp)->generate($request['email'], 'numeric', 4,10);
-        $message = "Kode OTP anda adalah: ".$otp->token;
-        // Send OTP via WhatsApp
-        $whatsapp = new Whatsapp($request['notelp'], $message);
-        $response = $whatsapp->send();
+        // // dd(session('user'));
+        // $otp = (new Otp)->generate($request['email'], 'numeric', 4,10);
+        // $message = "Kode OTP anda adalah: ".$otp->token;
+        // // Send OTP via WhatsApp
+        // $whatsapp = new Whatsapp($request['notelp'], $message);
+
+        // // dd($whatsapp);
+        // $response = $whatsapp->send();
+
         return to_route('otp');
     }
     public function otp()
@@ -58,11 +61,11 @@ class RegisterController extends Controller
     public function store(Request $request)
     {
         $user = session('user');
-        $otp = (new Otp)->validate($user['email'], $request->input('otp'));
-        if (!$otp->status) {
-            session()->flash('error', 'Kode OTP tidak valid');
-            return to_route('otp');
-        }
+        // $otp = (new Otp)->validate($user['email'], $request->input('otp'));
+        // if (!$otp->status) {
+        //     session()->flash('error', 'Kode OTP tidak valid');
+        //     return to_route('otp');
+        // }
         $modul = new Registration;
         $modul->email = $user['email'];
         $modul->password = $user['password'];

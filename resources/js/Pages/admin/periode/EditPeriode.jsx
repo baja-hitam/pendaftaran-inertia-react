@@ -14,7 +14,7 @@ const EditPeriode = ({open,row,handleChangeOpen})=>{
     const {data, setData, post} = useForm({
         startDate: row?.start_date,
         endDate: row?.end_date,
-        status: row?.aktif,
+        status: row?.aktif
     });
     // console.log(data);
     
