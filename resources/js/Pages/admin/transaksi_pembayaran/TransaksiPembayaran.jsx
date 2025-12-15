@@ -278,7 +278,6 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
                                 className='w-full mb-2 lg:w-[250px]'
                                 name='jenPembayaran'
                                 required
-                                disabled
                                 placeholder="-- Pilih Jenis Pembayaran --"
                                 onChange={handleChangeJenPembayaran}
                                 value={data.jenPembayaran}
@@ -287,7 +286,6 @@ const TransaksiPembayaran = ({datas,datasUserOption,datasJenPembayaranOption,jen
                                 options={optionsPeriode}
                                 className='w-full mb-2 lg:w-[150px]'
                                 name='periode'
-                                disabled
                                 placeholder="-- Pilih Periode --"
                                 onChange={handleSearchChangePeriode}
                                 value={data.periode}
